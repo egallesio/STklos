@@ -451,7 +451,14 @@ doc>
           (and file
                (cons file #f))))))
 
-;; ----------------------------------------
+
+(define (%normalize-require-provide spec)
+  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfif 0
+    (if match
+        (format "srfi/~a" (cadr match))
+        spec)))
+
+;; ----------------------------------------------------------------------
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING"))
       (verify-string (lambda (str)
@@ -462,6 +469,7 @@ doc>
     (lambda (what lib-only?)
       #:require
       (verify-string what)
+      (set! what (%normalize-require-provide what))
       (when stklos-building?
         ;; When building STklos, require-library ==  require.
         ;; Otherwise, we need an already installed  STklos
@@ -503,9 +511,10 @@ doc>
     (lambda (what)
       #:provide
       (verify-string what)
-      (unless (member what provided)
-        (set! provided (cons what provided)))
-      what))
+      (let ((spec (%normalize-require-provide what)))
+        (unless (member spec provided)
+          (set! provided (cons spec provided)))
+        spec)))
 
 
   (set! provided?
