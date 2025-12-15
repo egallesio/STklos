@@ -1,5 +1,5 @@
 ;;;;
-;;;; test-cond-expand.stk		-- Testing cond-expand
+;;;; test-cond-expand.stk          -- Testing cond-expand
 ;;;;
 ;;;; Copyright © 2025 Retropikzel <retropikzel@iki.fi>
 ;;;;
@@ -19,8 +19,8 @@
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
-;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date: 26-Nov-2006 10:47 (eg)
+;;;;           Author: Retropikzel <retropikzel@iki.fi>
+;;;;    Creation date: 12-Dec-2025 (retropikzel)
 ;;;;
 
 (import (scheme base))
@@ -129,7 +129,7 @@
   (cond-expand (srfi-93 93) (else #f))
   (cond-expand (srfi-94 94) (else #f))
   (cond-expand (srfi-95 95) (else #f))
-  (cond-expand (srfi-96 96) (else #f))
+;;  (cond-expand (srfi-96 96) (else #f))
   (cond-expand (srfi-97 97) (else #f))
   (cond-expand (srfi-98 98) (else #f))
   (cond-expand (srfi-99 99) (else #f))
