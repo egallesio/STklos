@@ -393,6 +393,17 @@ doc>
 ; REQUIRE/PROVIDE stuff
 ;
 ;=============================================================================
+(define-parameter warning-when-not-provided #t)  ;; FIXME: document it
+(define-parameter provided-list '())             ;; the list of provided files
+
+(define (%normalize-require-provide spec)
+  ;; Verify that spec is a string
+  (unless  (string? spec) (error "bad string ~S" spec))
+  ;; If it is of the form "srfi-NNN", replace it by "srfi/NNN"
+  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfif 0
+    (if match
+        (format "srfi/~a" (cadr match))
+        spec)))
 
 #|
 <doc EXT require provide require/provide provided?
@@ -415,70 +426,45 @@ doc>
  * the standard {{stklos}} `require` is used.
 doc>
 |#
-(define %require        #f)   ;; effective requiring function. "require" is a macro
-(define provide         #f)
-(define provided?       #f)
-(define require/provide #f)
+(define (%require what lib-only?)
+  ;; This is the function which do really the requiring job. The user "require" is in
+  ;; fact a macro which deals with the globals.
+  (let ((fn (%normalize-require-provide what)))
+    (unless (member fn (provided-list))
+      ;; fn was not loaded before.
+      (let ((file (find-path fn (load-path) (load-suffixes))))
+        (if file
+            (%load file '() '() #f)  ;; '() => no path & no suffixes
+            (%cannot-load fn)))
 
-(define-parameter warning-when-not-provided #t)  ;; FIXME: document it
+      ;; Verify that the loaded file contains the corresponding "provide"
+      (when (and (warning-when-not-provided)
+                 (not (member fn (provided-list))))
+        (format (current-error-port) "WARNING: ~S was not provided~%" fn)))
+    fn))
 
-(define (%normalize-require-provide spec)
-  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfif 0
-    (if match
-        (format "srfi/~a" (cadr match))
-        spec)))
 
-(let ((provided '())
-      (verify-string (lambda (str)
-                       (unless  (string? str)
-                         (error "bad string ~S" str)))))
+(define (provide what)
+  (let ((spec (%normalize-require-provide what)))
+    (unless (member spec (provided-list))
+      (provided-list (cons spec (provided-list))))
+    spec))
 
-  (set! %require
-    (lambda (what lib-only?)
-      #:require
-      (verify-string what)
-      (let ((fn (%normalize-require-provide what)))
-        (unless (member fn provided)
-          ;; fn was not loaded before.
-          (let ((file (find-path fn (load-path) (load-suffixes))))
-            (if file
-                (%load file '() '() #f)  ;; '() => no path & no suffixes
-                (%cannot-load fn)))
 
-          ;; Verify that the loaded file contains the corresponding "provide"
-          (when (and (warning-when-not-provided)
-                     (not (member fn provided)))
-            (format (current-error-port) "WARNING: ~S was not provided~%" fn)))
-        fn)))
+(define (provided? what)
+  (let ((spec (%normalize-require-provide what)))
+    (and (member spec (provided-list)) #t)))
 
-  (set! provide
-    (lambda (what)
-      #:provide
-      (verify-string what)
-      (let ((spec (%normalize-require-provide what)))
-        (unless (member spec provided)
-          (set! provided (cons spec provided)))
-        spec)))
 
-  (set! require/provide
-    (lambda (what)
-      #:require/provide
-      (verify-string what)
-      (let ((spec (%normalize-require-provide what)))
-        (unless (member spec provided)
-          (%load spec (load-path) (load-suffixes) #f)
-          (set!  provided (cons spec provided)))
-        spec)))
-
-  (set! provided?
-    (lambda (what)
-      #:provided
-      (verify-string what)
-      (let ((spec (%normalize-require-provide what)))
-        (and (member spec provided) #t)))))
+(define (require/provide what)
+  (let ((spec (%normalize-require-provide what)))
+    (unless (member spec (provided-list))
+      (%load spec (load-path) (load-suffixes) #f)
+      (provided-list (cons spec (provided-list))))
+    spec))
 
 ;;
-;; Overload require with a macro to let the compiler deal with globals
+;; The user "require" is in fact a macro
 ;;
 (define-macro (require what)
   `(#%require ,what #f))
