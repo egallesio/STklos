@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-json.stk         -- Testing JSON
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is freutfe software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@
 
 
 (require "test")
-(require "srfi-180")
+(require "srfi/180")
 
 (define-macro (test-json-read name expected str)
   `(test ,name ,expected (call-with-input-string ,str json-read)))

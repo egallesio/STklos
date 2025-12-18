@@ -393,6 +393,17 @@ doc>
 ; REQUIRE/PROVIDE stuff
 ;
 ;=============================================================================
+(define-parameter warning-when-not-provided #t)  ;; FIXME: document it
+(define-parameter provided-list '())             ;; the list of provided files
+
+(define (%normalize-require-provide spec)
+  ;; Verify that spec is a string
+  (unless  (string? spec) (error "bad string ~S" spec))
+  ;; If it is of the form "srfi-NNN", replace it by "srfi/NNN"
+  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfif 0
+    (if match
+        (format "srfi/~a" (cadr match))
+        spec)))
 
 #|
 <doc EXT require provide require/provide provided?
@@ -415,119 +426,50 @@ doc>
  * the standard {{stklos}} `require` is used.
 doc>
 |#
-(define %require        #f)   ;; effective requiring function. "require" is a macro
-(define provide         #f)
-(define provided?       #f)
-(define require/provide #f)
+(define (%require what lib-only?)
+  ;; This is the function which do really the requiring job. The user "require" is in
+  ;; fact a macro which deals with the globals.
+  (let ((fn (%normalize-require-provide what)))
+    (unless (member fn (provided-list))
+      ;; fn was not loaded before.
+      (let ((file (find-path fn (load-path) (load-suffixes))))
+        (if file
+            (%load file '() '() #f)  ;; '() => no path & no suffixes
+            (%cannot-load fn)))
 
-(define-parameter warning-when-not-provided #t)  ;; FIXME: document it
-
-
-#| HACK: FIXME:
- This version of require is a hacked one that transforms calls such
- as (require "srfi-N") in the sequence
-  (begin
-    (define-module STklos (import (srfi N)))
-    (provide "srfi-N"))
- It is temporary and should be changed when require will no more be used
- for using SRFIs (and the documentation adapted)
-|#
-(define (%rewrite-require-spec spec path suff)
-  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfi-0
-    (if match
-        ;; We required "srfi-N", try to transform it in "srfi/N"
-        ;; We don't try first with "srfi-N", because we could find
-        ;; old installed versions lying around
-        (let* ((new (format "srfi/~a" (cadr match)))
-               (lib  (string->symbol new))
-               (file (find-path new path suff)))
-          (if file
-              (cons file lib)
-              (let ((file (find-path spec path suff)))
-                (and file
-                     (cons file #f)))))
-        ;; Non-SRFI require
-        (let ((file (find-path spec path suff)))
-          (and file
-               (cons file #f))))))
-
-;; ----------------------------------------
-(let ((provided '())
-      (stklos-building? (getenv "STKLOS_BUILDING"))
-      (verify-string (lambda (str)
-                       (unless  (string? str)
-                         (error "bad string ~S" str)))))
-
-  (set! %require
-    (lambda (what lib-only?)
-      #:require
-      (verify-string what)
-      (when stklos-building?
-        ;; When building STklos, require-library ==  require.
-        ;; Otherwise, we need an already installed  STklos
-        (set! lib-only? #f))
-
-      (unless (member what provided)
-        (let* ((path (if lib-only?
-                         (list (%library-prefix 'data))
-                         (load-path)))
-               (suff (load-suffixes))
-               (file (%rewrite-require-spec what path suff)))
-          (if file
-              (let ((file     (car file))
-                    (lib-name (cdr file)))
-                (%load file '() '() #f)  ;; '() => no path & no suffixes
-                (when lib-name
-                  (%do-imports (find-module 'STklos)
-                               (list (list lib-name))
-                               #f)
-                  (provide what)))
-              (%cannot-load what))))
-
+      ;; Verify that the loaded file contains the corresponding "provide"
       (when (and (warning-when-not-provided)
-                 (not (member what provided)))
-        (format (current-error-port) "WARNING: ~S was not provided~%" what))
-      what))
+                 (not (member fn (provided-list))))
+        (format (current-error-port) "WARNING: ~S was not provided~%" fn)))
+    fn))
 
 
-  (set! require/provide
-    (lambda (what)
-      #:require/provide
-      (verify-string what)
-      (unless (member what provided)
-        (%load what (load-path) (load-suffixes) #f))
-      (provide what)))
+(define (provide what)
+  (let ((spec (%normalize-require-provide what)))
+    (unless (member spec (provided-list))
+      (provided-list (cons spec (provided-list))))
+    spec))
 
 
-  (set! provide
-    (lambda (what)
-      #:provide
-      (verify-string what)
-      (unless (member what provided)
-        (set! provided (cons what provided)))
-      what))
+(define (provided? what)
+  (let ((spec (%normalize-require-provide what)))
+    (and (member spec (provided-list)) #t)))
 
 
-  (set! provided?
-    (lambda (what)
-      #:provided
-      (verify-string what)
-      (and (member what provided) #t))))
+(define (require/provide what)
+  (let ((spec (%normalize-require-provide what)))
+    (unless (member spec (provided-list))
+      (%load spec (load-path) (load-suffixes) #f)
+      (provided-list (cons spec (provided-list))))
+    spec))
 
-
-;; Overload require with a macro to let the compiler deal with globals
+;;
+;; The user "require" is in fact a macro
+;;
 (define-macro (require what)
-  (if (string? what)
-      (let ((spec (%rewrite-require-spec what (load-path) (load-suffixes))))
-        (if (and spec (cdr spec))
-            ;; spec is of the form ("name of file to load" lib-name)
-            `(begin
-               (define-module STklos (import ,(cdr spec)))
-               (provide ,what))
-            `(#%require ,what #f)))
-      `(#%require ,what #f)))
+  `(#%require ,what #f))
 
-
+;; FIXME: used only by Silex. Remove it
 (define-macro (require-library what)
   `(#%require ,what #t))
 
@@ -588,7 +530,7 @@ doc>
  * In the second call, the file "utils" will be required before calling, for the
  * first time,  |cube|, |fact| or |fib|.
  *
- * [NOTE] 
+ * [NOTE]
  * ====
  * - If |spec| is a string, the corresponding |provide| must be present in the file
  * denoted by |spec|.

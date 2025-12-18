@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-r5rs-pitfall.stk	-- The SISC R5RS pitfall test
 ;;;;
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,11 @@
 
 (require "test")
 (unless (provided? "full-syntax")
+  ;; Beware, the slib library should be loaded before full-syntax
+  ;; (since it redefine load, eval, and some other function that slib
+  ;; also redefines).
+  (require "slib")
+  
   ;; We are probably executing this test prior installation => add
   ;; the distribution library to the current load-path.
   (load-path (cons "../lib" (load-path)))
