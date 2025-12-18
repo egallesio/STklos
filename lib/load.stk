@@ -460,7 +460,6 @@ doc>
 
 ;; ----------------------------------------------------------------------
 (let ((provided '())
-      (stklos-building? (getenv "STKLOS_BUILDING"))
       (verify-string (lambda (str)
                        (unless  (string? str)
                          (error "bad string ~S" str)))))
@@ -469,42 +468,39 @@ doc>
     (lambda (what lib-only?)
       #:require
       (verify-string what)
-      (set! what (%normalize-require-provide what))
-      (when stklos-building?
-        ;; When building STklos, require-library ==  require.
-        ;; Otherwise, we need an already installed  STklos
-        (set! lib-only? #f))
-
-      (unless (member what provided)
-        (let* ((path (if lib-only?
-                         (list (%library-prefix 'data))
-                         (load-path)))
-               (suff (load-suffixes))
-               (file (%rewrite-require-spec what path suff)))
-          (if file
-              (let ((file     (car file))
-                    (lib-name (cdr file)))
-                (%load file '() '() #f)  ;; '() => no path & no suffixes
+      (let ((fn (%normalize-require-provide what)))
+        (unless (member fn provided)
+          ;; fn was not loaded before.
+          (let ((file (%rewrite-require-spec fn
+                                             (load-path)
+                                             (load-suffixes))))
+            (if file
+                (let ((file     (car file))
+                      (lib-name (cdr file)))
+                  (%load file '() '() #f)  ;; '() => no path & no suffixes
                 (when lib-name
                   (%do-imports (find-module 'STklos)
                                (list (list lib-name))
                                #f)
-                  (provide what)))
-              (%cannot-load what))))
+                  (provide fn)))
+              (%cannot-load fn)))
 
-      (when (and (warning-when-not-provided)
-                 (not (member what provided)))
-        (format (current-error-port) "WARNING: ~S was not provided~%" what))
-      what))
+          ;; Verify that the loaded file contains the corresponding "provide"
+          (when (and (warning-when-not-provided)
+                     (not (member fn provided)))
+            (format (current-error-port) "WARNING: ~S was not provided~%" fn)))
+        fn)))
 
 
   (set! require/provide
     (lambda (what)
       #:require/provide
       (verify-string what)
-      (unless (member what provided)
-        (%load what (load-path) (load-suffixes) #f))
-      (provide what)))
+      (let ((spec (%normalize-require-provide what)))
+        (unless (member spec provided)
+          (%load spec (load-path) (load-suffixes) #f)
+          (set!  provided (cons spec provided)))
+        spec)))
 
 
   (set! provide
@@ -521,7 +517,8 @@ doc>
     (lambda (what)
       #:provided
       (verify-string what)
-      (and (member what provided) #t))))
+      (let ((spec (%normalize-require-provide what)))
+        (and (member spec provided) #t)))))
 
 
 ;; Overload require with a macro to let the compiler deal with globals
@@ -597,7 +594,7 @@ doc>
  * In the second call, the file "utils" will be required before calling, for the
  * first time,  |cube|, |fact| or |fib|.
  *
- * [NOTE] 
+ * [NOTE]
  * ====
  * - If |spec| is a string, the corresponding |provide| must be present in the file
  * denoted by |spec|.
