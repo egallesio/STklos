@@ -422,43 +422,12 @@ doc>
 
 (define-parameter warning-when-not-provided #t)  ;; FIXME: document it
 
-
-#| HACK: FIXME:
- This version of require is a hacked one that transforms calls such
- as (require "srfi-N") in the sequence
-  (begin
-    (define-module STklos (import (srfi N)))
-    (provide "srfi-N"))
- It is temporary and should be changed when require will no more be used
- for using SRFIs (and the documentation adapted)
-|#
-(define (%rewrite-require-spec spec path suff)
-  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfi-0
-    (if match
-        ;; We required "srfi-N", try to transform it in "srfi/N"
-        ;; We don't try first with "srfi-N", because we could find
-        ;; old installed versions lying around
-        (let* ((new (format "srfi/~a" (cadr match)))
-               (lib  (string->symbol new))
-               (file (find-path new path suff)))
-          (if file
-              (cons file lib)
-              (let ((file (find-path spec path suff)))
-                (and file
-                     (cons file #f)))))
-        ;; Non-SRFI require
-        (let ((file (find-path spec path suff)))
-          (and file
-               (cons file #f))))))
-
-
 (define (%normalize-require-provide spec)
   (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfif 0
     (if match
         (format "srfi/~a" (cadr match))
         spec)))
 
-;; ----------------------------------------------------------------------
 (let ((provided '())
       (verify-string (lambda (str)
                        (unless  (string? str)
@@ -471,19 +440,10 @@ doc>
       (let ((fn (%normalize-require-provide what)))
         (unless (member fn provided)
           ;; fn was not loaded before.
-          (let ((file (%rewrite-require-spec fn
-                                             (load-path)
-                                             (load-suffixes))))
+          (let ((file (find-path fn (load-path) (load-suffixes))))
             (if file
-                (let ((file     (car file))
-                      (lib-name (cdr file)))
-                  (%load file '() '() #f)  ;; '() => no path & no suffixes
-                (when lib-name
-                  (%do-imports (find-module 'STklos)
-                               (list (list lib-name))
-                               #f)
-                  (provide fn)))
-              (%cannot-load fn)))
+                (%load file '() '() #f)  ;; '() => no path & no suffixes
+                (%cannot-load fn)))
 
           ;; Verify that the loaded file contains the corresponding "provide"
           (when (and (warning-when-not-provided)
@@ -491,6 +451,14 @@ doc>
             (format (current-error-port) "WARNING: ~S was not provided~%" fn)))
         fn)))
 
+  (set! provide
+    (lambda (what)
+      #:provide
+      (verify-string what)
+      (let ((spec (%normalize-require-provide what)))
+        (unless (member spec provided)
+          (set! provided (cons spec provided)))
+        spec)))
 
   (set! require/provide
     (lambda (what)
@@ -502,17 +470,6 @@ doc>
           (set!  provided (cons spec provided)))
         spec)))
 
-
-  (set! provide
-    (lambda (what)
-      #:provide
-      (verify-string what)
-      (let ((spec (%normalize-require-provide what)))
-        (unless (member spec provided)
-          (set! provided (cons spec provided)))
-        spec)))
-
-
   (set! provided?
     (lambda (what)
       #:provided
@@ -520,20 +477,13 @@ doc>
       (let ((spec (%normalize-require-provide what)))
         (and (member spec provided) #t)))))
 
-
+;;
 ;; Overload require with a macro to let the compiler deal with globals
+;;
 (define-macro (require what)
-  (if (string? what)
-      (let ((spec (%rewrite-require-spec what (load-path) (load-suffixes))))
-        (if (and spec (cdr spec))
-            ;; spec is of the form ("name of file to load" lib-name)
-            `(begin
-               (define-module STklos (import ,(cdr spec)))
-               (provide ,what))
-            `(#%require ,what #f)))
-      `(#%require ,what #f)))
+  `(#%require ,what #f))
 
-
+;; FIXME: used only by Silex. Remove it
 (define-macro (require-library what)
   `(#%require ,what #t))
 
