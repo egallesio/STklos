@@ -129,7 +129,7 @@
   (cond-expand (srfi-93 93) (else #f))
   (cond-expand (srfi-94 94) (else #f))
   (cond-expand (srfi-95 95) (else #f))
-;;  (cond-expand (srfi-96 96) (else #f))
+  (cond-expand (srfi-96 96) (else #f))
   (cond-expand (srfi-97 97) (else #f))
   (cond-expand (srfi-98 98) (else #f))
   (cond-expand (srfi-99 99) (else #f))
