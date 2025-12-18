@@ -1,4 +1,4 @@
-(require "srfi-27")
+(require "srfi/27")
 
 (define (writeln . xs)
   (for-each display xs)

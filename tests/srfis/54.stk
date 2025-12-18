@@ -5,7 +5,7 @@
 ;;(require "srfi-9")  ;; some tests use records
 ;;(require "srfi-13") ;; one test uses string-reverse
 ;;(require "srfi-14") ;; two tests use charsets
-(require "srfi-26") ;; two tests use cut...
+(require "srfi/26") ;; two tests use cut...
 
 
 (define-macro (mute-cat expr)
