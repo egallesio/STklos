@@ -903,13 +903,52 @@ b|)
 
 
 
+;;;
+;;; Frames and environments
+;;;
 
+(define %%%%%e 0)
+(let ((a 1)
+      (b 2))
+  (let-syntax ((m (syntax-rules () ((m) 10)))
+               (s (syntax-rules () ((s) 20))))
+    (let ((c 3))
+    (set! %%%%%e (#%current-environment)))))
+(define %%%%%f (%environment-dynamic-environment %%%%%e))
+(define %%%%%s (%environment-static-environment %%%%%e))
 
+(test "environment?"
+      #t
+      (environment? %%%%%e))
 
+(test "%frame?"
+      #t
+      (%frame?  %%%%%f))
+(test "%frame-next 1"
+      #t
+      (%frame? (%frame-next %%%%%f)))
+(test "%frame-next 2"
+      #t
+      (module? (%frame-next (%frame-next %%%%%f))))
 
+(test "%frame-length 1"
+      1
+      (%frame-length %%%%%f))
+(test "%frame-length 2"
+      2
+      (%frame-length (%frame-next %%%%%f)))
 
+(test "%frame 1"
+      '(1 2)
+      (list (%frame-ref (%frame-next %%%%%f) 1)
+            (%frame-ref (%frame-next %%%%%f) 0)))
 
-
+(test "%static-env 1"
+      #t
+      (list? %%%%%s))
+(test "%static-env 2"
+      3
+      (length %%%%%s))
 
 ;;------------------------------------------------------------------
 (test-section-end)
