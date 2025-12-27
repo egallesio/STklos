@@ -118,6 +118,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-190: Coroutines Generators
     - SRFI-192: Port Positioning
     - SRFI-193: Command line
+    - SRFI-194: Random data generators
     - SRFI-195: Multiple-value boxes
     - SRFI-196: Range Objects
     - SRFI-207: String-notated bytevectors
