@@ -16,7 +16,7 @@
 
 # Makefile for the R7RS Scheme standard libraries
 #
-# Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2026 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -914,7 +914,7 @@ flonum.$(SO): flonum-incl.c
 flonum-incl.c: flonum.stk
 
 rlist.$(SO): rlist-incl.c
-rlist-incl.c: ../srfi/101.ostk
+rlist-incl.c: rlist.stk
 
 sort.$(SO): sort-incl.c
 sort-incl.c: sort.stk
