@@ -4223,15 +4223,16 @@ static SCM my_expt(SCM x, SCM y)
         double val = REAL_VAL(x);
         int odd_exp = (number_parity(y) == -1);
 
-        if (val > -1.0 && val < 1.0)               /* (-1, 1) */
-          return double2real((signbit(val) && odd_exp)? -0.0: 0.0);
         if (val == 1.0)                            /* 1 */
           return x;
         if (val == -1.0)                           /* -1 */
           return odd_exp? x : double2real(1.0);
-        if (val < -1.0 && odd_exp)
-          return double2real(minus_inf);/* negative, odd exponent */
-        return double2real(plus_inf);   /* negative with even expo., or positive */
+
+        /* if in ]-1, 1[ result is +/-0.0 and +/-inf.0 otherwise */
+        if (val > -1.0 && val < 1.0)               /*  ]-1, 1[ */
+          return double2real((signbit(val) && odd_exp)? -0.0: 0.0);
+        else                                       /* out of [-1, 1] */
+          return double2real((val < -1.0 && odd_exp)? minus_inf: plus_inf);
       }
       /* FALLTHROUGH */
     case tc_integer:
