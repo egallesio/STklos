@@ -345,15 +345,15 @@ DEFINE_PRIMITIVE("%debug-rlist", srfi101_debug_rlist, subr1, (SCM rlist))
 
 
 /*
-  <doc EXT srfi101:car
-  * (srfi101:car rlist)
-  *
-  * Returns the car of |rlist| (SRFI-101 purely functional random access list).
-  *
-  * @lisp
-  * (define x (rlist 10 20 30 40)) => 10
-  * @end lisp
-  doc>
+<DOC ext srfi101:car
+ * (srfi101:car rlist)
+ *
+ * Returns the car of |rlist| (SRFI-101 purely functional random access list).
+ *
+ * @lisp
+ * (define x (rlist 10 20 30 40)) => 10
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:car", srfi101_car, subr1, (SCM list))
 {
@@ -365,15 +365,15 @@ DEFINE_PRIMITIVE("srfi101:car", srfi101_car, subr1, (SCM list))
 
 
 /*
-  <doc EXT srfi101:cdr
-  * (srfi101:cdr rlist)
-  *
-  * Returns the cdr of |rlist| (SRFI-101 purely functional random access list).
-  *
-  * @lisp
-  * (define x (rlist 10 20 30 40)) => (20 30 40)
-  * @end lisp
-  doc>
+<DOC EXT srfi101:cdr
+ * (srfi101:cdr rlist)
+ *
+ * Returns the cdr of |rlist| (SRFI-101 purely functional random access list).
+ *
+ * @lisp
+ * (define x (rlist 10 20 30 40)) => (20 30 40)
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:cdr", srfi101_cdr, subr1, (SCM list))
 {
@@ -397,21 +397,21 @@ DEFINE_PRIMITIVE("srfi101:cdr", srfi101_cdr, subr1, (SCM list))
 
 
 /*
-  <doc EXT srfi101:cons
-  * (cons obj1 obj2)
-  *
-  * Returns a newly allocated rpair whose |rcar| is |obj1| and whose |rcdr| is |obj2|.
-  * The pair is guaranteed to be different (in the sense of |eqv?|) from every
-  * existing object.  This operation takes O(1) time.
-  *
-  * @lisp
-  *     (srfi101:cons 'a '())           =>  #,(<rlist> a)
-  *     (srfi101:cons '(a) '(b c d))    =>  #,(<rlist> (a) b c d)
-  *     (srfi101:cons "a" '(b c))       =>  #,(<rlist> "a" b c)
-  *     (srfi101:cons 'a 3)             =>  #,(<rlist> a . 3)
-  *     (srfi101:cons '(a b) 'c)        =>  #,(<rlist> (a b) . c)
-  * @end lisp
-  doc>
+<DOC EXT srfi101:cons
+ * (cons obj1 obj2)
+ *
+ * Returns a newly allocated rpair whose |rcar| is |obj1| and whose |rcdr| is |obj2|.
+ * The pair is guaranteed to be different (in the sense of |eqv?|) from every
+ * existing object.  This operation takes O(1) time.
+ *
+ * @lisp
+ *     (srfi101:cons 'a '())           =>  #,(<rlist> a)
+ *     (srfi101:cons '(a) '(b c d))    =>  #,(<rlist> (a) b c d)
+ *     (srfi101:cons "a" '(b c))       =>  #,(<rlist> "a" b c)
+ *     (srfi101:cons 'a 3)             =>  #,(<rlist> a . 3)
+ *     (srfi101:cons '(a b) 'c)        =>  #,(<rlist> (a b) . c)
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:cons", srfi101_cons, subr2, (SCM a, SCM list))
 {
@@ -458,19 +458,19 @@ DEFINE_PRIMITIVE("srfi101:list-copy", srfi_101_list_copy, subr1, (SCM x))
 
 
 /*
-  <doc EXT srfi101:pair?
-  * (pair? obj)
-  *
-  * Returns true if |obj| is an rlist pair, and otherwise returns false.
-  * This operation takes O(1) time.
-  *
-  * @lisp
-  * (pair? '(a . b))                               => #t
-  * (pair? '(a b c))                               => #t
-  * (pair? '())                                    => #f
-  * (pair? '#(a b))                                => #f
-  * @end lisp
-  doc>
+<DOC EXT srfi101:pair?
+ * (pair? obj)
+ *
+ * Returns true if |obj| is an rlist pair, and otherwise returns false.
+ * This operation takes O(1) time.
+ *
+ * @lisp
+ * (pair? '(a . b))                               => #t
+ * (pair? '(a b c))                               => #t
+ * (pair? '())                                    => #f
+ * (pair? '#(a b))                                => #f
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:pair?", srfi101_pairp, subr1, (SCM x))
 {
@@ -481,21 +481,21 @@ DEFINE_PRIMITIVE("srfi101:pair?", srfi101_pairp, subr1, (SCM x))
 
 
 /*
-  <doc EXT srfi101:list?
-  * (srfi101:list? obj)
-  *
-  * Returns true if |obj| is a list, false otherwise. By definition, all lists
-  * are chains of pairs that have finite length and are terminated by
-  * the empty list. This operation takes time bounded by O(log(n)),
-  * where n is the number of pairs in the chain forming the potential
-  * list.
-  *
-  * @lisp
-  * (list? '(a b c))                               =>  #t
-  * (list? '())                                    =>  #t
-  * (list? '(a . b))                               =>  #f
-  * @end lisp
-  doc>
+<DOC EXT srfi101:list?
+ * (srfi101:list? obj)
+ *
+ * Returns true if |obj| is a list, false otherwise. By definition, all lists
+ * are chains of pairs that have finite length and are terminated by
+ * the empty list. This operation takes time bounded by O(log(n)),
+ * where n is the number of pairs in the chain forming the potential
+ * list.
+ *
+ * @lisp
+ * (list? '(a b c))                               =>  #t
+ * (list? '())                                    =>  #t
+ * (list? '(a . b))                               =>  #f
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:list?", srfi101_listp, subr1, (SCM x))
 {
@@ -507,17 +507,17 @@ DEFINE_PRIMITIVE("srfi101:list?", srfi101_listp, subr1, (SCM x))
 
 
 /*
-  <doc EXT srfi101:list
-  * (srfi101:list obj1 ...)
-  *
-  * Returns a newly allocated rlist of its arguments.  This operation
-  * takes time bounded by O(n), where n is the number of arguments.
-  *
-  * @lisp
-  * (list 'a (+ 3 4) 'c)                        =>  (a 7 c)
-  * (list)                                      =>  ()
-  * @end lisp
-  doc>
+<DOC EXT srfi101:list
+ * (srfi101:list obj1 ...)
+ *
+ * Returns a newly allocated rlist of its arguments.  This operation
+ * takes time bounded by O(n), where n is the number of arguments.
+ *
+ * @lisp
+ * (list 'a (+ 3 4) 'c)                        =>  (a 7 c)
+ * (list)                                      =>  ()
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:list", srfi101_list, vsubr, (int argc, SCM *things))
 {
@@ -533,19 +533,19 @@ DEFINE_PRIMITIVE("srfi101:list", srfi101_list, vsubr, (int argc, SCM *things))
 
 /* FIXME: should be O(log(k)), but is O(k) */
 /*
-  <doc EXT srfi101:make-list
-  * (srfi101:make-list k)
-  * (srfi101:make-list k fill)
-  *
-  * Returns a newly allocated rlist of |k| elements. If a second argument
-  * is given, then each element is initialized to |fill| .  Otherwise the
-  * initial contents of each element is unspecified. This operation takes
-  * time and space bounded by O(log(k)).
-  *
-  * @lisp
-  * (make-list 5 0)                                ⇒  (0 0 0 0 0)
-  * @end lisp
-  doc>
+<DOC EXT srfi101:make-list
+ * (srfi101:make-list k)
+ * (srfi101:make-list k fill)
+ *
+ * Returns a newly allocated rlist of |k| elements. If a second argument
+ * is given, then each element is initialized to |fill| .  Otherwise the
+ * initial contents of each element is unspecified. This operation takes
+ * time and space bounded by O(log(k)).
+ *
+ * @lisp
+ * (make-list 5 0)                                ⇒  (0 0 0 0 0)
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:make-list", srfi101_make_list, subr12, (SCM k, SCM fill))
 {
@@ -561,20 +561,20 @@ DEFINE_PRIMITIVE("srfi101:make-list", srfi101_make_list, subr12, (SCM k, SCM fil
 
 
 /*
-  <doc EXT srfi101:length
-  * (srfi101:length rlist)
-  *
-  * Returns the length of |list|. This operation takes time bounded by
-  * O(log(n)), where n is the length of the list.
-  *
-  * @lisp
-  * (srfi101:length (srfi101:list a b c))             => 3
-  * (srfi101:length (srfi101:list a
-  *                               (srfi101:list b)
-  *                               (srfi101:list c)))  => 3
-  * (srfi101:length '())                              => 0
-  * @end lisp
-  doc>
+<DOC EXT srfi101:length
+ * (srfi101:length rlist)
+ *
+ * Returns the length of |list|. This operation takes time bounded by
+ * O(log(n)), where n is the length of the list.
+ *
+ * @lisp
+ * (srfi101:length (srfi101:list a b c))             => 3
+ * (srfi101:length (srfi101:list a
+ *                               (srfi101:list b)
+ *                               (srfi101:list c)))  => 3
+ * (srfi101:length '())                              => 0
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:length", srfi101_length, subr1, (SCM x))
 {
@@ -588,20 +588,20 @@ DEFINE_PRIMITIVE("srfi101:length", srfi101_length, subr1, (SCM x))
 
 
 /*
-  <doc srfi101:length<=?
-  * (srfi101:length<=? obj k)
-  *
-  * Returns true if |obj| is a chain of at least |k| pairs and false
-  * otherwise. This operation takes time bounded by O(log(min(k,n))),
-  * where n is the length of the chain of pairs.
-  *
-  * @lisp
-  * (length<=? 'not-a-list 0)                      =>  #t
-  * (length<=? '(a . b) 0)                         =>  #t
-  * (length<=? '(a . b) 1)                         =>  #t
-  * (length<=? '(a . b) 2)                         =>  #f
-  * @end lisp
-  doc>
+<DOC srfi101:length<=?
+ * (srfi101:length<=? obj k)
+ *
+ * Returns true if |obj| is a chain of at least |k| pairs and false
+ * otherwise. This operation takes time bounded by O(log(min(k,n))),
+ * where n is the length of the chain of pairs.
+ *
+ * @lisp
+ * (length<=? 'not-a-list 0)                      =>  #t
+ * (length<=? '(a . b) 0)                         =>  #t
+ * (length<=? '(a . b) 1)                         =>  #t
+ * (length<=? '(a . b) 2)                         =>  #f
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:length<=?", srfi101_length_le, subr2, (SCM list, SCM k))
 {
@@ -665,23 +665,23 @@ srfi_101_append(int argc, SCM* argv) {
 }
 
 /*
-  <doc EXT srfi101:append
-  * (srfi101:append list1 list2 ... obj)
-  *
-  * Returns a chain of pairs consisting of the elements of the first
-  * list followed by the elements of the other lists, with |obj| as the
-  * |cdr| of the final pair. An improper list results if |obj| is not a
-  * list. This operation takes time bounded by O(log(n)), where n is
-  * the total number of elements in the given lists.
-  *
-  * @lisp
-  * (append '(x) '(y))                           =>  (x y)
-  * (append '(a) '(b c d))                       =>  (a b c d)
-  * (append '(a (b)) '((c)))                     =>  (a (b) (c))
-  * (append '(a b) '(c . d))                     =>  (a b c . d)
-  * (append '() 'a)                              =>  a
-  * @end lisp
-  doc>
+<DOC EXT srfi101:append
+ * (srfi101:append list1 list2 ... obj)
+ *
+ * Returns a chain of pairs consisting of the elements of the first
+ * list followed by the elements of the other lists, with |obj| as the
+ * |cdr| of the final pair. An improper list results if |obj| is not a
+ * list. This operation takes time bounded by O(log(n)), where n is
+ * the total number of elements in the given lists.
+ *
+ * @lisp
+ * (append '(x) '(y))                           =>  (x y)
+ * (append '(a) '(b c d))                       =>  (a b c d)
+ * (append '(a (b)) '((c)))                     =>  (a (b) (c))
+ * (append '(a b) '(c . d))                     =>  (a b c . d)
+ * (append '() 'a)                              =>  a
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:append", srfi101_append, vsubr, (int argc, SCM* argv))
 {
@@ -698,18 +698,18 @@ DEFINE_PRIMITIVE("srfi101:append", srfi101_append, vsubr, (int argc, SCM* argv))
 
 
 /*
-  <doc EXT srfi101:reverse
-  * (reverse rlist)
-  *
-  * Returns a newly allocated list consisting of the element of list in
-  * reverse order. This operation takes time bounded by O(n) where n
-  * is the length of the list.
-  *
-  * @lisp
-  * (srfi101:reverse '(a b c))                =>  (c b a)
-  * (srfi101:reverse '(a (b c) 'd '(e (f))))  =>  ((e (f)) d (b c) a)
-  * @end lisp
-  doc>
+<DOC EXT srfi101:reverse
+ * (reverse rlist)
+ *
+ * Returns a newly allocated list consisting of the element of list in
+ * reverse order. This operation takes time bounded by O(n) where n
+ * is the length of the list.
+ *
+ * @lisp
+ * (srfi101:reverse '(a b c))                =>  (c b a)
+ * (srfi101:reverse '(a (b c) 'd '(e (f))))  =>  ((e (f)) d (b c) a)
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:reverse", srfi101_reverse, subr1, (SCM list))
 {
@@ -730,18 +730,18 @@ DEFINE_PRIMITIVE("srfi101:reverse", srfi101_reverse, subr1, (SCM list))
 
 
 /*
-  <doc EXT srfi101:list-ref
-  * (list-ref pair k)
-  *
-  * |Pair| must be a chain of pairs whose count is at least |k| + 1. The
-  * |list-ref| procedure returns the |k|th element of pair. This operation
-  * takes time bounded by O(min(k,log(n))), where n is the length
-  * of the chain of pairs.
-  *
-  * @lisp
-  * (list-ref '(a b c d) 2)      => c
-  * @end lisp
-  doc>
+<DOC EXT srfi101:list-ref
+ * (list-ref pair k)
+ *
+ * |Pair| must be a chain of pairs whose count is at least |k| + 1. The
+ * |list-ref| procedure returns the |k|th element of pair. This operation
+ * takes time bounded by O(min(k,log(n))), where n is the length
+ * of the chain of pairs.
+ *
+ * @lisp
+ * (list-ref '(a b c d) 2)      => c
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:list-ref", srfi101_list_ref, subr2, (SCM list, SCM k))
 {
@@ -768,18 +768,18 @@ DEFINE_PRIMITIVE("srfi101:list-ref", srfi101_list_ref, subr2, (SCM list, SCM k))
 
 
 /*
-  <doc EXT list-set
-  * (list-set pair k obj)
-  *
-  * |Pair| must be a chain of pairs whose count is at least |k| + 1. The
-  * |list-set| procedure returns the chain of pairs obtained by replacing
-  * the kth element with obj. This operation takes time bounded by
-  * O(min(k,log(n))), where n is the length of the chain of pairs.
-  *
-  * @lisp
-  * (list-set '(a b c d) 2 'x)    => (a b x d)
-  * @end lisp
-  doc>
+<DOC EXT list-set
+ * (list-set pair k obj)
+ *
+ * |Pair| must be a chain of pairs whose count is at least |k| + 1. The
+ * |list-set| procedure returns the chain of pairs obtained by replacing
+ * the kth element with obj. This operation takes time bounded by
+ * O(min(k,log(n))), where n is the length of the chain of pairs.
+ *
+ * @lisp
+ * (list-set '(a b c d) 2 'x)    => (a b x d)
+ * @end lisp
+DOC>
 */
 static inline void check_rlist_and_size(SCM list)
 {
@@ -799,7 +799,7 @@ DEFINE_PRIMITIVE("srfi101:list-set", srfi101_list_set, subr3, (SCM list, SCM k, 
   check_rlist_and_size(list);
   check_integer(k);
   long idx = INT_VAL(k);
-    
+
   if (idx < 0) STk_error("index %d out of bounds", idx);
 
   /* The following function already checks for idx past the
@@ -814,23 +814,26 @@ DEFINE_PRIMITIVE("srfi101:list-set", srfi101_list_set, subr3, (SCM list, SCM k, 
 
 
 /*
-  <doc EXT list-ref/update
-  * (list-ref/update pair k proc)
-  *
-  * Returns the same results as:
-  * @lisp
-  * (values (list-ref pair k)
-  *         (list-set pair k (proc (list-ref pair k))))
-  * @end lisp
-  *
-  * but it may be implemented more efficiently.
-  *
-  * @lisp
-  * (list-ref/update '(7 8 9 10) 2 -)    => 9 (7 8 -9 10)
-  * end lisp
-  doc>
+<DOC EXT list-ref/update
+ * (list-ref/update pair k proc)
+ *
+ * Returns the same results as:
+ * @lisp
+ * (values (list-ref pair k)
+ *         (list-set pair k (proc (list-ref pair k))))
+ * @end lisp
+ *
+ * but it may be implemented more efficiently.
+ *
+ * @lisp
+ * (list-ref/update '(7 8 9 10) 2 -)
+ *        => 9
+ *           (7 8 -9 10)
+ * @end lisp
+DOC>
 */
-DEFINE_PRIMITIVE("srfi101:list-ref/update", srfi101_list_ref_update, subr3, (SCM list, SCM k, SCM proc))
+DEFINE_PRIMITIVE("srfi101:list-ref/update", srfi101_list_ref_update, subr3,
+                                            (SCM list, SCM k, SCM proc))
 {
   check_integer(k);
   check_rlist(list);
@@ -970,36 +973,36 @@ srfi101_iterate(SCM proc, int map, SCM *rlists, long arity) {
 }
 
 /*
-  <doc EXT srfi101:map
-  * (srfi101:map proc list1 list2 ...)
-  *
-  * The lists should all have the same length. |Proc| should accept as many
-  * arguments as there are lists and return a single value.
-  *
-  * The |map| procedure applies |proc| element-wise to the elements of the
-  * lists and returns a list of the results, in order. |Proc| is always
-  * called in the same dynamic environment as map itself. The order in
-  * which |proc| is applied to the elements of the lists is unspecified.
-  *
-  * @lisp
-  * (srfi101:map cadr (srfi101:list '(a b)
-  *                                 '(d e)
-  *                                 '(g h))) => (b e h)
-  *
-  * (srfi101:map (lambda (n) (expt n n))
-  *              (srfi101:list 1 2 3 4 5))
-  *                                         => (1 4 27 256 3125)
-  *
-  * (srfi101:map + (srfi101:list 1 2 3)
-  *                (srfi101:list 4 5 6))    => (5 7 9)
-  *
-  * (let ((count 0))
-  *   (srfi101:map (lambda (ignored)
-  *          (set! count (+ count 1))
-  *          count)
-  *        (srfi101:list a b)))             => (1 2) or (2 1)
-  * @end lisp
-  doc>
+<DOC EXT srfi101:map
+ * (srfi101:map proc list1 list2 ...)
+ *
+ * The lists should all have the same length. |Proc| should accept as many
+ * arguments as there are lists and return a single value.
+ *
+ * The |map| procedure applies |proc| element-wise to the elements of the
+ * lists and returns a list of the results, in order. |Proc| is always
+ * called in the same dynamic environment as map itself. The order in
+ * which |proc| is applied to the elements of the lists is unspecified.
+ *
+ * @lisp
+ * (srfi101:map cadr (srfi101:list '(a b)
+ *                                 '(d e)
+ *                                 '(g h))) => (b e h)
+ *
+ * (srfi101:map (lambda (n) (expt n n))
+ *              (srfi101:list 1 2 3 4 5))
+ *                                         => (1 4 27 256 3125)
+ *
+ * (srfi101:map + (srfi101:list 1 2 3)
+ *                (srfi101:list 4 5 6))    => (5 7 9)
+ *
+ * (let ((count 0))
+ *   (srfi101:map (lambda (ignored)
+ *          (set! count (+ count 1))
+ *          count)
+ *        (srfi101:list a b)))             => (1 2) or (2 1)
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:map", srfi101_map, vsubr, (int argc, SCM *argv))
 {
@@ -1012,29 +1015,29 @@ DEFINE_PRIMITIVE("srfi101:map", srfi101_map, vsubr, (int argc, SCM *argv))
 }
 
 /*
-  <doc EXT srfi101:for-each
-  * (for-each proc list1 list2 ...)
-  *
-  * The lists should all have the same length. |Proc| should accept as
-  * many arguments as there are lists.
-  *
-  * The |for|-each procedure applies |proc| element-wise to the elements of
-  * the lists for its side effects, in order from the first element to the
-  * last. |Proc| is always called in the same dynamic environment as
-  * |for-each| itself. The return values of |for-each| are unspecified.
-  *
-  * @lisp
-  * (let ((v (make-vector 5)))
-  *  (srfi101:for-each (lambda (i)
-  *                      (vector-set! v i (* i i)))
-  *                    (srfi101:list 0 1 2 3 4))
-  *  v)                                           =>  #(0 1 4 9 16)
-  *
-  * (srfi101:for-each (lambda (x) x)
-  *                   (srfi101:list 1 2 3 4))     =>  unspecified
-  * (srfi101:for-each even? '())                  =>  unspecified
-  * @end lisp
-  doc>
+<DOC EXT srfi101:for-each
+ * (for-each proc list1 list2 ...)
+ *
+ * The lists should all have the same length. |Proc| should accept as
+ * many arguments as there are lists.
+ *
+ * The |for|-each procedure applies |proc| element-wise to the elements of
+ * the lists for its side effects, in order from the first element to the
+ * last. |Proc| is always called in the same dynamic environment as
+ * |for-each| itself. The return values of |for-each| are unspecified.
+ *
+ * @lisp
+ * (let ((v (make-vector 5)))
+ *  (srfi101:for-each (lambda (i)
+ *                      (vector-set! v i (* i i)))
+ *                    (srfi101:list 0 1 2 3 4))
+ *  v)                                           =>  #(0 1 4 9 16)
+ *
+ * (srfi101:for-each (lambda (x) x)
+ *                   (srfi101:list 1 2 3 4))     =>  unspecified
+ * (srfi101:for-each even? '())                  =>  unspecified
+ * @end lisp
+DOC>
 */
 DEFINE_PRIMITIVE("srfi101:for-each", srfi101_for_each, vsubr, (int argc, SCM *argv))
 {
