@@ -1,7 +1,7 @@
 ;;;;
 ;;;; 96.stk                 -- SRFI-96 support
 ;;;;
-;;;; Copyright © 2008-2025 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2008-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -27,5 +27,5 @@
   ;; All symbols are defined globally with Slib. So, this module
   ;; is just empty. Importing it will only load "slib".
 )
-(require "slib")
+;; FIXME: temporary (require "slib")
 (provide "srfi/96")
