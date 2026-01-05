@@ -74,6 +74,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-96: SLIB Prerequisites
     - SRFI-98: Interface to access environment variables
     - SRFI-100: define-lambda-object
+    - SRFI-101: Purely Functional Random-Access Pairs and Lists
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-113: Sets and Bags
