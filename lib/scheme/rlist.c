@@ -781,13 +781,26 @@ DEFINE_PRIMITIVE("srfi101:list-ref", srfi101_list_ref, subr2, (SCM list, SCM k))
  * @end lisp
 doc>
 */
+static inline void check_rlist_and_size(SCM list)
+{
+  // HACK: This function permits to circumvent an issue with GCC 15.2
+  // (with option -O2 or -O3). If we place those lines in the srfi101_list_set
+  // function, GCC signals an error (and only in this function, whereas this
+  // is used at everal places elsewhere) :-<.
+  // This is all the more strange given that the function is inline and that
+  // this code is normally inserted into srfi101_list_set.
+  check_rlist(list);
+  if (TREE_SIZE(list) == 0)      STk_error("empty rlist");
+}
+
+
 DEFINE_PRIMITIVE("srfi101:list-set", srfi101_list_set, subr3, (SCM list, SCM k, SCM obj))
 {
-    check_integer(k);
-    check_rlist(list);
-    long idx = INT_VAL(k);
-    if (TREE_SIZE(list) == 0)      STk_error("empty rlist");
-    if (idx < 0) STk_error("index %d out of bounds", idx);
+  check_rlist_and_size(list);
+  check_integer(k);
+  long idx = INT_VAL(k);
+    
+  if (idx < 0) STk_error("index %d out of bounds", idx);
 
     /* The following function already checks for idx past the
        end of the list: */
@@ -950,7 +963,7 @@ srfi101_iterate(SCM proc, int map, SCM *rlists, long arity) {
 	/* And set cdr: */
 	CDR(&args[i]) = &args[i+1];
     }
-    CAR(&args[arity-1]) = MAKE_INT(- 999);
+    CAR(&args[arity-1]) = MAKE_INT((unsigned long) -999);
     CDR(&args[arity-1]) = STk_nil;
 
     return iterate_aux(proc, args, lists, arity, output_size, map);
@@ -1153,3 +1166,7 @@ MODULE_ENTRY_START("scheme/rlist")
 MODULE_ENTRY_END
 
 DEFINE_MODULE_INFO
+
+/* Local Variables: */
+/* tab-width: 8 */
+/* End: */
