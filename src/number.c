@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -4218,8 +4218,24 @@ static SCM my_expt(SCM x, SCM y)
 {
   /* y is >= 0 */
   switch (TYPEOF(y)) {
-    case tc_integer:
     case tc_bignum:
+      if (REALP(x)) {
+        double val = REAL_VAL(x);
+        int odd_exp = (number_parity(y) == -1);
+
+        if (val == 1.0)                            /* 1 */
+          return x;
+        if (val == -1.0)                           /* -1 */
+          return odd_exp? x : double2real(1.0);
+
+        /* if in ]-1, 1[ result is +/-0.0 and +/-inf.0 otherwise */
+        if (val > -1.0 && val < 1.0)               /*  ]-1, 1[ */
+          return double2real((signbit(val) && odd_exp)? -0.0: 0.0);
+        else                                       /* out of [-1, 1] */
+          return double2real((val < -1.0 && odd_exp)? minus_inf: plus_inf);
+      }
+      /* FALLTHROUGH */
+    case tc_integer:
 
       if (y == MAKE_INT(0))  /* Treat special case where y = 0 => 1 */
         return MAKE_INT(1);
