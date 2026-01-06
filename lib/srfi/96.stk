@@ -27,5 +27,5 @@
   ;; All symbols are defined globally with Slib. So, this module
   ;; is just empty. Importing it will only load "slib".
 )
-;; FIXME: temporary (require "slib")
+(require "slib")
 (provide "srfi/96")
