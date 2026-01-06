@@ -1,7 +1,7 @@
 ;;;;
 ;;;; load.stk   -- Extended load function
 ;;;;
-;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -396,11 +396,11 @@ doc>
 (define-parameter warning-when-not-provided #t)  ;; FIXME: document it
 (define-parameter provided-list '())             ;; the list of provided files
 
-(define (%normalize-require-provide spec)
+(define (%normalize-require-provide who spec)
   ;; Verify that spec is a string
-  (unless  (string? spec) (error "bad string ~S" spec))
+  (unless  (string? spec) (error who "bad string ~S" spec))
   ;; If it is of the form "srfi-NNN", replace it by "srfi/NNN"
-  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfif 0
+  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not SRFI 0
     (if match
         (format "srfi/~a" (cadr match))
         spec)))
@@ -429,7 +429,7 @@ doc>
 (define (%require what lib-only?)
   ;; This is the function which do really the requiring job. The user "require" is in
   ;; fact a macro which deals with the globals.
-  (let ((fn (%normalize-require-provide what)))
+  (let ((fn (%normalize-require-provide 'require what)))
     (unless (member fn (provided-list))
       ;; fn was not loaded before.
       (let ((file (find-path fn (load-path) (load-suffixes))))
@@ -445,19 +445,19 @@ doc>
 
 
 (define (provide what)
-  (let ((spec (%normalize-require-provide what)))
+  (let ((spec (%normalize-require-provide 'provide what)))
     (unless (member spec (provided-list))
       (provided-list (cons spec (provided-list))))
     spec))
 
 
 (define (provided? what)
-  (let ((spec (%normalize-require-provide what)))
+  (let ((spec (%normalize-require-provide 'provided? what)))
     (and (member spec (provided-list)) #t)))
 
 
 (define (require/provide what)
-  (let ((spec (%normalize-require-provide what)))
+  (let ((spec (%normalize-require-provide 'require/provide what)))
     (unless (member spec (provided-list))
       (%load spec (load-path) (load-suffixes) #f)
       (provided-list (cons spec (provided-list))))

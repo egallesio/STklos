@@ -337,8 +337,8 @@
 (define slib:load slib:load-source)
 
 ;;; If your implementation provides R4RS macros:
-;;(define macro:eval slib:eval)
-;;(define macro:load slib:load-source)
+(define macro:eval slib:eval)
+(define macro:load slib:load-source)
 
 ;;; If your implementation provides syntax-case macros:
 ;;(define syncase:eval slib:eval)
@@ -356,46 +356,41 @@
 ;;;
 
 ;;;
-;;; Retain original require/provide before loading "require.scm"
+;;; Retain original require/provide before (eventually) loading "require.scm"
 ;;;
 (define stklos:require   %require)
 (define stklos:provide   provide)
 (define stklos:provided? provided?)
 
 
-;;;
-;;; Load the SLIB "require" file
-;;;
-(slib:load (in-vicinity (library-vicinity) "require"))
+(if (not (equal? (library-vicinity) ""))
+    ;;
+    ;; SLIB is installed
+    ;;
+    (begin
+      ;; Load the SLIB "require" file (if SLIB is installed)
+      (slib:load (in-vicinity (library-vicinity) "require"))
+      ;; Create (implementation-vicinity) if it does not exists since
+      ;; it will be needed by the SLIB require function
+      (ensure-directories-exist (implementation-vicinity)))
+    ;;
+    ;; SLIB is not installed
+    ;;
+    (begin
+      (define (error-slib-not-intalled who)
+        (error who
+               (string-append "It seems that you want to use the SLIB ~S function,\n"
+                              "but its path cannot be guessed.\n"
+                              "Define SCHEME_LIBRARY_PATH shell variable.")
+               who))
 
-;;; Create (implementation-vicinity) if it does not exists since
-;;; it will be needed by the SLIB require function
-(ensure-directories-exist (implementation-vicinity))
-
-
-
-;; FIXME: We do not say that we have srfi-0 to avoid
-;; a problem with the automatic loading of the first
-;; 150 SRFIs done by SLIB.
-;;
-;;(parameterize ((warning-when-not-provided #f))
-;;  (slib:load (in-vicinity (library-vicinity) "require"))
-;;
-;;  ;; SLIB require.scm does a cond-expand on the first 150 srfi
-;;  ;; but the ones which are loaded do a provide which is the SLIB
-;;  ;; one (since provide is not still redefined. Correct this now
-;;  '(dotimes (i 151)
-;;    (let* ((srfi-name (format "srfi-~a" i))
-;;           (srfi      (string->symbol srfi-name)))
-;;      (when (srfi-0-feature-implementation-file srfi)
-;;        (stklos:provide srfi-name))
-;;      ;; Clean result
-;;      (set! slib:features (filter symbol? slib:features)))))
-;;
-
+      (define (slib:require . _)   (error-slib-not-intalled 'require))
+      (define (slib:provide . _)   (error-slib-not-intalled 'provide))
+      (define (slib:provided? . _) (error-slib-not-intalled 'provided?))))
 
 ;;;
 ;;; Redefine require/provide so that symbols use SLIB one and strings use STk one
+;;; Note that if SLIB is not intalled, SLIB function will yield an error.
 ;;;
 (define-macro (require what)
   ` (if (string? ,what)
