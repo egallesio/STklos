@@ -60,6 +60,7 @@ extern char* rl_basic_quote_characters;         // completion related (see below
 static SCM gen;                 // A pointer to the Scheme generator function
 
 
+
 /*
   Calls the generator (gen) with two arguments:
   1. the text to be matched
@@ -145,23 +146,34 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,
  * enabled. It permits to change dynamically the behaviour of the readline
  * library. The list of possible variables |var| and values |val| can be found
  * in in the https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html[readline documentation manual].
- * 
+ *
  * @lisp
- * (readline-set-option! "disable-completion" "on") ;; disable TAB-completion
+ * (readline-set-option! "disable-completion" "on")   ;; disable TAB-completion
+ * (readline-set-option! "blink-matching-paren" "on") ;; enable parenthesis flashing
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
-                 (SCM option, SCM value)) {
-  if (!STRINGP(option)) STk_error("bad string ~s", option);
-  if (!STRINGP(value)) STk_error("bad string ~s", value);
-  if (STRING_SIZE(option) + STRING_SIZE(value) > 195)
-    STk_error("option and value strings too long (max 195 bytes)");
+static void verify_string(SCM obj) {
+  if (!STRINGP(obj)) STk_error("bad string ~S", obj);
+}
 
-  char s[201];
-  snprintf(s,200,"set %s %s",STRING_CHARS(option), STRING_CHARS(value));
-  int res = rl_parse_and_bind(s);
-  return MAKE_BOOLEAN(res == 0);
+
+DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
+                 (SCM option, SCM value))
+{
+  char *s;
+  int len;
+
+  verify_string(option);
+  verify_string(value);
+
+  len = STRING_SIZE(option) + STRING_SIZE(value) + 20;
+  s   = STk_must_malloc_atomic(len);
+  snprintf(s, len, "set %s %s", STRING_CHARS(option), STRING_CHARS(value));
+
+  if (rl_parse_and_bind(s) != 0)
+    STk_error("cannot set option ~S to ~S", option, value);
+  return STk_void;
 }
 
 
