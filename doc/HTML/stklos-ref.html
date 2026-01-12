@@ -26805,11 +26805,50 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 <p>The primitive <code>readline-set-option!</code> is defined when readline support is
 enabled. It permits to change dynamically the behaviour of the readline
 library. The list of possible variables <code>var</code> and values <code>val</code> can be found
-in in the <a href="https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html">readline documentation manual</a>.</p>
+in in the <a href="https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html">readline documentation manual</a>.
+Both parameters, <code>var</code> and <code>val</code>, must be strings.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"disable-completion"</span> <span class="s">"on"</span><span class="p">)</span> <span class="c1">;; disable TAB-completion</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"disable-completion"</span> <span class="s">"on"</span><span class="p">)</span>   <span class="c1">;; disable TAB-completion</span>
+<span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"blink-matching-paren"</span> <span class="s">"on"</span><span class="p">)</span> <span class="c1">;; enable parenthesis flashing</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_readline-bind!'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-bind! key val) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The primitive <code>readline-bind!</code> is defined when readline support is
+enabled. It permits to change dynamically the action associated to a key.
+Parameters <code>key</code> and <code>val</code> may be strings or symbols.</p>
+</div>
+<div class="paragraph">
+<p>If <code>key</code> is a symbol, it is used as a <em>keyname</em> (a key spelled out in English);
+if it is a string, it is used as a <em>keyseq</em> (a way to denote an entire key
+sequence). See the <em>readline</em> documentaion for the difference between a <em>keysym</em>
+and a <em>keyseq</em>.</p>
+</div>
+<div class="paragraph">
+<p>If <code>val</code> is a string, it indicates the characters that are inserted in the input
+buffer when the binding is triggered. If it is symbol, it denotes a <em>readline</em>
+macro name.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-bind!</span> <span class="ss">'Control-l</span> <span class="s">"lambda "</span><span class="p">)</span> <span class="c1">;; Typing ^L inserts the strin "lambda "</span>
+<span class="p">(</span><span class="nf">readline-bind!</span> <span class="s">"\C-l"</span>    <span class="s">"lambda "</span><span class="p">)</span> <span class="c1">;; The same thing with a keyseq</span>
+<span class="p">(</span><span class="nf">readline-bind!</span> <span class="ss">'Control-o</span> <span class="ss">'kill-whole-line</span><span class="p">)</span>  <span class="c1">;; Typing ^O kills the current line</span></code></pre>
 </div>
 </div>
 <div class="paragraph">

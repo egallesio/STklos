@@ -110,6 +110,17 @@ scheme_completion(const char *str, int start, int _UNUSED(end)) {
 }
 
 
+static void verify_string(SCM obj) {
+  if (!STRINGP(obj)) STk_error("bad string ~S", obj);
+}
+
+static void error_bad_string_or_symbol(char * who, SCM obj) {
+  STk_error("%s must be a string of a symbol. It was ~S", who, obj);
+}
+
+
+
+
 /* ======================================================================
  *
  * Readline primitives
@@ -146,19 +157,14 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,
  * enabled. It permits to change dynamically the behaviour of the readline
  * library. The list of possible variables |var| and values |val| can be found
  * in in the https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html[readline documentation manual].
- *
+ * Both parameters, |var| and |val|, must be strings.
  * @lisp
  * (readline-set-option! "disable-completion" "on")   ;; disable TAB-completion
  * (readline-set-option! "blink-matching-paren" "on") ;; enable parenthesis flashing
  * @end lisp
 doc>
 */
-static void verify_string(SCM obj) {
-  if (!STRINGP(obj)) STk_error("bad string ~S", obj);
-}
-
-
-DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
+DEFINE_PRIMITIVE("readline-set-option!", readline_set_option, subr2,
                  (SCM option, SCM value))
 {
   char *s;
@@ -176,13 +182,75 @@ DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
   return STk_void;
 }
 
+/*
+<doc EXT readline-bind!
+ * (readline-bind! key val)
+ *
+ * The primitive |readline-bind!| is defined when readline support is
+ * enabled. It permits to change dynamically the action associated to a key.
+ * Parameters |key| and |val| may be strings or symbols.
+ *
+ * If |key| is a symbol, it is used as a _keyname_ (a key spelled out in English);
+ * if it is a string, it is used as a _keyseq_ (a way to denote an entire key
+ * sequence). See the _readline_ documentaion for the difference between a _keysym_
+ * and a _keyseq_.
+ *
+ * If |val| is a string, it indicates the characters that are inserted in the input
+ * buffer when the binding is triggered. If it is symbol, it denotes a _readline_
+ * macro name.
+ *
+ * @lisp
+ * (readline-bind! 'Control-l "lambda ") ;; Typing ^L inserts the strin "lambda "
+ * (readline-bind! "\\C-l"    "lambda ") ;; The same thing with a keyseq
+ * (readline-bind! 'Control-o 'kill-whole-line)  ;; Typing ^O kills the current line
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("readline-bind!", readline_bind, subr2, (SCM key, SCM value))
+{
+  char *s, *s1, *s2, *sep1, *sep2;
+  int len;
 
+if (STRINGP(key)) {
+  s1   = (char *) STRING_CHARS(key);
+  sep1 = "\"";
+ } else {
+  if (!SYMBOLP(key))
+    error_bad_string_or_symbol("key", key);
+  s1   = (char*) SYMBOL_PNAME(key);
+  sep1 = "";
+ }
+
+ if (STRINGP(value)) {
+   s2   = (char *) STRING_CHARS(value);
+   sep2 = "\"";
+ } else {
+   if (!SYMBOLP(value))
+     error_bad_string_or_symbol("value", value);
+   s2   = (char*) SYMBOL_PNAME(value);
+   sep2 = "";
+ }
+
+  len = strlen(s1) + strlen(s2) + 10;
+  s   = STk_must_malloc_atomic(len);
+  snprintf(s, len, "%s%s%s: %s%s%s", sep1, s1, sep1, sep2, s2, sep2);
+  
+  if (rl_parse_and_bind(s) != 0)
+    STk_error("cannot bind key ~S to ~S", key, value);
+  return STk_void;
+}
+
+
+//
+// ----------------------------------------------------------------------
+//
 MODULE_ENTRY_START("readline-utils")
 {
   SCM module =  STk_STklos_module;   // FIXME: should be READLINE
 
   ADD_PRIMITIVE_IN_MODULE(readline_init_completion, module);
   ADD_PRIMITIVE_IN_MODULE(readline_set_option, module);
+  ADD_PRIMITIVE_IN_MODULE(readline_bind, module);
 
   // NOTE: the following assignments are not related to completion and should
   // not be here.  However since our FFI doesn't permit to read/set variables
