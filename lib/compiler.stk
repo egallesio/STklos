@@ -157,6 +157,27 @@
               (scope-locals env) (scope-mlocals env) (scope-parent env))
       (L (scope-parent env)))))
 
+;; From A, B, creates A **on top of** B,
+(define (append-scope env-a env-b)
+  (%debug "A:\n")
+  (%debug "~S\n" env-a)
+  (%debug "B:\n")
+  (%debug "~S\n" env-b)
+
+  (if (or (not (scope-parent env-a))
+          (module? (scope-parent env-a)))
+      (make-scope (scope-locals  env-a)
+                  (scope-mlocals env-a)
+                  env-b)
+      (make-scope (scope-locals  env-a)
+                  (scope-mlocals env-a)
+                  (append-scope (scope-parent env-a)
+                                env-b))))
+
+
+(define (compile-%%debug-scope e env tail)
+  (%debug-scope env))
+
 
 ; ======================================================================
 ;
@@ -551,7 +572,8 @@ doc>
                 (let ((obj `( (#%in-scheme '%make-syntax) ',name
                                                           ',proc
                                                           ,proc
-                                                          ',(module-name mod))))
+                                                          ',(module-name mod)
+                                                          #f)))
                   ;; produce code for defining the macro
                   (%register-new-global! name)
                   (compile obj #f env #f)
@@ -1362,7 +1384,7 @@ doc>
       ((null?)  (comp1 'IN-NULLP))
       ((not)    (comp1 'IN-NOT))
       ((pair?)  (comp1 'IN-PAIRP))
-      
+
       ((list)           (compile-args actuals env)
                         (emit 'IN-LIST len))
       ((vector-ref)     (comp2 'IN-VREF))
@@ -1930,7 +1952,8 @@ both forms.
                                          name
                                          expander
                                          exp-val
-                                         #f))) ; #f =>  non global macro
+                                         #f ; #f =>  non global macro
+                                         env)))
                         (Loop (cdr bindings)
                               (cons (cons name new-macro)
                                     new-env)))))))))))
@@ -1986,7 +2009,8 @@ both forms.
                        (obj      (%make-syntax name
                                                proc
                                                expander
-                                               modname)))
+                                               modname
+                                               #f)))
                   ;; Define the expander in the imported module
                   (%symbol-define name obj module)
 
@@ -2120,7 +2144,9 @@ both forms.
          (cond
          ((find-syntax-in-env first env)
           ;; --- Macro call
-          (compile (%macro-expand e env) env epair tail?))
+          (compile (%macro-expand e (append-scope
+                                     (%syntax-environment first)
+                                     env)) env epair tail?))
 
          ((%icall? first)
           ;; --- Internal call such as #%if, #%and ...
