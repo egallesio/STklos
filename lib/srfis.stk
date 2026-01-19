@@ -209,7 +209,7 @@
     (169 "Underscores in numbers")
     (170 "POSIX API" (posix) "srfi-170")
     (171 "Transducers" (transducers) "srfi-171")
-    ;; 172  Two Safer Subsets of R7RS
+    (172 "Two Safer Subsets of R7RS" () "srfi-172")
     (173 "Hooks" (hooks) "srfi-173")
     (174 "POSIX Timespecs" (posix-timespecs) "srfi-174")
     (175 "ASCII character library" (ascii) "srfi-175")
