@@ -825,6 +825,8 @@
 ;;------------------------------------------------------------------
 (test-subsection "division")
 
+(test/compile-error "0/0" (/ 0 0))
+
 (define (almost=? x y)
   (define (flonum=? x y)
     (let ((ax (abs x)) (ay (abs y)))

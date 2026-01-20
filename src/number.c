@@ -2615,7 +2615,7 @@ SCM STk_div2(SCM o1, SCM o2)
         case tc_rational: return make_rational(mul2(o1, RATIONAL_DEN(o2)),
                                                RATIONAL_NUM(o2));
         case tc_bignum:   break;
-        case tc_integer:  if (o1 == MAKE_INT(0)) return o1;
+        case tc_integer:  if (o1 == MAKE_INT(0) && o2 != MAKE_INT(0)) return o1;
                           break;
         default:          goto div_error;
       }
