@@ -3861,76 +3861,78 @@ static SCM my_log2(SCM x, SCM b) {
   /* And now that we checked that the base is neither 0 nor 1: */
   if (x == MAKE_INT(1))  return MAKE_INT(0);
 
-  long base = INT_VAL(b);
-
   if (INTP(b)) {
-    /* Fast path for base two. When the number is negative, we compute
-       the exact log, and make a complex number with an exact real part,
-       and an inexact imaginary part (equal to pi/log(b) ).    */
+    long base = INT_VAL(b);
 
-    if (power_of_2_p(base)) {
-      switch (TYPEOF(x)) {
-      case tc_integer: {
-        unsigned long pwr = base;
-
-        long xx = INT_VAL(x);
-        if (power_of_2_p(xx) && base > 2)
-          return div2(my_log2(x,MAKE_INT(2)), my_log2(b,MAKE_INT(2)));
-
-        int pos = (xx > 0);
-
-        /* Explicitly check for +-1, so we give an exact result in these cases: */
-        if (xx == 1)  return MAKE_INT(0);
-        if (xx == -1) return Cmake_complex(MAKE_INT(0),double2real(MY_PI/log(base)));
-
-        xx = labs(xx);
-        if (xx == 0) STk_error("cannot take log of zero");
-        /* Linear search for the wanted power... */
-        for (unsigned long i=1; i < INT_LENGTH; i++, pwr *= base) {
-          if (xx == (long) pwr)
+    switch (TYPEOF(x)) {
+    case tc_bignum: {
+      /* Special case: bignums with fixnum base between 2 and 62. If the log is integer,
+         we can easily return an exact result using the GMP! */
+      if (base <= 62) { /* This is a GMP limitation */
+        mpz_t *xx = &BIGNUM_VAL(x);
+        mpz_t r;
+        mpz_init(r);
+        int sgn = mpz_sgn(*xx);
+        /* mpz_sizeinbase returns log(xx) in base two plus one, if it's
+           exact: */
+        unsigned long s = mpz_sizeinbase(*xx,base);
+        if (s != 1) {
+          mpz_ui_pow_ui(r, base, (s-1));
+          /* Now, is s-1 the exact log of xx in this base ? */
+          if (!mpz_cmpabs(r,*xx)) {
             /* If the number is negative, we return the same
                result, but with an imaginary part equal to
                PI/log(base). */
-            return pos
-              ? MAKE_INT(i)
-              : Cmake_complex(MAKE_INT(i),double2real(MY_PI/log(base)));
-        }
-        break;
-      }
-      case tc_bignum: {
-        if (base <= 62) { /* This is a GMP limitation */
-          mpz_t *xx = &BIGNUM_VAL(x);
-          mpz_t r;
-          mpz_init(r);
-          int sgn = mpz_sgn(*xx);
-          /* mpz_sizeinbase returns log(xx) in base two plus one, if it's
-             exact: */
-          unsigned long s = mpz_sizeinbase(*xx,base);
-          if (s != 1) {
-            mpz_ui_pow_ui(r, base, (s-1));
-            /* Now, is s-1 the exact log of xx in base 2 ? */
-            if (!mpz_cmpabs(r,*xx)) {
-              /* If the number is negative, we return the same
-               result, but with an imaginary part equal to
-               PI/log(base). */
-              mpz_clear(r);
-              return (sgn>0)
-                ? MAKE_INT(s-1)
+            mpz_clear(r);
+            return (sgn>0)
+              ? MAKE_INT(s-1)
               : Cmake_complex(MAKE_INT(s-1),double2real(MY_PI/log(base)));
-            }
           }
-          mpz_clear(r);
-          /* If not, do the floating-point work after the switch... */
         }
-        break;
+        mpz_clear(r);
       }
-      case tc_rational:
-        /* Do log(a/b) = log(a)/log(b).
-           This allows us to give exact answers to (log 1/32 2),
-           for example! */
-        return sub2(my_log2(RATIONAL_NUM(x),b),
-                    my_log2(RATIONAL_DEN(x),b));
+      break;
+    }
+
+    case tc_rational:
+      /* Do log(a/b) = log(a)/log(b).
+         This allows us to give exact answers to (log 1/32 2),
+         for example! */
+      return sub2(my_log2(RATIONAL_NUM(x),b),
+                  my_log2(RATIONAL_DEN(x),b));
+
+      /* When the number is negative, we compute
+         the exact log, and make a complex number with an exact real part,
+         and an inexact imaginary part (equal to pi/log(b) ).    */
+    case tc_integer: {
+      unsigned long pwr = base;
+
+      long xx = INT_VAL(x);
+
+      /* Fast path for base two. */
+      if (power_of_2_p(xx) && base > 2)
+        return div2(my_log2(x,MAKE_INT(2)), my_log2(b,MAKE_INT(2)));
+
+      int pos = (xx > 0);
+
+      /* Explicitly check for +-1, so we give an exact result in these cases: */
+      if (xx == 1)  return MAKE_INT(0);
+      if (xx == -1) return Cmake_complex(MAKE_INT(0),double2real(MY_PI/log(base)));
+
+      xx = labs(xx);
+      if (xx == 0) STk_error("cannot take log of zero");
+      /* Linear search for the wanted power... */
+      for (unsigned long i=1; i < INT_LENGTH; i++, pwr *= base) {
+        if (xx == (long) pwr)
+          /* If the number is negative, we return the same
+             result, but with an imaginary part equal to
+             PI/log(base). */
+          return pos
+            ? MAKE_INT(i)
+            : Cmake_complex(MAKE_INT(i),double2real(MY_PI/log(base)));
       }
+      break;
+    }
     }
   }
   return div2(my_log(x),my_log(b));
