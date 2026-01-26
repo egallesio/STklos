@@ -3051,11 +3051,29 @@ DEFINE_PRIMITIVE("lcm", lcm, vsubr, (int argc, SCM *argv))
   if (STk_numberp(*argv) == STk_false) error_bad_number(*argv);
 
   for (res = *argv--; --argc; argv--) {
-    gcd = gcd2(res, *argv);
-    res = mul2(res,div2(*argv, gcd));
+    /* It's faster to use GMP functions when it makes sense to do so: */
+    if (BIGNUMP(res) && BIGNUMP(*argv)) {       /* BIGNUM - BIGNUM */
+      mpz_t *r = &BIGNUM_VAL(res);
+      mpz_lcm(*r, *r, BIGNUM_VAL(*argv));
+      res = bignum2number(*r);
+    } else if (BIGNUMP(res) && INTP(*argv)) {   /* BIGNUM - FIXNUM */
+      mpz_t *r = &BIGNUM_VAL(res);
+      mpz_lcm_ui(*r, *r, labs(INT_VAL(*argv)));
+      res = bignum2number(*r);
+    } else if (INTP(res) && BIGNUMP(*argv)) {   /* FIXNUM - BIGNUM */
+      mpz_t *r = &BIGNUM_VAL(*argv);
+      mpz_lcm_ui(*r, *r, labs(INT_VAL(res)));
+      res = bignum2number(*r);
+    } else {                                    /* FIXNUM - FIXNUM */
+      /* No bignums; revert to the simple LCM algorithm for fixnums: */
+      gcd = gcd2(res, *argv);
+      res = mul2(res,div2(*argv, gcd));
+    }
   }
   return absolute(res);
 }
+
+
 
 /*
 <doc  numerator denominator
