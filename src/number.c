@@ -687,14 +687,15 @@ static SCM double2integer(double n)     /* small or big depending on n's size */
 static SCM double2rational(double d)
 {
   double fraction, i;
-  SCM res;
+  SCM int_part, res;
   int negative = 0;
 
   if (d < 0.0) { negative = 1; d = -d; }
   fraction = modf(d, &i);
+  int_part = double2integer(i);
 
   if (!fraction) {
-    res = double2integer(negative ? (-i) : i);
+    res = negative ? double2integer((- i)) : int_part;
   } else {
 #ifdef __MINI_GMP_H__
     /* BEGIN code for compiling WITH MINI GMP (*no* rationals!) */
@@ -709,7 +710,7 @@ static SCM double2rational(double d)
       if (i)
         num = add2(num, MAKE_INT(1));
     }
-    res = add2(double2integer(i), div2(num, den));
+    res = add2(int_part, div2(num, den));
     if (negative)
       res = sub2(MAKE_INT(0), res);
 #else
