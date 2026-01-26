@@ -108,19 +108,16 @@
          (cadadr c)
          c))
    (if (<= 3 len 4)
-       (let* ((Cond (rewrite-cond (rewrite-expression (cadr expr) env)))
-              (expr (cons (car expr)
-                          (cons Cond (cddr expr))))
-              (Then (caddr expr))
-              (Else (if (null? (cdddr expr))
-                        #void
-                        (cadddr expr))))
+       (let ((Cond (rewrite-cond (rewrite-expression (cadr expr) env)))
+             (Then (caddr expr))
+             (Else (if (null? (cdddr expr))
+                       #void
+                       (cadddr expr))))
          (if (const-expr? Cond)
              (if (const-value Cond)
                  (rewrite-expression Then env)
                  (rewrite-expression Else env))
-             expr)))))
-
+             (list (car expr) Cond Then Else))))))
 
 
 (compiler:add-rewriter!            ;; 'NOT' rewriter
