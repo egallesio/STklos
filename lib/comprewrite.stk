@@ -2,7 +2,7 @@
 ;;;;
 ;;;; comprewrite.stk         -- Rewrite expressions in simpler ones
 ;;;;
-;;;; Copyright © 2024-2025 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2024-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -64,6 +64,12 @@
       (cadr expr)
       expr))
 
+(define (not-overloaded? s env)
+  (and (not (find-symbol-in-env s env))      ; s is not in env
+       (eq? (symbol-value  s *scmmod*)       ; value is the std Scheme one
+            (symbol-value* s *stklosmod*))))
+
+
 (define (rewrite-expression e env)  ;; try to rewrite(simplify) expression e
   (let Loop ((save e))
     (when (pair? e)
@@ -71,10 +77,8 @@
              (optim (compiler:find-rewriter s)))
         (when (and optim                             ;; we have a rewriter
                    (or (%icall? s)
-                       (and (not (find-symbol-in-env s env))      ; s is not in env
-                            (eq? (symbol-value  s *scmmod*)       ; value is the std
-                                 (symbol-value* s *stklosmod*))))); Scheme one
-          ;; We can rewrite this form
+                       (not-overloaded? s env)))
+          ;; We can try to rewrite this form
           (set! e (optim e (length e) env))          ;; call the optimizer
           (unless (equal? e save)                    ;; loop is rewritten
             ;; (%debug "Rewrite ~s => ~s" save e)
@@ -99,8 +103,17 @@
  ;; ===> then-expr  (if CONST is #f)
  ;; ===> else-expr  (otherwise)
  (lambda (expr len env)
+   (define (rewrite-cond c)
+     (if (and (not-overloaded? 'not env)
+              (pair? c)             ; (
+              (eq? (car c)  'not)   ; (not
+              (pair? (cdr c))       ; (not (...
+              (pair? (cadr c))      ; (not ( OBJ      (cdr not nil)
+              (eq? (caadr c) 'not)) ; (not (not ...
+         (cadadr c)
+         c))
    (if (<= 3 len 4)
-       (let ((Cond (rewrite-expression (cadr expr) env))
+       (let ((Cond (rewrite-cond (rewrite-expression (cadr expr) env)))
              (Then (caddr expr))
              (Else (if (null? (cdddr expr))
                        #void
@@ -109,8 +122,7 @@
              (if (const-value Cond)
                  (rewrite-expression Then env)
                  (rewrite-expression Else env))
-             expr))
-       expr)))
+             (list (car expr) Cond Then Else))))))
 
 
 (compiler:add-rewriter!            ;; 'NOT' rewriter
