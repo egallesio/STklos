@@ -64,6 +64,12 @@
       (cadr expr)
       expr))
 
+(define (not-overloaded? s env)
+  (and (not (find-symbol-in-env s env))      ; s is not in env
+       (eq? (symbol-value  s *scmmod*)       ; value is the std Scheme one
+            (symbol-value* s *stklosmod*))))
+
+
 (define (rewrite-expression e env)  ;; try to rewrite(simplify) expression e
   (let Loop ((save e))
     (when (pair? e)
@@ -71,10 +77,8 @@
              (optim (compiler:find-rewriter s)))
         (when (and optim                             ;; we have a rewriter
                    (or (%icall? s)
-                       (and (not (find-symbol-in-env s env))      ; s is not in env
-                            (eq? (symbol-value  s *scmmod*)       ; value is the std
-                                 (symbol-value* s *stklosmod*))))); Scheme one
-          ;; We can rewrite this form
+                       (not-overloaded? s env)))
+          ;; We can try to rewrite this form
           (set! e (optim e (length e) env))          ;; call the optimizer
           (unless (equal? e save)                    ;; loop is rewritten
             ;; (%debug "Rewrite ~s => ~s" save e)
@@ -100,7 +104,8 @@
  ;; ===> else-expr  (otherwise)
  (lambda (expr len env)
    (define (rewrite-cond c)
-     (if (and (pair? c)             ; (
+     (if (and (not-overloaded? 'not env)
+              (pair? c)             ; (
               (eq? (car c)  'not)   ; (not
               (pair? (cdr c))       ; (not (...
               (pair? (cadr c))      ; (not ( OBJ      (cdr not nil)
