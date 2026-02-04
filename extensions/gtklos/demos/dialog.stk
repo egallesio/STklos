@@ -1,7 +1,7 @@
 ;;;;
 ;;;; dialog.stk -- Dialog box
 ;;;;
-;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ All the demos use the make-simple-message dialog procedure
 to create the dialog.
 ")
 
-(define (make-dialog parent str type buttons)
+(define (make-dialog parent str type . options)
   (make <button>
     :parent parent
     :text (format #f "~A dialog" str)
@@ -42,7 +42,7 @@ to create the dialog.
                               type
                               (format "<big><b>~A</b></big>:\n\n<i>    Some text …</i>"
                                       str)
-                              buttons)))
+                              :buttons options)))
                  (printf "You choose ~S on the ~S dialog\n"
                          val str)))))
 
@@ -51,8 +51,8 @@ to create the dialog.
   (let* ((win (make <demo-window> :title "Dialog Demo" :x 100 :y 100
                     :file "dialog" :border-width 15
                     :message *dialog-msg*)))
-    (make-dialog win "Error"    'error '("gtk-ok"))
-    (make-dialog win "Info"     'info '("gtk-ok"))
-    (make-dialog win "Question" 'question '("gtk-yes" "gtk-no"))
-    (make-dialog win "Warning"  'warning '("More information" "gtk-cancel"))
+    (make-dialog win "Error"    'error "gtk-ok")
+    (make-dialog win "Info"     'info "gtk-ok")
+    (make-dialog win "Question" 'question "gtk-yes" "gtk-no")
+    (make-dialog win "Warning"  'warning "More information" "gtk-cancel")
     (gtk-main)))
