@@ -514,12 +514,17 @@ HAVE_GTK=0
 HAVE_CANVAS=0
 GOOCANV=absent
 GOOVERS=""
+GTK_LOCATION=""
 
 # Do we have GTK+?
 if ${PKGCONFIG} --exists gtk+-3.0
 then
   GTK_CFLAGS=`${PKGCONFIG} --cflags gtk+-3.0`
   HAVE_GTK=1
+  # Guess a plausible path for GTK libraries location on this system
+  # This is very empiric.
+  tmp=`/usr/sbin/ldconfig -p | grep "libgtk-3.so " | cut -d ' ' -f 4` 2>/dev/null
+  GTK_LOCATION=`dirname "$tmp"`
 fi
 
 # Do we have goocanvas?
@@ -540,6 +545,12 @@ then
    HAVE_CANVAS=1
    GOOCANV=present
 fi
+
+
+
+SYSLIBS_LOC=$(dirname $(ldd /bin/ls | grep libc.so | cut -d ' '  -f 3)) 2>/dev/null
+
+
 
 ###
 ### SFI-176 stuff
@@ -745,6 +756,7 @@ AC_SUBST(HAVE_CANVAS)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GOOCANV)
 AC_SUBST(GOOVERS)
+AC_SUBST(GTK_LOCATION)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile

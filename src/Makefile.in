@@ -268,7 +268,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/extraconf.h.in \
 	$(srcdir)/stklosconf.h.in $(top_srcdir)/depcomp \
-	$(top_srcdir)/mkinstalldirs
+	$(top_srcdir)/mkinstalldirs TODO
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -323,6 +323,7 @@ GMPLIB = @GMPLIB@
 GOOCANV = @GOOCANV@
 GOOVERS = @GOOVERS@
 GTK_CFLAGS = @GTK_CFLAGS@
+GTK_LOCATION = @GTK_LOCATION@
 HAVE_CANVAS = @HAVE_CANVAS@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
