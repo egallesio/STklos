@@ -2,7 +2,7 @@
 ;;;;
 ;;;; gtklos.stk         -- GTklos extension
 ;;;;
-;;;; Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2021-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,11 @@
 
 
 (select-module stklos/gtklos)
+
+(when-load-and-compile
+ ;; The path guessed for GTK libraries at configuration time
+ (define *guessed-gtk-libraries-location* "@GTK_LOCATION@"))
+
 
 (%compile-time-define %gtk-get-property %gtk-set-property!
                       %readline-idle-hook get-gtk-event
