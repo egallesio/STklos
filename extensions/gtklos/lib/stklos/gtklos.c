@@ -1,7 +1,7 @@
 /*
  * gtklos.c              -- Various GTk+ wrappers for GTklos
  *
- * Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright Â© 2007-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
