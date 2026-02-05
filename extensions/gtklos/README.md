@@ -12,21 +12,31 @@ $ make all      # compile GTklos and build the demos
 
 ## Requirement: GTK Libraries
 
-The GTK libraries are searched in standard places (that is
-`/usr/lib` and `/usr/local/lib`). If your libraries are located elsewhere (use the `locate` command to have a hint), you can set the `STKLOS_GTK_DIR` environment variable. For instance, for a machine running Debian or Ubuntu on a x86_64 architecture, you'll probably have to do
+The GTK libraries are searched in standard places (that is `/usr/lib` and
+`/usr/local/lib`). If your libraries are located elsewhere, the configuration
+script guess a plausible directory. Normally, the libraries should be found
+and you don't need to do anything special. Anyway, if the libraries are not found,
+you can use the `locate` command to have a hint  (search for  `libgtk-3`).
+Once you have found this directory, you can set the `STKLOS_GTK_DIR` environment variable.
+
+For instance, on a machine running Debian or Ubuntu (on a x86_64
+architecture), this directory is `/usr/lib/x86_64-linux-gnu`. Normally, the
+`./configure` for **STklos** should have found this directory by itself on these
+distributions. However, if this not the case, you can set the variable
+`STKLOS_GTK_DIR` with:
 
 ```shell
 $ export STKLOS_GTK_DIR=/usr/lib/x86_64-linux-gnu
 ```
 
-if you are on macos you'll probably install gtk with `brew` so you have to do
+If you are on macOS you'll probably install gtk with `brew` so you have to do
 
 ```shell
 brew install gtk+3
 export STKLOS_GTK_DIR=/usr/local/opt/gtk+3/
 ```
 
-after that you have to run `./configure` from the project root directory and then return here and run `make`
+After that, you have to run `./configure` from the project root directory and then return in `extensions/gtklos` and run `make`
 
 ## Demos
 
