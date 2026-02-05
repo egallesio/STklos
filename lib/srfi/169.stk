@@ -26,4 +26,12 @@
 ;;;;
 
 (define-module srfi/169)
+
+;; STklos has this parameter set to #t by default. However...
+;; If the user turned it off, and then decided to "load SRFI 169",
+;; perhaps by the principle of least surprise, we should turn
+;; it back on (because having loaded the SRFI we'd expect it to
+;; work from now on...)
+(accept-srfi-169-numbers #t)
+
 (provide "srfi/169")
