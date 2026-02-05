@@ -80,6 +80,19 @@ On machines with a more limited space, you can use the following Makefile instal
 **Note**: `make install` is equivalent to `make install-base install-sources install-docs`.
 
 
-
 For a more complete description of the build process, you can refer to the
 INSTALL file at the top of the distribution tree.
+
+## Using the GTK+ toolkit
+
+**STklos**  offers bindings for the GTK+ toolkit (version 3). The library is not compiled/installed by default. If you  want to use it:
+
+1. be sure to have `libgtk+-3` installed on you machine
+2. if you plan to use the `canvas` widget you must have also the goocanvas
+   library (which is often not installed by default.
+3. go in the `extensions/gtklos` directory
+4. run the command `make` to build the `(stklos gtklos)` library and the demos.
+5. some demos may be launched with the command `./extensions/gtklos/run-demos`
+
+For more information, you can go in the `extensions/gtklos` directory.
+Documentation is available in the `extensions/gtklos/doc` directory.
