@@ -1547,7 +1547,7 @@ EXTERN_C_BEGIN
 #       endif
 #       define MAP_FAILED (void *) ((word)-1)
 #       define HEAP_START (ptr_t)0x40000000
-#   endif /* DGUX */
+#   endif
 #   ifdef LINUX
 #       if !defined(REDIRECT_MALLOC)
 #           define MPROTECT_VDB
@@ -1765,9 +1765,13 @@ EXTERN_C_BEGIN
 # ifdef LOONGARCH
 #   define MACH_TYPE "LoongArch"
 #   ifdef LINUX
-#     pragma weak __data_start
-      extern int __data_start[];
-#     define DATASTART ((ptr_t)(__data_start))
+#     if defined(__GLIBC__)
+#       pragma weak __data_start
+        extern int __data_start[];
+#       define DATASTART ((ptr_t)(__data_start))
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #     define CPP_WORDSZ (__SIZEOF_SIZE_T__ * 8)
 #     define ALIGNMENT (CPP_WORDSZ/8)
 #   endif
@@ -1776,9 +1780,13 @@ EXTERN_C_BEGIN
 # ifdef MIPS
 #   define MACH_TYPE "MIPS"
 #   ifdef LINUX
-#     pragma weak __data_start
-      extern int __data_start[];
-#     define DATASTART ((ptr_t)(__data_start))
+#     if defined(__GLIBC__)
+#       pragma weak __data_start
+        extern int __data_start[];
+#       define DATASTART ((ptr_t)(__data_start))
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #     ifdef _MIPS_SZPTR
 #       define CPP_WORDSZ _MIPS_SZPTR
 #       define ALIGNMENT (_MIPS_SZPTR/8)
@@ -1886,8 +1894,12 @@ EXTERN_C_BEGIN
 #   define CPP_WORDSZ 32
 #   define MACH_TYPE "NIOS2"
 #   ifdef LINUX
-      extern int __data_start[];
-#     define DATASTART ((ptr_t)(__data_start))
+#     if defined(__GLIBC__)
+        extern int __data_start[];
+#       define DATASTART ((ptr_t)(__data_start))
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #     define ALIGNMENT 4
 #     ifndef HBLKSIZE
 #       define HBLKSIZE 4096
@@ -1899,8 +1911,12 @@ EXTERN_C_BEGIN
 #   define CPP_WORDSZ 32
 #   define MACH_TYPE "OR1K"
 #   ifdef LINUX
-      extern int __data_start[];
-#     define DATASTART ((ptr_t)(__data_start))
+#     if defined(__GLIBC__)
+        extern int __data_start[];
+#       define DATASTART ((ptr_t)(__data_start))
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #     define ALIGNMENT 4
 #     ifndef HBLKSIZE
 #       define HBLKSIZE 4096
@@ -2178,8 +2194,12 @@ EXTERN_C_BEGIN
 #     endif
 #   endif
 #   ifdef LINUX
+#     if defined(__GLIBC__)
         extern int __data_start[] __attribute__((__weak__));
 #       define DATASTART ((ptr_t)(__data_start))
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
         extern int _end[] __attribute__((__weak__));
 #       define DATAEND ((ptr_t)(_end))
 #       define CACHE_LINE_SIZE 256
@@ -2209,11 +2229,11 @@ EXTERN_C_BEGIN
 #     if !defined(REDIRECT_MALLOC)
 #       define MPROTECT_VDB
 #     endif
-#     if defined(HOST_ANDROID)
-#       define SEARCH_FOR_DATA_START
-#     else
+#     if defined(__GLIBC__)
         extern int __data_start[] __attribute__((__weak__));
 #       define DATASTART ((ptr_t)__data_start)
+#     else
+#       define SEARCH_FOR_DATA_START
 #     endif
 #   endif
 #   ifdef DARWIN
@@ -2547,8 +2567,12 @@ EXTERN_C_BEGIN
 #   define ALIGNMENT 4
 #   define CACHE_LINE_SIZE 64
 #   ifdef LINUX
-      extern int __data_start[] __attribute__((__weak__));
-#     define DATASTART ((ptr_t)__data_start)
+#     if defined(__GLIBC__)
+        extern int __data_start[] __attribute__((__weak__));
+#       define DATASTART ((ptr_t)__data_start)
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #   endif
 # endif /* ARC */
 
@@ -2575,8 +2599,12 @@ EXTERN_C_BEGIN
 #   define PREFETCH(x) __insn_prefetch(x)
 #   define CACHE_LINE_SIZE 64
 #   ifdef LINUX
-      extern int __data_start[];
-#     define DATASTART ((ptr_t)__data_start)
+#     if defined(__GLIBC__)
+        extern int __data_start[];
+#       define DATASTART ((ptr_t)__data_start)
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #   endif
 # endif /* TILEPRO */
 
@@ -2590,8 +2618,12 @@ EXTERN_C_BEGIN
 #   define PREFETCH(x) __insn_prefetch_l1(x)
 #   define CACHE_LINE_SIZE 64
 #   ifdef LINUX
-      extern int __data_start[];
-#     define DATASTART ((ptr_t)__data_start)
+#     if defined(__GLIBC__)
+        extern int __data_start[];
+#       define DATASTART ((ptr_t)__data_start)
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #   endif
 # endif /* TILEGX */
 
@@ -2603,8 +2635,12 @@ EXTERN_C_BEGIN
       /* Nothing specific. */
 #   endif
 #   ifdef LINUX
-      extern int __data_start[] __attribute__((__weak__));
-#     define DATASTART ((ptr_t)__data_start)
+#     if defined(__GLIBC__)
+        extern int __data_start[] __attribute__((__weak__));
+#       define DATASTART ((ptr_t)__data_start)
+#     else
+#       define SEARCH_FOR_DATA_START
+#     endif
 #   endif
 #   ifdef NETBSD
       /* Nothing specific. */
@@ -2876,6 +2912,13 @@ EXTERN_C_BEGIN
 # undef SOFT_VDB
 #endif
 
+#if defined(USE_PROC_FOR_LIBRARIES) && !defined(LINUX) \
+    && defined(GC_SINGLE_OBJ_BUILD)
+  /* GC_proc_read_dirty() use the new structured "/proc" definitions,   */
+  /* but GC_register_dynamic_libraries() requires the old ones.         */
+# undef PROC_VDB
+#endif
+
 #ifdef NO_GWW_VDB
 # undef GWW_VDB
 #endif
@@ -3124,6 +3167,11 @@ EXTERN_C_BEGIN
 # define WRAP_MARK_SOME
 #endif
 
+#if defined(FREEBSD) && defined(PARALLEL_MARK) && defined(REDIRECT_MALLOC)
+  /* Prevent calling redirected strdup() from a marker thread.  */
+# undef HAVE_PTHREAD_SETNAME_NP_WITH_TID
+#endif
+
 #if defined(GC_DISABLE_SUSPEND_THREAD)
 # undef GC_ENABLE_SUSPEND_THREAD
 #endif
@@ -3220,7 +3268,7 @@ EXTERN_C_BEGIN
 
 #if defined(CAN_HANDLE_FORK) && !defined(CAN_CALL_ATFORK) \
     && !defined(GC_NO_CAN_CALL_ATFORK) && !defined(HOST_TIZEN) \
-    && !defined(HURD) && (!defined(HOST_ANDROID) || __ANDROID_API__ >= 21)
+    && (!defined(HOST_ANDROID) || __ANDROID_API__ >= 21)
   /* Have working pthread_atfork().     */
 # define CAN_CALL_ATFORK
 #endif
@@ -3339,6 +3387,14 @@ EXTERN_C_BEGIN
 # define NFRAMES 1
 # define NARGS 0
 # define NEED_CALLINFO
+#endif
+
+#if defined(NEED_CALLINFO) && defined(LINUX) && !defined(SMALL_CONFIG) \
+    && !defined(CALLINFO_USE_ADDR2LINE) && !defined(REDIRECT_MALLOC)
+  /* Use addr2line utility when printing callers to get symbol line */
+  /* numbers.  Not supported in case of malloc redirection because  */
+  /* the current implementation uses popen() which may call malloc. */
+# define CALLINFO_USE_ADDR2LINE
 #endif
 
 #if (defined(FREEBSD) || (defined(DARWIN) && !defined(_POSIX_C_SOURCE)) \
