@@ -829,11 +829,11 @@ GC_API void GC_CALL GC_register_altstack(void *stack, GC_word stack_size,
     GC_threads[hv] = me;
   }
 
-/* Remove all entries from the GC_threads table, except the one for */
-/* the current thread.  Also update thread identifiers stored in    */
-/* the table for the current thread.  We need to do this in the     */
-/* child process after a fork(), since only the current thread      */
-/* survives in the child.                                           */
+/* Remove all entries from the GC_threads table, except the one (if */
+/* any) for the current thread.  Also update thread identifiers     */
+/* stored in the table for the current thread.  We need to do this  */
+/* in the child process after a fork(), since only the current      */
+/* thread survives in the child.                                    */
 STATIC void GC_remove_all_threads_but_me(void)
 {
     int hv;
@@ -870,12 +870,9 @@ STATIC void GC_remove_all_threads_but_me(void)
       store_to_threads_table(hv, NULL);
     }
 
-#   if defined(CPPCHECK) || defined(LINT2)
-      if (NULL == me)
-        ABORT("Current thread is not found after fork");
-#   else
-      GC_ASSERT(me != NULL);
-#   endif
+    if (NULL == me)
+      return; /* fork() is called from an unregistered thread */
+
     /* Update pthread's id as it is not guaranteed to be the same   */
     /* between this (child) process and the parent one.             */
     me -> id = pthread_self();
@@ -912,7 +909,7 @@ STATIC void GC_remove_all_threads_but_me(void)
 }
 #endif /* CAN_HANDLE_FORK */
 
-#ifdef USE_PROC_FOR_LIBRARIES
+#if defined(USE_PROC_FOR_LIBRARIES) && defined(LINUX)
   GC_INNER GC_bool GC_segment_is_thread_stack(ptr_t lo, ptr_t hi)
   {
     int i;
@@ -947,7 +944,7 @@ STATIC void GC_remove_all_threads_but_me(void)
     }
     return FALSE;
   }
-#endif /* USE_PROC_FOR_LIBRARIES */
+#endif
 
 #if (defined(HAVE_PTHREAD_ATTR_GET_NP) || defined(HAVE_PTHREAD_GETATTR_NP)) \
     && defined(IA64)
@@ -1109,11 +1106,11 @@ STATIC void GC_remove_all_threads_but_me(void)
     /* The file might probably contain a comma-separated list   */
     /* but we do not need to handle it (just silently ignore).  */
     if (len < 2 || stat_buf[0] != '0' || stat_buf[len - 1] != '\n') {
-      return 0; /* read error or unrecognized content */
+      return 0; /* read error or unrecognized contents */
     } else if (len == 2) {
       return 1; /* an uniprocessor */
     } else if (stat_buf[1] != '-') {
-      return 0; /* unrecognized content */
+      return 0; /* unrecognized contents */
     }
 
     stat_buf[len - 1] = '\0'; /* terminate the string */
@@ -1192,6 +1189,15 @@ IF_CANCEL(static int fork_cancel_state;)
 #   endif
 # endif /* PARALLEL_MARK */
 
+/* Same as GC_thread_is_registered() but assumes the allocator lock */
+/* is held.                                                         */
+static GC_bool is_thread_registered_inner(void)
+{
+  GC_thread me = GC_lookup_thread(pthread_self());
+
+  return me != NULL && !(me -> flags & FINISHED);
+}
+
 /* Called before a fork()               */
 #if defined(GC_ASSERTIONS) && defined(CAN_CALL_ATFORK)
   /* GC_lock_holder is updated safely (no data race actually).  */
@@ -1221,7 +1227,10 @@ static void fork_prepare_proc(void)
         if (GC_parallel)
           wait_for_reclaim_atfork();
 #     endif
-      GC_wait_for_gc_completion(TRUE);
+      if (is_thread_registered_inner()) {
+        /* fork() is called from a thread registered in the collector. */
+        GC_wait_for_gc_completion(TRUE);
+      }
 #     if defined(PARALLEL_MARK)
         if (GC_parallel) {
 #         if defined(THREAD_SANITIZER) && defined(GC_ASSERTIONS) \
@@ -2007,6 +2016,13 @@ GC_INNER_PTHRSTART void GC_thread_exit_proc(void *arg)
     DCL_LOCK_STATE;
 
     INIT_REAL_SYMS();
+    if (!EXPECT(GC_is_initialized, TRUE)) {
+      /*
+       * The only case this seems to be needed is when the client calls
+       * pthread_detach(pthread_self()) before the collector initialization.
+       */
+      GC_init();
+    }
     LOCK();
     t = (GC_thread)COVERT_DATAFLOW(GC_lookup_thread(thread));
     UNLOCK();

@@ -514,18 +514,27 @@ GC_INNER const char * GC_get_maps(void)
   }
 #endif /* NETBSD */
 
-#if defined(ADDRESS_SANITIZER) && (defined(UNIX_LIKE) \
-                    || defined(NEED_FIND_LIMIT) || defined(MPROTECT_VDB)) \
-    && !defined(CUSTOM_ASAN_DEF_OPTIONS)
+#if defined(ADDRESS_SANITIZER) && !defined(CUSTOM_ASAN_DEF_OPTIONS)
   EXTERN_C_BEGIN
   GC_API const char *__asan_default_options(void);
   EXTERN_C_END
 
-  /* To tell ASan to allow GC to use its own SIGBUS/SEGV handlers.      */
-  /* The function is exported just to be visible to ASan library.       */
+  /* Provide the Address Sanitizer runtime configuration.               */
+  /* The function is exported just to be visible to the ASan library.   */
+  /* FIXME: It might not work if the collector is built as a shared     */
+  /* library unless the client provides own __asan_default_options()    */
+  /* or sets ASAN_OPTIONS environment variable with the below flags.    */
   GC_API const char *__asan_default_options(void)
   {
-    return "allow_user_segv_handler=1";
+    /* TODO: support ASan fake stacks properly. */
+    return (
+#     if defined(MPROTECT_VDB) || defined(NEED_FIND_LIMIT) \
+         || defined(UNIX_LIKE)
+        /* Use its own SIGBUS/SEGV handlers. */
+        "allow_user_segv_handler=1:"
+#     endif
+      /* Do not to use fake stacks. */
+      "detect_stack_use_after_return=0");
   }
 #endif
 
@@ -875,7 +884,7 @@ GC_get_stack_base(struct GC_stack_base *sb)
     WARN("get_stack_bounds failed\n", 0);
     return GC_UNIMPLEMENTED;
   }
-  sb->mem_base = base + size;
+  sb->mem_base = (void *)(base + size);
   return GC_SUCCESS;
 }
 # define HAVE_GET_STACK_BASE
@@ -2808,7 +2817,7 @@ GC_INNER void GC_unmap_gap(ptr_t start1, size_t bytes1, ptr_t start2,
 
     static void scan_regs_cb(void *begin, void *end)
     {
-      GC_push_all_stack((ptr_t)begin, (ptr_t)end);
+      GC_push_all_stack(begin, end);
     }
 
     STATIC void GC_CALLBACK GC_default_push_other_roots(void)
@@ -2831,7 +2840,7 @@ PCR_ERes GC_push_thread_stack(PCR_Th_T *t, PCR_Any dummy)
 
     info.ti_stkLow = info.ti_stkHi = 0;
     result = PCR_ThCtl_GetInfo(t, &info);
-    GC_push_all_stack((ptr_t)(info.ti_stkLow), (ptr_t)(info.ti_stkHi));
+    GC_push_all_stack(info.ti_stkLow, info.ti_stkHi);
     return(result);
 }
 
@@ -2840,7 +2849,7 @@ PCR_ERes GC_push_thread_stack(PCR_Th_T *t, PCR_Any dummy)
 /* overflow.                                                    */
 PCR_ERes GC_push_old_obj(void *p, size_t size, PCR_Any data)
 {
-    GC_push_all_stack((ptr_t)p, (ptr_t)p + size);
+    GC_push_all_stack(p, (ptr_t)p + size);
     return(PCR_ERes_okay);
 }
 
@@ -4738,7 +4747,8 @@ STATIC void *GC_mprotect_thread(void *arg)
   /* Even if this doesn't get updated property, it isn't really a problem. */
   STATIC int GC_sigbus_count = 0;
 
-  STATIC void GC_darwin_sigbus(int num, siginfo_t *sip, void *context)
+  STATIC void GC_darwin_sigbus(int num, siginfo_t *sip GC_ATTR_UNUSED,
+                               void *context GC_ATTR_UNUSED)
   {
     if (num != SIGBUS)
       ABORT("Got a non-sigbus signal in the sigbus handler");
@@ -5048,14 +5058,11 @@ catch_exception_raise(mach_port_t exception_port GC_ATTR_UNUSED,
       word index = PHT_HASH(h+i);
       async_set_pht_entry_from_index(GC_dirty_pages, index);
     }
-  } else if (GC_mprotect_state == GC_MP_DISCARDING) {
+  } else {
     /* Lie to the thread for now. No sense UNPROTECT()ing the memory
        when we're just going to PROTECT() it again later. The thread
        will just fault again once it resumes */
-  } else {
-    /* Shouldn't happen, i don't think */
-    GC_err_printf("KERN_PROTECTION_FAILURE while world is stopped\n");
-    return FWD();
+    /* Could happen (but rarely) even if the state is GC_MP_STOPPED. */
   }
   return KERN_SUCCESS;
 }
@@ -5315,7 +5322,7 @@ GC_INNER void GC_print_callers(struct callinfo info[NFRAMES])
       GC_err_printf("\tCall chain at allocation:\n");
 #   endif
     for (i = 0; i < NFRAMES; i++) {
-#       if defined(LINUX) && !defined(SMALL_CONFIG)
+#       ifdef CALLINFO_USE_ADDR2LINE
           GC_bool stop = FALSE;
 #       endif
 
@@ -5358,7 +5365,7 @@ GC_INNER void GC_print_callers(struct callinfo info[NFRAMES])
             buf[sizeof(buf) - 1] = '\0';
             name = buf;
           }
-#         if defined(LINUX) && !defined(SMALL_CONFIG)
+#         ifdef CALLINFO_USE_ADDR2LINE
             /* Try for a line number. */
             do {
                 FILE *pipe;
@@ -5456,7 +5463,7 @@ GC_INNER void GC_print_callers(struct callinfo info[NFRAMES])
 #               endif
                 name = result_buf;
             } while (0);
-#         endif /* LINUX */
+#         endif
           GC_err_printf("\t\t%s\n", name);
 #         if defined(GC_HAVE_BUILTIN_BACKTRACE) \
              && !defined(GC_BACKTRACE_SYMBOLS_BROKEN)
@@ -5464,7 +5471,7 @@ GC_INNER void GC_print_callers(struct callinfo info[NFRAMES])
               free(sym_name);   /* May call GC_[debug_]free; that's OK  */
 #         endif
         }
-#       if defined(LINUX) && !defined(SMALL_CONFIG)
+#       ifdef CALLINFO_USE_ADDR2LINE
           if (stop)
             break;
 #       endif

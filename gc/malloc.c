@@ -553,7 +553,9 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_uncollectable(size_t lb)
       size_t lb = strlen(s) + 1;
       char *result = (char *)REDIRECT_MALLOC_F(lb);
       if (result == 0) {
-        errno = ENOMEM;
+#       ifndef MSWINCE
+          errno = ENOMEM;
+#       endif
         return 0;
       }
       BCOPY(s, result, lb);
@@ -574,7 +576,9 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_uncollectable(size_t lb)
         len = size;
       copy = (char *)REDIRECT_MALLOC_F(len + 1);
       if (copy == NULL) {
-        errno = ENOMEM;
+#       ifndef MSWINCE
+          errno = ENOMEM;
+#       endif
         return NULL;
       }
       if (EXPECT(len > 0, TRUE))
@@ -715,8 +719,7 @@ GC_API void GC_CALL GC_free(void * p)
 
   void free(void * p GC_ATTR_UNUSED)
   {
-#   ifndef IGNORE_FREE
-#     if defined(GC_LINUX_THREADS) && !defined(USE_PROC_FOR_LIBRARIES)
+#   if defined(GC_LINUX_THREADS) && !defined(USE_PROC_FOR_LIBRARIES)
         /* Don't bother with initialization checks.  If nothing         */
         /* has been initialized, the check fails, and that's safe,      */
         /* since we have not allocated uncollectible objects neither.   */
@@ -730,7 +733,8 @@ GC_API void GC_CALL GC_free(void * p)
           GC_free(p);
           return;
         }
-#     endif
+#   endif
+#   ifndef IGNORE_FREE
       REDIRECT_FREE_F(p);
 #   endif
   }

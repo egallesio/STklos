@@ -940,7 +940,6 @@ EXTRA_TEST_LIBS = @EXTRA_TEST_LIBS@
 FGREP = @FGREP@
 FILECMD = @FILECMD@
 GC_CFLAGS = @GC_CFLAGS@
-GC_VERSION = @GC_VERSION@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -1050,7 +1049,7 @@ top_srcdir = @top_srcdir@
 # Info (current:revision:age) for the Libtool versioning system.
 # These numbers should be updated at most once just before the release,
 # and, optionally, at most once during the development (after the release).
-LIBGC_VER_INFO = 6:5:5
+LIBGC_VER_INFO = 6:6:5
 LIBGCCPP_VER_INFO = 6:0:5
 
 # We currently use the source files directly from libatomic_ops, if we

@@ -1,4 +1,42 @@
 
+== [8.2.12] 2026-02-05 ==
+
+* Do not prevent shared builds on OpenBSD/alpha
+* Eliminate 'argument unused' gcc warning in push_all_stack_partially_eager
+* Eliminate 'assign long to void*' gcc warning in get_stack_base on Serenity
+* Eliminate 'format expects argument of type' gcc warnings in dump_meminfo
+* Eliminate 'GC_push_all_stack not used' gcc warning if fix-up pointers
+* Eliminate 'GC_remove_roots_subregion not used' gcc warning on Solaris
+* Eliminate 'unused parameter' clang warnings in GC_darwin_sigbus
+* Fix 'KERN_PROTECTION_FAILURE while world is stopped' error on MacOS X
+* Fix 'MA_FETCHOP undeclared' gcc error if USE_PROC_FOR_LIBRARIES on Solaris
+* Fix 'PIOCNMAP undeclared' gcc error if USE_PROC_FOR_LIBRARIES on Solaris
+* Fix 'reserved' argument handling in GC_DllMain
+* Fix 'undefined errno' compiler error in strdup/strndup on WinCE
+* Fix a cycle in NORMAL freelist if malloc is redirected on Linux
+* Fix assertion in GC_wait_for_reclaim if DllMain-based thread registration
+* Fix code defect of LOCK/UNLOCK in separate 'if' in GC_generic_malloc_many
+* Fix missing new-line in help message of console variant of cord/de
+* Fix race in DllMain by deferring delete_thread call to GC_start_world
+* Fix redirected 'free' for callers from libdl/libpthread if IGNORE_FREE
+* Fix reliance on glibc-specific '__data_start' for some Linux platforms
+* Fix shared library build on MinGW if disable_single_obj_compilation
+* Fix SIGSEGV during pthread_setname_np if redirect malloc on FreeBSD
+* Fix SIGSEGV if pthread_detach is called before collector initialization
+* Fix SIGSEGV in remove_all_threads_but_me if fork from unregistered thread
+* Fix typos (about getcontext) in printed message in setjmp_test
+* Fix various typos in comments and documentation
+* Prevent collection if fork from an unregistered thread
+* Refine USE_PROC_FOR_LIBRARIES macro documentation for Solaris
+* Remove unneeded '__MINGW_EXCPT_DEFINE_PSDK' macro define for mingw32
+* Remove unused GC_VERSION in configure
+* Remove unused redefinition of GC_free in gctest
+* Revert 'Avoid abort on ResumeThread failure if DllMain closes thread'
+* Revert 'Fix GC_suspend abort when the thread is deleted by DllMain'
+* Turn on pthread_atfork usage on Hurd
+* Workaround locals not pushed in sanitized binaries by disabling fake stacks
+
+
 == [8.2.10] 2025-10-18 ==
 
 * Add missing test_cpp dependency on gc_allocator.h in build scripts
@@ -645,6 +683,15 @@
 * Workaround various cppcheck false positives
 
 
+== [8.0.18] 2026-02-04 ==
+
+* Eliminate 'GC_push_all_stack not used' gcc warning if fix-up pointers
+* Fix 'MA_FETCHOP undeclared' gcc error if USE_PROC_FOR_LIBRARIES on Solaris
+* Fix 'PIOCNMAP undeclared' gcc error if USE_PROC_FOR_LIBRARIES on Solaris
+
+Also, includes 7.6.26 changes
+
+
 == [8.0.16] 2025-10-17 ==
 
 * Add missing test_cpp dependency on gc_allocator.h in build scripts
@@ -1140,7 +1187,7 @@ Also, includes 7.6.18 changes
 * New API function (GC_dump_named) to produce named dumps
 * New API function (GC_is_incremental_mode)
 * New API function (get_expl_freed_bytes_since_gc)
-* New API function (get_size_map_at) to get content of size_map table
+* New API function (get_size_map_at) to get element of size_map table
 * New API to stop and start the GC world externally
 * New API to turn on manual VDB at runtime
 * New field (expl_freed_bytes_since_gc) in public prof_stats_s
@@ -1223,6 +1270,15 @@ Also, includes 7.6.18 changes
 * Workaround 'bad pointer arithmetic' false waring in check_annotated_obj
 * Workaround Clang optimizer bug crashing clear_stack_inner on OS X 10.8
 * Workaround Thread Sanitizer (TSan) false positive warnings
+
+
+== [7.6.26] 2026-02-04 ==
+
+* Eliminate 'argument unused' gcc warning in push_all_stack_partially_eager
+* Fix GC_NO_THREADS_DISCOVERY macro check before definition
+* Fix redirected 'free' for callers from libdl/libpthread if IGNORE_FREE
+
+Also, includes 7.4.32 changes
 
 
 == [7.6.24] 2025-10-17 ==
@@ -1827,6 +1883,31 @@ Also, includes 7.4.6 changes
 * Workaround a bug in winpthreads causing parallel marks deadlock (MinGW)
 
 Also, includes 7.4.4 changes
+
+
+== [7.4.32] 2026-02-04 ==
+
+* Eliminate 'cast between incompatible func types' warnings for FARPROC vars
+* Eliminate 'format expects argument of type' gcc warnings in dump_meminfo
+* Eliminate 'GC_remove_roots_subregion not used' gcc warning on Solaris
+* Eliminate 'unused parameter' clang warnings in GC_darwin_sigbus
+* Eliminate 'unused variable i' gcc warning in GC_start_world (Windows)
+* Fix 'KERN_PROTECTION_FAILURE while world is stopped' error on MacOS X
+* Fix 'reserved' argument handling in GC_DllMain
+* Fix 'undefined errno' compiler error in strdup/strndup on WinCE
+* Fix a cycle in NORMAL freelist if malloc is redirected on Linux
+* Fix assertion in GC_wait_for_reclaim if DllMain-based thread registration
+* Fix missing new-line in help message of console variant of cord/de
+* Fix race in DllMain by deferring delete_thread call to GC_start_world
+* Fix SIGSEGV if pthread_detach is called before collector initialization
+* Fix typos (about getcontext) in printed message in setjmp_test
+* Fix various typos in comments and documentation
+* Prevent collection if fork from an unregistered thread
+* Refine USE_PROC_FOR_LIBRARIES macro documentation for Solaris
+* Remove unused GC_VERSION in configure
+* Remove unused redefinition of GC_free in gctest
+* Revert 'Avoid abort on ResumeThread failure if Win32 DllMain closes thread'
+* Revert 'Fix GC_suspend abort when the thread is deleted by DllMain'
 
 
 == [7.4.30] 2025-10-17 ==
@@ -2449,6 +2530,34 @@ Also, includes 7.2e, 7.2d, 7.2c, 7.2b changes
 * Use pthread_key for thread-local storage on FreeBSD
 * Use union of AO_t and word to favor strict-aliasing compiler optimization
 Also, includes 7.2 changes
+
+
+== [7.2u] 2026-02-04 ==
+
+* Change cord function declaration style from K-R to ANSI C
+* Eliminate 'incompatible function pointer' warning in mark_some (MinGW/x86)
+* Fix 'incompatible pointer' compiler warning in GC_init_dyld (OS X 64-bit)
+* Fix 'KERN_PROTECTION_FAILURE while world is stopped' error on MacOS X
+* Fix 'reserved' argument handling in DllMain
+* Fix 'undefined errno' compiler error in strdup/strndup on WinCE
+* Fix a cycle in NORMAL freelist if malloc is redirected on Linux
+* Fix GC_push_stack_for() to push also Xmm registers on Windows/x64
+* Fix missing new-line in help message of console variant of cord/de
+* Fix race in DllMain by deferring delete_thread call to GC_start_world
+* Fix SIGSEGV if pthread_detach is called before collector initialization
+* Fix typos (about getcontext) in printed message in setjmp_test
+* Fix various typos in comments and documentation
+* Prevent collection if fork from an unregistered thread
+* Prevent GetThreadContext failure (Windows)
+* Refactoring of WoW64 workaround (Win32)
+* Refine USE_PROC_FOR_LIBRARIES macro documentation for Solaris
+* Remove dummy GC_noop call from code visible to Lint tool only
+* Remove part of DllMain-specific code which is always disabled (Windows)
+* Remove unused GC_VERSION in configure
+* Remove unused redefinition of GC_free in gctest
+* Replace var-args GC_noop with fixed-args one
+* Replace Win32 GC_delete_gc_thread with GC_delete_gc_thread_no_free
+* Use GC_noop1 instead of GC_noop in GC_pause and remove duplicate GC_noop1
 
 
 == [7.2t] 2025-10-17 ==
@@ -9413,7 +9522,7 @@ library is loaded with LD_PRELOAD, e.g. for leak detection.
 * If the GC_find_leak environment variable is set, do a
 atexit(GC_gcollect) to give us at least one chance to detect leaks.
 This may report some very benign leaks, but ...
-* Addeded REDIRECT_FREE.  It's necessary if we want leak detection with
+* Added REDIRECT_FREE.  It's necessary if we want leak detection with
 LD_PRELOAD.
 * Defer printing of leaked objects, as for smashed objects.
 * Fixed process and descriptor leak in GC_print_callers.  Try for

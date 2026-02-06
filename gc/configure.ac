@@ -14,7 +14,7 @@
 dnl Process this file with autoconf to produce configure.
 
 dnl Initialization.
-AC_INIT(gc,8.2.10,https://github.com/bdwgc/bdwgc/issues)
+AC_INIT(gc,8.2.12,https://github.com/bdwgc/bdwgc/issues)
 dnl Version must conform to: [0-9]+[.][0-9]+[.][0-9]+
 
 AC_CONFIG_SRCDIR(gcj_mlc.c)
@@ -27,7 +27,6 @@ AC_CONFIG_HEADERS([include/config.h])
 AM_MAINTAINER_MODE
 
 AC_SUBST(PACKAGE)
-AC_SUBST(GC_VERSION)
 
 AM_PROG_CC_C_O
 AC_PROG_CXX
@@ -556,15 +555,6 @@ AC_SUBST(CXXLIBS)
 #
 AC_MSG_CHECKING(whether to build shared libraries)
 AC_ENABLE_SHARED
-
-case "$host" in
- alpha-*-openbsd*)
-     enable_shared=no
-     ;;
- *)
-     ;;
-esac
-
 AC_MSG_RESULT($enable_shared)
 
 # Compile with GC_DLL defined unless building static libraries.
