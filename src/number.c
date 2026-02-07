@@ -4331,6 +4331,49 @@ static SCM my_expt(SCM x, SCM y)
       return fixnum_exponent_expt(x, INT_VAL(y));
 
     case tc_rational:
+      /* If we have 1/2k in the exponent, we can repeatedly take square roots
+         of x, until the denominator is odd, then we call my_expt again to
+         finish the computation.
+         1. The result will be more precise
+         2. Oh, it's faster! ;)                                              */
+
+      if (RATIONAL_NUM(y) == MAKE_INT(1)) {
+        SCM z = x;
+        /* Denominator is FIXNUM: */
+        if (INTP(RATIONAL_DEN(y)) && power_of_2_p(INT_VAL(RATIONAL_DEN(y)))) {
+          long den = INT_VAL(RATIONAL_DEN(y));
+          while (den % 2 == 0) {
+            z = STk_sqrt(z);
+            den = den / 2;
+          }
+          if (den == 1) return z;
+          else          return my_expt(z, Cmake_rational(MAKE_INT(1), MAKE_INT(den)));
+
+          /* Denominator is a BIGNUM: */
+        } else if (BIGNUMP(RATIONAL_DEN(y)) && mpz_even_p(BIGNUM_VAL(RATIONAL_DEN(y)))) {
+          mpz_t bden;
+          mpz_init(bden);
+          mpz_set(bden, BIGNUM_VAL(RATIONAL_DEN(y)));
+          while (mpz_even_p(bden)) {
+            mpz_sqrt(z, z);
+            mpz_divexact_ui(bden, bden, 2);
+          }
+          if (mpz_cmp_si(bden,1) == 0) return z;
+          else                         return my_expt(z, Cmake_rational(MAKE_INT(1),
+                                                                        bignum2number(bden)));
+        }
+
+        /* x^(a/b), with a < b:
+           First do x^a, then x^(1/b).
+           In some cases, this is more precise than doing the whole thing at
+           once... */
+      } else if (RATIONAL_DEN(y) > RATIONAL_NUM(y))
+        return my_expt(my_expt(x,RATIONAL_NUM(y)),
+                       Cmake_rational(MAKE_INT(1),RATIONAL_DEN(y)));
+
+      /* None of the cases above apply, we treat the number as a real: */
+
+      /* FALLTHROUGH */
     case tc_real:
       if (zerop(y)) /* Treat  special case where y = 0.0 (or -0.0) */
         return double2real(1.0);
