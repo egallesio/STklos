@@ -44,12 +44,6 @@
 # define _USING_POSIX4A_DRAFT10 1
 #endif
 
-#if defined(__MINGW32__) && !defined(__MINGW_EXCPT_DEFINE_PSDK) \
-    && defined(__i386__) && defined(GC_EXTERN) /* defined in gc.c */
-  /* See the description in mark.c.     */
-# define __MINGW_EXCPT_DEFINE_PSDK 1
-#endif
-
 # if defined(NO_DEBUGGING) && !defined(GC_ASSERTIONS) && !defined(NDEBUG)
     /* To turn off assertion checking (in atomic_ops.h). */
 #   define NDEBUG 1
@@ -1956,9 +1950,13 @@ GC_INNER GC_bool GC_collection_in_progress(void);
 /* (one or several words).                                              */
 #define GC_PUSH_ALL_SYM(sym) GC_push_all_eager(&(sym), &(sym) + 1)
 
-GC_INNER void GC_push_all_stack(ptr_t b, ptr_t t);
+#if defined(NEED_FIXUP_POINTER)
+# define GC_push_all_stack(b, t) GC_push_all_eager(b, t)
+#else
+  GC_INNER void GC_push_all_stack(void *b, void *t);
                                     /* As GC_push_all but consider      */
                                     /* interior pointers as valid.      */
+#endif
 
 #ifdef NO_VDB_FOR_STATIC_ROOTS
 # define GC_push_conditional_static(b, t, all) \
@@ -2144,7 +2142,7 @@ GC_INNER void GC_set_fl_marks(ptr_t p);
                                     /* set.  Abort if not.              */
 #endif
 void GC_add_roots_inner(ptr_t b, ptr_t e, GC_bool tmp);
-#ifdef USE_PROC_FOR_LIBRARIES
+#if defined(USE_PROC_FOR_LIBRARIES) && defined(LINUX)
   GC_INNER void GC_remove_roots_subregion(ptr_t b, ptr_t e);
 #endif
 GC_INNER void GC_exclude_static_roots_inner(void *start, void *finish);
@@ -2887,7 +2885,7 @@ GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
 # endif
   GC_INNER void GC_do_blocking_inner(ptr_t data, void * context);
   GC_INNER void GC_push_all_stacks(void);
-# ifdef USE_PROC_FOR_LIBRARIES
+# if defined(USE_PROC_FOR_LIBRARIES) && defined(LINUX)
     GC_INNER GC_bool GC_segment_is_thread_stack(ptr_t lo, ptr_t hi);
 # endif
 # if (defined(HAVE_PTHREAD_ATTR_GET_NP) || defined(HAVE_PTHREAD_GETATTR_NP)) \

@@ -18,7 +18,7 @@ the full version counterpart.
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 8.2.10
+    - Version: 8.2.12
     - License: Free (BSD-like)
     - Home Page: https://www.hboehm.info/gc/
 

@@ -377,7 +377,7 @@ STATIC void GC_remove_roots_inner(ptr_t b, ptr_t e)
 #   endif
 }
 
-#ifdef USE_PROC_FOR_LIBRARIES
+#if defined(USE_PROC_FOR_LIBRARIES) && defined(LINUX)
   /* Exchange the elements of the roots table.  Requires rebuild of     */
   /* the roots index table after the swap.                              */
   GC_INLINE void swap_static_roots(int i, int j)
@@ -472,7 +472,7 @@ STATIC void GC_remove_roots_inner(ptr_t b, ptr_t e)
     if (rebuild)
       GC_rebuild_root_index();
   }
-#endif /* USE_PROC_FOR_LIBRARIES */
+#endif
 
 #if !defined(NO_DEBUGGING)
   /* For the debugging purpose only.                                    */
@@ -690,9 +690,9 @@ GC_INNER void GC_push_all_stack_sections(
     while (traced_stack_sect != NULL) {
         GC_ASSERT((word)lo HOTTER_THAN (word)traced_stack_sect);
 #       ifdef STACK_GROWS_UP
-            GC_push_all_stack((ptr_t)traced_stack_sect, lo);
+            GC_push_all_stack(traced_stack_sect, lo);
 #       else /* STACK_GROWS_DOWN */
-            GC_push_all_stack(lo, (ptr_t)traced_stack_sect);
+            GC_push_all_stack(lo, traced_stack_sect);
 #       endif
         lo = traced_stack_sect -> saved_stack_ptr;
         GC_ASSERT(lo != NULL);
@@ -725,7 +725,7 @@ GC_INNER void GC_push_all_stack_sections(
  * GC_dirty() call.
  */
 STATIC void GC_push_all_stack_partially_eager(ptr_t bottom, ptr_t top,
-                                              ptr_t cold_gc_frame)
+        ptr_t cold_gc_frame GC_ATTR_UNUSED)
 {
 #ifndef NEED_FIXUP_POINTER
   if (GC_all_interior_pointers) {

@@ -339,7 +339,7 @@ STATIC void GC_suspend_handler_inner(ptr_t dummy GC_ATTR_UNUSED,
 # endif
   AO_t my_stop_count = ao_load_acquire_async(&GC_stop_count);
                         /* After the barrier, this thread should see    */
-                        /* the actual content of GC_threads.            */
+                        /* the actual contents of GC_threads.           */
 
   DISABLE_CANCEL(cancel_state);
       /* pthread_setcancelstate is not defined to be async-signal-safe. */
@@ -882,8 +882,8 @@ GC_INNER void GC_push_all_stacks(void)
 #       endif
 #       ifdef NACL
           /* Push reg_storage as roots, this will cover the reg context. */
-          GC_push_all_stack((ptr_t)p -> stop_info.reg_storage,
-              (ptr_t)(p -> stop_info.reg_storage + NACL_GC_REG_STORAGE_SIZE));
+          GC_push_all_stack(p -> stop_info.reg_storage,
+              p -> stop_info.reg_storage + NACL_GC_REG_STORAGE_SIZE);
           total_size += NACL_GC_REG_STORAGE_SIZE * sizeof(ptr_t);
 #       endif
 #       ifdef E2K
