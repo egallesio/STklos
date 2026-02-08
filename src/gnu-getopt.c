@@ -47,7 +47,9 @@
 /* STklos: # include <config.h> */
 /* STklos: #endif               */
 
-#include "stklos.h" /* STklos: */
+#include "stklos.h"           /* STklos: */
+#define __GNU_LIBRARY__       /* STklos: */
+
 
 #if !defined __STDC__ || !__STDC__
 /* This is a separate conditional since some stdc systems

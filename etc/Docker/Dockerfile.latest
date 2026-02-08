@@ -13,7 +13,7 @@
 # 
 
 # ---------- Build stage
-FROM alpine:3.23 AS build
+FROM alpine:3.22 AS build
 RUN apk update && \
     apk add build-base automake autoconf git \
         gc-dev gmp-dev libffi-dev pcre2-dev readline
@@ -30,7 +30,7 @@ RUN autoreconf
 RUN env TERM="dumb" make all tests install
 
 # ---------- Running stage
-FROM alpine:3.23
+FROM alpine:3.22
 RUN apk update && \
     apk add gc gmp libffi pcre2 readline
 COPY --from=build /usr/local/ /usr/local/
