@@ -13,11 +13,11 @@ approximately 15Mb.
 **Example:**
 
 ```bash
-$ docker pull stklos/stklos:1.70          # grab the 1.70 version of STklos
-$ docker run -ti stklos/stklos:1.70       # and run it
+$ docker pull stklos/stklos:XX.yy          # grab the XX.yy version of STklos
+$ docker run -ti stklos/stklos:XX.yy       # and run it
 ...
 stklos> (version)
-"1.70"
+"XX.yy"
 stklos> (exit)
 ```
 
@@ -30,9 +30,10 @@ version of STklos:
 ```bash
 $ cat hello.stk
 (display "Hello, world!\n")
-$ docker run -v$(pwd):/home -ti stklos/stklos:1.40 \
+$ docker run -v$(pwd):/home -ti stklos/stklos:XX.yy \
         stklos -f hello.stk
 Hello, world!
+
 ```
 ## Build your own Docker image
 

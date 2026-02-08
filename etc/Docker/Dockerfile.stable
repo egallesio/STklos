@@ -8,9 +8,9 @@
 # The image is created from a released version of STklos
 # The version number must be passed on the command line
 #
-# To build an image on your machine of STklos version 1.XY,
+# To build an image on your machine of STklos version XX.yy,
 # place yourself in this directory and type (don't forget the final dot)
-#    $ VERS=1.XY
+#    $ VERS=XX.yy
 #    $ docker build --build-arg version=$VERS -f Dockerfile.stable -t stklos:$VERS .
 #
 # To run the image:
@@ -18,7 +18,7 @@
 #
 
 # ---------- Build stage
-FROM alpine:3.15 AS build
+FROM alpine:3.22 AS build
 RUN apk update && \
     apk add build-base gc-dev gmp-dev libffi-dev pcre2-dev git
 
@@ -36,11 +36,11 @@ RUN env CFLAGS=-O3 ./configure \
 RUN env TERM="dumb" make all tests install
 
 # ---------- Running stage
-FROM alpine:3.15
+FROM alpine:3.22
 RUN apk update && \
     apk add gc gmp libffi pcre2 readline
 COPY --from=build /usr/local/ /usr/local/
-RUN ln -s /usr/lib/libreadline.so.8.1 /usr/lib/libreadline.so
+RUN ln -s /usr/lib/libreadline.so.8.2 /usr/lib/libreadline.so
 WORKDIR /home
 CMD ["stklos", "--utf8-encoding=yes"]
 
