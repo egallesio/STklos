@@ -2454,6 +2454,28 @@ void STk_get_stack_pointer(void **addr)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclobbered"
 
+
+/* `%make-continuation` is the primitive that captures the current
+   continuation.
+
+   It basically:
+
+   1. Determines the size of the C stack and the start address;
+   2. Determines the size of the Scheme stack;
+   3. Allocates a object of type `struct continuation_obj`, but whose
+      size is that of the continuation structure *plus* the size of
+      the two stacks;
+   4. Copies the sizes of the stack into the continuation object;
+   5. Calls `patch_environment(vm)`. This will clone the environments
+      down through the activation records (we cannot jsut copy the stack;
+      the values must be copied -- in particular, values of globals must
+      be the ones at the time the continuation was captured);
+   6. Copies the VM registers into the continuation;
+   7. Allocates and copy the Scheme stack and the C stack;
+   8. Marks the continuation as fresh;
+   9. Uses theh usual `setjmp` method to either return the continuation
+      object (if it's the first time it is used) or return the
+      continuation value (if it is getting back after being caputred).                   */
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
   SCM z;
@@ -2534,6 +2556,22 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Winfinite-recursion"
 
+/* restore_cont_jump is the final step when restoring a continuation.
+
+  - parameter k is used to get the beginning and end of the C stack to
+    be restored;
+  - parameter addr is the current top of the C stack;
+  - vm (obtained inside the function) is THIS thread;
+  - vm->start_stack is the beginning of the stack (in this thread).
+
+  1. Calculate the distance from beginning to the top, in order to
+     be sure that there is enough room (if the current stack is shorter
+     than the old, we cannot just copy over the top!)
+  2. If there's not enough space, call ourselves recursively. Sounds strange,
+     but -- with each recursive call, we allocate 1024 bytes (see at the
+     beginning of the function)!
+  3. memcpy from the beginning to the (new) top.
+  4. longjump to the saved state, but this time return 1.      */
 static void restore_cont_jump(struct continuation_obj *k, void *addr){
   char unused_buf[1024];  /* needed here to arbitrarily use some stack space */
   vm_thread_t *vm = STk_get_current_vm();
@@ -2556,6 +2594,24 @@ static void restore_cont_jump(struct continuation_obj *k, void *addr){
 #pragma GCC diagnostic pop
 
 
+/* %restore-continuation is called when we do (k val) inside a
+   (call/cc (lambda (k) ...)).
+
+   This is what it does:
+
+   1. Copies the continuation information into the VM registers;
+   2. Copies `value` into VM's `val` register (because the value is not
+      part of the continuation, it was passed now to
+      `%restore-continuation`);
+   3. Sets `fresh` to `0` in the continuation (marks it as already
+      restored);
+   4. Copies the Scheme stack from the continuation, overriding the
+      current Scheme stack (no need to check if it fits, since the Scheme
+      stack has a fixed size and has been allocated already);
+   5. Gets the address of the current top of the C stack. This is done by
+      calling `STk_get_stack_pointer(&addr)`;
+   6. Calls `restore_cont_jump(k, addr)`, where `k` is the continuation
+      and `addr` is the top of the C stack.                                    */
 DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM value))
 {
   struct continuation_obj *k;
