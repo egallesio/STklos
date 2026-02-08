@@ -1,0 +1,49 @@
+;;;;
+;;;; string-histogram-program.stk  -- A program to produce histograms of strings
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 19-Mar-2025 09:21 (jpellegrini)
+;;;;
+
+;;; The file "srting-histogram.stk" must be in the same directory as this,
+;;; so it will be automatically loaded. If not, then one needs to adjust the
+;;; load-path parameter to include the directory where the library implementation
+;;; is.
+
+;;; How to use this:
+;;;
+;;; stklos -f string-histgram-program.stk
+;;;
+;;; OR just start STklos and load this from the REPL:
+;;;
+;;; stklos> (load "string-histogram-program.stk")
+;;;
+;;; OR, after compiling, execute it:
+;;;
+;;; stklos-compile -o string-histogram.ostk string-histogram.stk
+;;; stklos-compile -o string-histogram-program string-histogram-program.stk
+;;; ./string-histogram-program
+
+(import (string-histogram))
+
+(define text "who would believe this?")
+
+(vowel-histogram text)
