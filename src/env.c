@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -763,15 +763,6 @@ SCM STk_symb_in_scheme(SCM symb) // value of symb in module SCHEME
 \*===========================================================================*/
 
 #define FRAME_ALLOC_BYTES(len) (sizeof(struct frame_obj) + ((len)-1)*sizeof(SCM))
-
-SCM STk_make_frame(int len)
-{
-  SCM z;
-
-  NEWCELL_WITH_LEN(z, frame, FRAME_ALLOC_BYTES(len));
-  FRAME_LENGTH(z) = len;
-  return z;
-}
 
 SCM STk_clone_frame(SCM f)
 {

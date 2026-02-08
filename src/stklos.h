@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -557,7 +557,6 @@ struct frame_obj {
 #define MODULEP(p)              (BOXED_TYPE_EQ((p), tc_module))
 #define ENVIRONMENTP(p)         (BOXED_TYPE_EQ((p), tc_environment))
 
-SCM STk_make_frame(int len);
 SCM STk_clone_frame(SCM f);
 
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound);
