@@ -2126,6 +2126,18 @@ value of <code>%call/cc</code>, so it does not set the value of <code>b</code>:<
 <span class="mi">6</span> <span class="mi">2</span> <span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Interestingly, the captured continuation is a <strong>primitive</strong> procedure!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">%make-continuation</span><span class="p">))</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=1416</span> <span class="nv">S=1312</span><span class="p">)</span> <span class="mi">8</span><span class="nv">c61b000</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">primitive</span> <span class="nv">procedure</span><span class="o">.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The details of how continuations are implemented is in the file <code>vm.adoc</code>.</p>
+</div>
 </div>
 </div>
 <div class="sect1">

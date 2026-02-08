@@ -707,7 +707,12 @@ pre.rouge {
 <li><a href="#_run_vmvm_thread_vm">12.2. <code>run_vm(vm_thread *vm)</code></a></li>
 </ul>
 </li>
-<li><a href="#_continuations">13. Continuations</a></li>
+<li><a href="#_continuations">13. Continuations</a>
+<ul class="sectlevel3">
+<li><a href="#_capturing_a_continuation">13.1. Capturing a continuation</a></li>
+<li><a href="#_restoring_a_continuation">13.2. Restoring a continuation</a></li>
+</ul>
+</li>
 <li><a href="#_verifying_the_vm_configuration">14. Verifying the VM configuration</a></li>
 <li><a href="#_collecting_statistics">15. Collecting statistics</a></li>
 </ul>
@@ -2726,44 +2731,148 @@ in <code>vm.h</code>) contains pointers to the C stack, the Scheme stack and sev
 data.</p>
 </div>
 <div class="paragraph">
-<p>Capturing a continuation is carried out by the following steps (these are
-the actual comments in the function <code>STk_make_continuation</code>):</p>
+<p>STklos saves both the C and the Scheme stack when capturing
+continuations. For that to work, we need to be able to tell where the
+C stack begins and where the top is (the precise C pointers to those
+places).</p>
+</div>
+<div class="paragraph">
+<p>The C function that retrieves the address of the current top of the
+stack is quite simple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="kt">void</span> <span class="nf">STk_get_stack_pointer</span><span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="n">addr</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+  <span class="o">*</span><span class="n">addr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is called when initializing the current thread, and also when
+capturing and saving continuations.</p>
+</div>
+<div class="sect3">
+<h4 id="_capturing_a_continuation">13.1. Capturing a continuation</h4>
+<div class="paragraph">
+<p><code>%make-continuation</code> is the primitive that captures the current
+continuation.</p>
+</div>
+<div class="paragraph">
+<p>It basically:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Determine the size of the C stack and the start address</p>
+<p>Determines the size of the C stack and the start address;</p>
 </li>
 <li>
-<p>Determine the size of the Scheme stack</p>
+<p>Determines the size of the Scheme stack;</p>
 </li>
 <li>
-<p>Allocate a continuation object</p>
+<p>Allocates a object of type <code>struct continuation_obj</code>, but whose size
+is that of the continuation structure <strong>plus</strong> the size of the two stacks;</p>
 </li>
 <li>
-<p>Save the Scheme stack</p>
+<p>Copies the Scheme and C stacks into the continuation object;</p>
 </li>
 <li>
-<p>Save the C stack</p>
+<p>Calls <code>patch_environment(vm)</code>. This will clone the environments
+down through the activation records (we cannot just copy the stack; the
+values must be copied to the ones at the time the continuation was captured);</p>
+</li>
+<li>
+<p>Copies the VM registers into the continuation;</p>
+</li>
+<li>
+<p>Allocates and copy the Scheme stack and the C stack;</p>
+</li>
+<li>
+<p>Marks the continuation as fresh;</p>
+</li>
+<li>
+<p>Uses the usual <code>setjmp</code> method to either return the continuation
+object (if it&#8217;s the first time it is used) or return the continuation
+value (if it is getting back after being caputred).</p>
 </li>
 </ol>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_restoring_a_continuation">13.2. Restoring a continuation</h4>
 <div class="paragraph">
-<p>Restoring is easier:</p>
+<p><code>restore_cont_jump</code> is the final step when restoring a continuation.
+It receives two parameters:
+- parameter <code>k</code> is used to get the beginning and end of the C stack to
+  be restored;
+- parameter <code>addr</code> is the current top of the C stack;</p>
+</div>
+<div class="paragraph">
+<p>Inside the function,
+- <code>vm</code> (obtained inside the function) is THIS thread;
+- <code>vm&#8594;start_stack</code> is the beginning of the stack (in this thread).</p>
+</div>
+<div class="paragraph">
+<p>This is what this C function does:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Restore the Scheme stack</p>
+<p>Calculate the distance from beginning to the top, in order to be
+sure that there is enough room (if the current stack is shorter
+than the old, we cannot just copy over the top!);</p>
 </li>
 <li>
-<p>Restore the C stack</p>
+<p>If there&#8217;s not enough space, call ourselves recursively. Sounds
+strange, but&#8201;&#8212;&#8201;with each recursive call, we allocate 1024 bytes
+(see at the beginning of the function&#8201;&#8212;&#8201;the declaration
+<code>char unused_buf[1024];</code> serves this purpose only!);</p>
+</li>
+<li>
+<p><code>memcpy</code> from the beginning to the (new) top;</p>
+</li>
+<li>
+<p><code>longjmp</code> to the saved state, but this time return 1.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>And, when the C stack is restored, the VM is back to its original state, except
-for the global variables.</p>
+<p><code>%restore-continuation</code> is called when we do <code>(k val)</code> inside a
+<code>(call/cc (lambda (k) &#8230;&#8203;))</code>.</p>
+</div>
+<div class="paragraph">
+<p>This C function (and Scheme primitive) basically:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Copies the continuation information into the VM registers;</p>
+</li>
+<li>
+<p>Copies <code>value</code> into VM&#8217;s <code>val</code> register (because the value is not
+part of the continuation, it was passed now to
+<code>%restore-continuation</code>);</p>
+</li>
+<li>
+<p>Sets <code>fresh</code> to <code>0</code> in the continuation (marks it as already
+restored);</p>
+</li>
+<li>
+<p>Copies the Scheme stack from the continuation, overriding the
+current Scheme stack (no need to check if it fits, since the Scheme
+stack has a fixed size and has been allocated already);</p>
+</li>
+<li>
+<p>Gets the address of the current top of the C stack. This is done by
+calling <code>STk_get_stack_pointer(&amp;addr)</code>;</p>
+</li>
+<li>
+<p>Calls <code>restore_cont_jump(k, addr)</code>, where <code>k</code> is the continuation
+and <code>addr</code> is the top of the C stack.</p>
+</li>
+</ol>
+</div>
 </div>
 </div>
 </div>
