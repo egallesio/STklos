@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -2467,15 +2467,15 @@ void STk_get_stack_pointer(void **addr)
       the two stacks;
    4. Copies the sizes of the stack into the continuation object;
    5. Calls `patch_environment(vm)`. This will clone the environments
-      down through the activation records (we cannot jsut copy the stack;
-      the values must be copied -- in particular, values of globals must
-      be the ones at the time the continuation was captured);
+      down through the activation records (we cannot just copy the stack;
+      the values must be copied to the ones at the time the continuation
+      was captured);
    6. Copies the VM registers into the continuation;
    7. Allocates and copy the Scheme stack and the C stack;
    8. Marks the continuation as fresh;
-   9. Uses theh usual `setjmp` method to either return the continuation
+   9. Uses the usual `setjmp` method to either return the continuation
       object (if it's the first time it is used) or return the
-      continuation value (if it is getting back after being caputred).                   */
+      continuation value (if it is getting back after being caputred).           */
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
   SCM z;
