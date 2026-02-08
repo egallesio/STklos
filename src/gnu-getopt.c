@@ -1,7 +1,7 @@
 /*
  * gnu-getopt.c         -- Adaptation of the GNU getopt function for STklos
  *
- * Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2001-2026 Erick Gallesio <eg@stklos.net>
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
@@ -266,9 +266,9 @@ static char *posixly_correct;
 /* Avoid depending on library functions or files
    whose names are inconsistent.  */
 
-#ifndef getenv
-extern char *getenv ();
-#endif
+// STklos: #ifndef getenv
+// STklos: extern char *getenv ();
+// STklos: #endif
 
 static char *
 my_index (str, chr)

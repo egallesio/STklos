@@ -13,10 +13,10 @@
 # 
 
 # ---------- Build stage
-FROM alpine:3.15 AS build
+FROM alpine:3.23 AS build
 RUN apk update && \
     apk add build-base automake autoconf git \
-        gc-dev gmp-dev libffi-dev pcre2-dev
+        gc-dev gmp-dev libffi-dev pcre2-dev readline
 
 WORKDIR /build
 RUN git clone https://github.com/egallesio/STklos.git stklos
@@ -26,14 +26,15 @@ RUN env CFLAGS='-O3' ./configure \
     --without-provided-gc     \
     --without-provided-regexp \
     --without-provided-ffi
+RUN autoreconf
 RUN env TERM="dumb" make all tests install
 
 # ---------- Running stage
-FROM alpine:3.15
+FROM alpine:3.23
 RUN apk update && \
     apk add gc gmp libffi pcre2 readline
 COPY --from=build /usr/local/ /usr/local/
-RUN ln -s /usr/lib/libreadline.so.8.1 /usr/lib/libreadline.so
+RUN ln -s /usr/lib/libreadline.so.8.2 /usr/lib/libreadline.so
 WORKDIR /home
 CMD ["stklos", "--utf8-encoding=yes"]
 
