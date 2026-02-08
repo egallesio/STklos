@@ -117,10 +117,26 @@
 ;                               SCOPE
 ;
 ; ======================================================================
+
+;; When "ENV" is given to a procedure in this compiler, it is either a
+;; struct of the type 'scope' (below) or #f.
+;;
+;; An example of scope struct: in the following code,
+;;
+;; (let ((a 10) (b 20))
+;;   (let-syntax ((f (syntax-rules () ((_) -1))))
+;;     (let ((c 5))
+;;       ...)))
+;;
+;; Scope will be represented as
+;;
+;; SCOPE-A: locals= (c)   mlocals= ()                  parent = SCOPE-B
+;; SCOPE-B: locals= ()    mlocals= ((f . #[syntax f])) parent = SCOPE-C
+;; SCOPE-C: locals= (b a) mlocals= ()                  parent =#f
 (define-struct scope
-  locals                        ; local symbols
-  mlocals                       ; #t if symbols are macros
-  parent)                       ; parent scope
+  locals             ; local symbols            (list of symbols)
+  mlocals            ; #t if symbols are macros (list of conses, symbol/transformer)
+  parent)            ; parent scope             (or #f if no parent)
 
 ;; find-symbol-in-env will return:
 ;;    - a symbol, if it is a local variable
@@ -149,13 +165,29 @@
                     (list->scope (cdr lst))))
       #f))
 
-(define (%debug-scope env)     ;; FIXME:
-  (%debug "***SCOPE*** ~S\n" env)
-  (let L ((env env))
-    (when env
-      (%debug "   ==> locals= ~S mlocals= ~S parent =~S"
-              (scope-locals env) (scope-mlocals env) (scope-parent env))
-      (L (scope-parent env)))))
+;; This is an internal compiler call that can be used to debug
+;; scopes when working on the compiler.
+;; Uncomment the following definition when debugging the scope.
+;; It may be used as in the following example:
+;; STKLOS-COMPILER> (let ((a 10) (b 20))
+;;                    (let-syntax ((f (syntax-rules () ((_) -1))))
+;;                      (let ((c 5))
+;;                        (#%debug-scope))))
+;;
+;; ***SCOPE*** #[struct scope 7f38fa04e7b0]
+;;
+;;    ==> locals= (c) mlocals= () parent =#[struct scope 7f38fa04b150]
+;;    ==> locals= () mlocals= ((f . #[syntax f])) parent =#[struct scope 7f38fa046690]
+;;    ==> locals= (b a) mlocals= () parent =#f
+
+(define (compile-%%debug-scope args env tail?)     ;; FIXME:
+ (%debug "***SCOPE*** ~S\n" env)
+ (let L ((env env))
+   (when env
+     (%debug "   ==> locals= ~S mlocals= ~S parent =~S"
+             (scope-locals env) (scope-mlocals env) (scope-parent env))
+     (L (scope-parent env))))
+ (emit 'IM-VOID))
 
 
 ; ======================================================================
@@ -1514,6 +1546,21 @@ doc>
 ;; LETREC
 ;;
 
+;; compile-%%letrec will do the following transformation (as an example):
+;;
+;; (letrec ((e? (lambda (n) (if (zero? n) #t (o? (- n 1)))))
+;;          (o? (lambda (n) (if (zero? n) #f (e? (- n 1))))))
+;;   (e? 88))
+;;
+;; =>
+;;
+;; (let ((e? #f) (o? #f))
+;;   (let ((G5 (lambda (n) (if (zero? n) #t (o? (- n 1)))))
+;;         (G6 (lambda (n) (if (zero? n) #f (e? (- n 1))))))
+;;     (set! e? G5)
+;;     (set! o? G6))
+;;   (let () (e? 88)))
+;;
 (define (compile-%%letrec args env tail?)
   (let ((len (length args)))
     (if (< len 3)
@@ -1536,6 +1583,26 @@ doc>
 ;; LET (& named let)
 ;;
 
+;; compile-named-let will do the following transformation:
+;;
+;; (compile-named-let 'loop
+;;                    '((a 1) (b 2))
+;;                    '((if #f (loop b a) (void)))
+;;                    4
+;;                    '(%%let loop ((a 1) (b 2)) (if #f (loop b a) (void))) #f #f)
+;;
+;; =>
+;;
+;; ((letrec ((loop (lambda (a b)
+;;                  (if #f
+;;                      (loop b a)
+;;                      (void)))))
+;;    loop)
+;;  1 2)
+;;
+;; - 'loop' is defined as a lambda, which takes arguments a and b;
+;; - it is then applied to the init forms (1 and 2).
+;;
 (define (compile-named-let name bindings body len args env tail?)
   (if (< len 4)
       (compiler-error 'let args "ill formed named let ~S" args)
@@ -1548,6 +1615,27 @@ doc>
                  tail?))))
 
 
+;; compile-%%let does the basic transformation of LET into LAMBDA:
+;;
+;; (let ((a 1) (b 2)) body1 body2)
+;;
+;; =>
+;;
+;; ((lambda (a b) body1 body2)
+;;  1 2)
+;;
+;; If it's a named LET:
+;;
+;; (let loop ((a 1) (b 2)) body1 body2)
+;;
+;; =>
+;;
+;; ((letrec ((loop (lambda (a b)
+;;                   body1 body2)))
+;;    loop)
+;;  1 2)
+;;
+;; LETREC itself will be transformed into nested LETs.
 (define (compile-%%let args env tail?)
   (let ((len (length args)))
     (if (< len 3)
@@ -1628,6 +1716,28 @@ doc>
 
 ;;
 ;; COND
+
+;;
+;; COND is rewritten into IFs in a quite standard way:
+;;
+;; (cond ((test1 body1)
+;;        (test2 body2)
+;;        (test3)
+;;        (test4 => func)
+;;        (else body-default)))
+;;
+;; =>
+;;
+;; (if test1
+;;     (begin body1)
+;;     (if test2
+;;         (begin body2)
+;;         (let ((G16 test3))
+;;           (or G16
+;;               (let ((G17 test4))
+;;                 (if G17
+;;                     (func G17)
+;;                     (begin body-default)))))))
 ;;
 (define (rewrite-cond-clauses c)
   (cond
@@ -1666,6 +1776,20 @@ doc>
 ;; CASE
 ;;
 
+;; Standard transformation of CASE.
+;; (case key
+;;       ((1 2) one-two)
+;;       ((3 4) three-four)
+;;       ((5 6) => print)
+;;       (else nope))
+;;
+;; =>
+;;
+;; (cond ((memv key '(1 2)) one-two)
+;;       ((memv key '(3 4)) three-four)
+;;       ((memv key '(5 6)) (print key))
+;;       (else nope))
+;;
 (define (rewrite-case-clauses key clauses)
   ;; Some controls on the case form
   (let ((all-values '()))
