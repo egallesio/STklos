@@ -1,10 +1,18 @@
 NEWS
 ====
-## Version 2.20
 
-@jpellegrini
-@Retropikzel
+## Version 26.0
 
+*Version numbering scheme changed: the first number corresponds to the
+year of the version.  The number after dot is the rank of this version
+in the year (starting from 0).*
+
+This version principally enhances ***STklos*** performance: compiler is faster and, some Scheme primitives have been rewritten in C, several numerical primitives have been optimized (thanks to Jerônimo Pellegrini). As usual a bunch of new SRFIs have been implemented. 
+
+**Contributors for this version**:
+
+- Jerônimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
+- Retropikzel ([@Retropikzel](https://github.com/Retropikzel))
 
 
 **Enhancements**
@@ -107,12 +115,12 @@ NEWS
 
 ## Version 2.10
 
-This version of ***STklos*** mostly enhances the 2.00 version released a year ago. As usual, this version could not have be finalized without the help of Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini)).
+This version of ***STklos*** mostly enhances the 2.00 version released a year ago. As usual, this version could not have be finalized without the help of Jerônimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini)).
 
 **Contributors for this version**:
 
 - Akinori Hattori ([@hattya](https://github.com/hattya))
-- Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
+- Jerônimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
 
 
 **Enhancements:**
@@ -197,7 +205,7 @@ persons (in alphabetical order):
    - Lassi Kortela ([@lassik](https://github.com/lassik))
    - Ivan Maidanski ([@ivmai](https://github.com/ivmai))
    - Tom Niget ([@zdimension](https://github.com/zdimension))
-   - Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
+   - Jerônimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
    - Ryan Schmidt ([@ryandesign](https://github.com/ryandesign))
    - Ben Taca ([@bentaca](https://github.com/bentaca))
    - Robby Zambito ([@Zambito1](https://github.com/Zambito1))
@@ -367,7 +375,7 @@ Version 1.60
 ------------
 
 As the previous version, R7RS compliance is enhanced and a bunch of
-new SRFIS has been implemented (thanks again to [Jeronimo Pellegrini —
+new SRFIS has been implemented (thanks again to [Jerônimo Pellegrini —
 **@jpellegrini**](https://github.com/jpellegrini)).
 
 Changes in this version are:
@@ -409,7 +417,7 @@ Changes in this version are:
 Version 1.50
 ------------
 
-This version enhances R7RS compliance and a lot of new SRFIs (thanks to the awesome work of [Jeronimo Pellegrini  — **@jpellegrini**](https://github.com/jpellegrini))
+This version enhances R7RS compliance and a lot of new SRFIs (thanks to the awesome work of [Jerônimo Pellegrini  — **@jpellegrini**](https://github.com/jpellegrini))
 
 Changes in this version are:
 
