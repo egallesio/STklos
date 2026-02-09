@@ -48,7 +48,6 @@
 /* STklos: #endif               */
 
 #include "stklos.h"           /* STklos: */
-#define __GNU_LIBRARY__       /* STklos: */
 
 
 #if !defined __STDC__ || !__STDC__

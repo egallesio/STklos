@@ -53,7 +53,15 @@ easy to port old STk graphical applications (provided that they use
 objects). The GTK+ extension can be loaded at run time and does not
 require a special interpreter as was the case with STk.
 
+**February 2026**
+
+Version numbering scheme changed: the first number corresponds to the
+year of the version.  The number after dot is the rank of this version
+in the year (starting from 0).
+
+
 **August 2020**
+
 The 1.50 version has been ported to various architectures (in
 particular to "small" 32-bit little- and big-endian systems)
 and a port to Android.  This version also brings support
@@ -61,14 +69,17 @@ of 23 new SRFIs. For a complete list of supported SRFIs, see
 https://www.stklos.net/srfi.html
 
 **February 2021**
+
 Support for 16 new [**SRFIs**](https://www.stklos.net/srfi.html).
 
 **November 2021**
+
 The 1.70 version supports 14 new [**SRFIs**](https://www.stklos.net/srfi.html).
 (We now have 98 SRFIs supported). The (new) `extensions` directory contains
 an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit.
 
 **August 2023**
+
 The 2.00 version is available. This version is conforming to *R⁷RS*
 (previous versions of STklos used to implement the R^5^RS standard).
 It adds support for 24 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
@@ -76,6 +87,7 @@ support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/)
 library thanks to the new **curl** extension.
 
 **October 2024**
+
 The 2.10 versions enhances the REPL, the documentation and numerical
 functions. It adds support for 3 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
 support for 125 SRFIs.
@@ -84,7 +96,7 @@ support for 125 SRFIs.
 SRFI Support
 ------------
 
-The current version of STklos supports more than 120 final SRFIs (a
+The current version of STklos supports more than 130 final SRFIs (a
 complete list of implemented SRFIs is available in the file
 SUPPORTED-SRFIS in the distribution). The goal is to support as many
 final SRFIs as possible.  Any help on implementing other SRFIs on
