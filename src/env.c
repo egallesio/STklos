@@ -180,6 +180,11 @@ static void verify_environment(SCM obj)
   if (!ENVIRONMENTP(obj)) STk_error("bad environment ~S", obj);
 }
 
+static void verify_frame(SCM obj)
+{
+  if (!FRAMEP(obj)) STk_error("bad frame ~S", obj);
+}
+
 static void verify_list(SCM obj)
 {
   if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
@@ -762,7 +767,8 @@ SCM STk_symb_in_scheme(SCM symb) // value of symb in module SCHEME
  *
 \*===========================================================================*/
 
-#define FRAME_ALLOC_BYTES(len) (sizeof(struct frame_obj) + ((len)-1)*sizeof(SCM))
+#define FRAME_ALLOC_BYTES(len) (sizeof(struct frame_obj) + ((len)-1) * sizeof(SCM))
+#define FRAME_SIZE(p)          (FRAME_LENGTH(p) - (sizeof(struct frame_obj)) + sizeof(SCM))
 
 SCM STk_clone_frame(SCM f)
 {
@@ -941,8 +947,119 @@ DEFINE_PRIMITIVE("%environment-module", env_module, subr1, (SCM env))
   return ENV_MODULE(env);
 }
 
+DEFINE_PRIMITIVE("%frame?", framep, subr1, (SCM x)) {
+  return MAKE_BOOLEAN(FRAMEP(x));
+}
 
+DEFINE_PRIMITIVE("%frame-owner", frame_owner, subr1, (SCM frame)) {
+  verify_frame(frame);
+  return FRAME_OWNER(frame);
+}
 
+DEFINE_PRIMITIVE("%frame-next", frame_next, subr1, (SCM frame)) {
+  verify_frame(frame);
+  return FRAME_NEXT(frame);
+}
+
+DEFINE_PRIMITIVE("%frame-length", frame_len, subr1, (SCM frame)) {
+  verify_frame(frame);
+  return MAKE_INT(FRAME_LENGTH(frame));
+}
+
+DEFINE_PRIMITIVE("%frame-ref", frame_ref, subr2, (SCM frame, SCM index)) {
+  verify_frame(frame);
+  if (!INTP(index)) STk_error("bad integer ~s", index);
+  long i = INT_VAL(index);
+  if ((i < 0) ||
+      (i >= FRAME_LENGTH(frame)))
+    STk_error("index ~s out of bounds (0 -- ~s)", index, MAKE_INT(FRAME_LENGTH(frame)-1));
+  return FRAME_LOCAL(frame, (int) i);
+}
+
+/* %debug-environment will print a nice representation of the static + dynamic environment.
+
+(define e 0)
+(let ((a 1)
+      (b 2))
+  (let-syntax ((m (syntax-rules () ((m) 10)))
+               (s (syntax-rules () ((s) 20))))
+    (let ((c 3))
+    (set! e (#%current-environment)))))
+(define f (%environment-dynamic-environment e))
+(define s (%environment-static-environment e))
+
+(%debug-environment e)
+
+And the output is:
+
+ ----------------
+/ FRAME with 1 variables:
+| c --> 3
+\
+ ----------------
+/ LEXICAL LEVEL with 2 syntaxes:
+| s
+| m
+\
+ ----------------
+/ FRAME with 2 variables:
+| b --> 2
+| a --> 1
+\
+ ----------------
+
+ */
+DEFINE_PRIMITIVE("%debug-environment", debug_env, subr12, (SCM e, SCM p)) {
+  verify_environment(e);
+  SCM port = p ? p : STk_stdout;
+  if (!PORTP(port)) STk_error("bad port ~s", port);
+
+  SCM dyn  = ENV_DYN_ENV(e);
+  SCM stat = ENV_STAT_ENV(e);
+
+  STk_puts(" ----------------\n", port);
+
+  while(CONSP(stat)) { /* For each level */
+    SCM vars;
+
+    if (CONSP(CAR(stat)) && CONSP(CAR(CAR(stat)))) { /* VARIABLES */
+      vars=CAR(CAR(stat));
+      STk_puts("/ FRAME with ", port);
+      STk_print(MAKE_INT(FRAME_LENGTH(dyn)), port, DSP_MODE);
+      STk_puts(" variables:\n", port);
+      for (int i=0; i < FRAME_LENGTH(dyn); i++) { /* For each binding */
+        STk_puts("| ", port);
+        STk_print(CAR(vars), port, WRT_MODE);
+        STk_puts(" --> ", port);
+        STk_print(STk_frame_ref(dyn, MAKE_INT(i)), port, WRT_MODE);
+        STk_puts("\n", port);
+        vars = CDR(vars);
+      }
+      /* We only go to the next frame here, because macros do NOT
+         live in frames. They actually do NOT exist in runtime! */
+      dyn  = FRAME_NEXT(dyn);
+    } else if (CONSP(CAR(stat)) && CONSP(CDR(CAR(stat)))) { /* MACROS */
+      vars = CAR(CDR(CAR(stat)));
+      STk_puts("/ LEXICAL LEVEL with ", port);
+      int size = STk_int_length(vars);
+      STk_print(MAKE_INT(size), port, DSP_MODE);
+      STk_puts(" syntaxes:\n", port);
+      SCM m = vars;
+      for (int i=0; i<size; i++) {
+        if (!CONSP(CAR(m))) STk_error("INTERNAL ERROR: weird lex level!");
+        STk_puts("| ", port);
+        STk_print(CAR(CAR(m)), port, WRT_MODE);
+        STk_puts("\n", port);
+        m = CDR(m);
+      }
+    } else
+      STk_error("INTERNAL ERROR: weird frame or lex level!");
+
+    STk_puts("\\\n ----------------\n", port);
+    stat = CDR(stat);
+  }
+  return STk_void;
+}
 
 /*===========================================================================*\
  *
@@ -1014,6 +1131,12 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(env_stat_env);
   ADD_PRIMITIVE(env_dyn_env);
   ADD_PRIMITIVE(env_module);
+  ADD_PRIMITIVE(framep);
+  ADD_PRIMITIVE(frame_owner);
+  ADD_PRIMITIVE(frame_next);
+  ADD_PRIMITIVE(frame_len);
+  ADD_PRIMITIVE(frame_ref);
+  ADD_PRIMITIVE(debug_env);
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(glob_var_info);
 #endif
