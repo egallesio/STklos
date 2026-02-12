@@ -1947,6 +1947,17 @@
         (and (<  1.7631802000 r  1.7631803000)
              (< -1.0303769000 i -1.0303768000))))
 
+;; optimized (rewritten) log
+
+(test "log 4 -- 2"
+      2
+      (/ (log 4) (log 2)))
+
+(test "log 64 -- 4"
+      3
+      (/ (log 64) (log 4)))
+
+
 ;; exact-integer-log
 
 (dotimes (n 50)
