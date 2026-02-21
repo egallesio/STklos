@@ -1,4 +1,4 @@
-STklos (version 2.10)
+STklos Scheme
 =====================
 **Erick Gallesio** <eg(at)stklos.net>
 
