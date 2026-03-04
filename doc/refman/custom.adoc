@@ -59,7 +59,6 @@ the history and function or file completion).
 {{insertdoc 'repl}}
 
 
-
 ==== REPL commands
 
 By default, {{stklos}} accepts some special commands. A command starts
@@ -131,6 +130,7 @@ The following parameter objects can be used to customize the REPL:
 
 {{insertdoc 'repl-theme}}
 {{insertdoc 'repl-show-startup-message}}
+{{insertdoc 'repl-flushed-characters}}
 
 ==== REPL readline support
 
