@@ -54,39 +54,39 @@
  * (repl-flushed-characters)
  * (repl-flushed-characters lst)
  *
- * When a line is intered int the REPL, STklos will flush the characters
- * in the list contained in the parameter obejct |repl-flushed-characters|.
- * The default value is |(#\space #\tab)|. Newlines and end-of-file are
- * always flushed.
+ * When a line is entered in the REPL, the characters of the list
+ * contained in the parameter object |repl-flushed-characters| are
+ * flushed. The default value of this parameter object is the list
+ * |(#\space #\tab)|. Newlines and end-of-file are always flushed.
  *
  * @lisp
  * stklos> (read-char)      <= no character after the closing parenthesis
  * 4                        <= user input
- * #\4                      <= return value
+ * #\\4                      <= return value
  * stklos> (read-char)      <= a space after the closing parenthesis
  * 4                        <= user input
- * #\4                      <= return value
+ * #\\4                      <= return value
  * stklos> (read-char)3     <= '3' after closing parenthesis
- * #\3                      <= return value
+ * #\\3                      <= return value
  * stklos> (read-char) 3    <= space and '3' after closing parenthesis
- * #\3                      <= return value
+ * #\\3                      <= return value
  * stklos> (read-char)35    <= '35' after closing parenthesis
- * #\3                      <= return value
+ * #\\3                      <= return value
  * 5                        <= next return value
  *
  * (repl-flushed-characters '())
  * stklos> (read-char)      <= no character after the closing parenthesis
  * 4                        <= user input
- * #\4                      <= return value
+ * #\\4                      <= return value
  * stklos> (read-char)      <= a space after the closing parenthesis
- * #\space                  <= return value (the space was not skipped)
+ * #\\space                  <= return value (the space was not skipped)
  * stklos> (read-char)3     <= '3' after closing parenthesis
- * #\3                      <= return value
+ * #\\3                      <= return value
  * stklos> (read-char) 3    <= space and '3' after closing parenthesis
- * #\space                  <= return value (the space was not skipped)
- * #\3                      <= next return value
+ * #\\space                  <= return value (the space was not skipped)
+ * #\\3                      <= next return value
  * stklos> (read-char)35    <= '35' after closing parenthesis
- * #\3                      <= return value
+ * #\\3                      <= return value
  * 5                        <= next return value
  * @end lisp
 doc>
