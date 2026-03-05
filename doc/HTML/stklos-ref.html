@@ -26784,6 +26784,59 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p><a id='P_repl-flushed-characters'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(repl-flushed-characters) </strong></code><br>
+<code><strong>(repl-flushed-characters lst) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>When a line is entered in the REPL, the characters of the list
+contained in the parameter object <code>repl-flushed-characters</code> are
+flushed. The default value of this parameter object is the list
+<code>(#space #tab)</code>. Newlines and end-of-file are always flushed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span>      <span class="nv">&lt;=</span> <span class="nv">no</span> <span class="nv">character</span> <span class="nv">after</span> <span class="nv">the</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="mi">4</span>                        <span class="nv">&lt;=</span> <span class="nv">user</span> <span class="nv">input</span>
+<span class="sc">#\4</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span>      <span class="nv">&lt;=</span> <span class="nv">a</span> <span class="nv">space</span> <span class="nv">after</span> <span class="nv">the</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="mi">4</span>                        <span class="nv">&lt;=</span> <span class="nv">user</span> <span class="nv">input</span>
+<span class="sc">#\4</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span><span class="mi">3</span>     <span class="nv">&lt;=</span> <span class="ss">'3</span><span class="o">'</span> <span class="nv">after</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\3</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span> <span class="mi">3</span>    <span class="nv">&lt;=</span> <span class="nv">space</span> <span class="nv">and</span> <span class="ss">'3</span><span class="o">'</span> <span class="nv">after</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\3</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span><span class="mi">35</span>    <span class="nv">&lt;=</span> <span class="ss">'35</span><span class="o">'</span> <span class="nv">after</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\3</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="mi">5</span>                        <span class="nv">&lt;=</span> <span class="nv">next</span> <span class="nv">return</span> <span class="nv">value</span>
+
+<span class="p">(</span><span class="nf">repl-flushed-characters</span> <span class="o">'</span><span class="p">())</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span>      <span class="nv">&lt;=</span> <span class="nv">no</span> <span class="nv">character</span> <span class="nv">after</span> <span class="nv">the</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="mi">4</span>                        <span class="nv">&lt;=</span> <span class="nv">user</span> <span class="nv">input</span>
+<span class="sc">#\4</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span>      <span class="nv">&lt;=</span> <span class="nv">a</span> <span class="nv">space</span> <span class="nv">after</span> <span class="nv">the</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\space</span>                  <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span> <span class="p">(</span><span class="nf">the</span> <span class="nv">space</span> <span class="nv">was</span> <span class="nv">not</span> <span class="nv">skipped</span><span class="p">)</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span><span class="mi">3</span>     <span class="nv">&lt;=</span> <span class="ss">'3</span><span class="o">'</span> <span class="nv">after</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\3</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span> <span class="mi">3</span>    <span class="nv">&lt;=</span> <span class="nv">space</span> <span class="nv">and</span> <span class="ss">'3</span><span class="o">'</span> <span class="nv">after</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\space</span>                  <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span> <span class="p">(</span><span class="nf">the</span> <span class="nv">space</span> <span class="nv">was</span> <span class="nv">not</span> <span class="nv">skipped</span><span class="p">)</span>
+<span class="sc">#\3</span>                      <span class="nv">&lt;=</span> <span class="nv">next</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">read-char</span><span class="p">)</span><span class="mi">35</span>    <span class="nv">&lt;=</span> <span class="ss">'35</span><span class="o">'</span> <span class="nv">after</span> <span class="nv">closing</span> <span class="nv">parenthesis</span>
+<span class="sc">#\3</span>                      <span class="nv">&lt;=</span> <span class="nv">return</span> <span class="nv">value</span>
+<span class="mi">5</span>                        <span class="nv">&lt;=</span> <span class="nv">next</span> <span class="nv">return</span> <span class="nv">value</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="doc_repl_readline_support">10.3.4. REPL readline support</h4>

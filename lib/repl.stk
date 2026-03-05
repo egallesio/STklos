@@ -34,6 +34,7 @@
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
           repl-theme get-repl-color repl-show-startup-message
+          repl-flushed-characters
           repl-add-command
           @ @1 @2 @3 @4 @5 @*)
 
@@ -47,6 +48,50 @@
 (define default-in  (current-input-port))
 (define default-out (current-output-port))
 (define default-err (current-error-port))
+
+#|
+<doc EXT repl-flushed-characters
+ * (repl-flushed-characters)
+ * (repl-flushed-characters lst)
+ *
+ * When a line is entered in the REPL, the characters of the list
+ * contained in the parameter object |repl-flushed-characters| are
+ * flushed. The default value of this parameter object is the list
+ * |(#\space #\tab)|. Newlines and end-of-file are always flushed.
+ *
+ * @lisp
+ * stklos> (read-char)      <= no character after the closing parenthesis
+ * 4                        <= user input
+ * #\\4                      <= return value
+ * stklos> (read-char)      <= a space after the closing parenthesis
+ * 4                        <= user input
+ * #\\4                      <= return value
+ * stklos> (read-char)3     <= '3' after closing parenthesis
+ * #\\3                      <= return value
+ * stklos> (read-char) 3    <= space and '3' after closing parenthesis
+ * #\\3                      <= return value
+ * stklos> (read-char)35    <= '35' after closing parenthesis
+ * #\\3                      <= return value
+ * 5                        <= next return value
+ *
+ * (repl-flushed-characters '())
+ * stklos> (read-char)      <= no character after the closing parenthesis
+ * 4                        <= user input
+ * #\\4                      <= return value
+ * stklos> (read-char)      <= a space after the closing parenthesis
+ * #\\space                  <= return value (the space was not skipped)
+ * stklos> (read-char)3     <= '3' after closing parenthesis
+ * #\\3                      <= return value
+ * stklos> (read-char) 3    <= space and '3' after closing parenthesis
+ * #\\space                  <= return value (the space was not skipped)
+ * #\\3                      <= next return value
+ * stklos> (read-char)35    <= '35' after closing parenthesis
+ * #\\3                      <= return value
+ * 5                        <= next return value
+ * @end lisp
+doc>
+|#
+(define repl-flushed-characters (make-parameter '(#\space #\tab)))
 
 (define @1 #void)
 (define @2 #void)
@@ -444,7 +489,7 @@ doc>
 (define (skip-until-end-of-line port)
   ;; Advance on input to avoid cascading errors
   ;; Example: #x8(1 2 3)
-  ;;    - without skipping characters would signal to errors (bad tag and
+  ;;    - without skipping characters would signal two errors (bad tag and
   ;;      a bad function call
   ;;    - with skip, only the bad tag will be signaled, and (1 2 3) will be skipped
   ;; Of course, this is only done  for the REPL.
@@ -471,7 +516,9 @@ doc>
 (define (repl :key (in  default-in)
                    (out default-out)
                    (err default-err))
-  (let ((eof #f))
+  (let ((eof #f)
+        (skip #t))    ;; Do we nee need to skip until EOL if an error occurs?
+
     (set! repl-level (+ repl-level 1))
     (let Loop ()
       (with-handler (lambda (c)
@@ -481,7 +528,7 @@ doc>
                         ;; another condition or even non-condition). Skip
                         ;; characters until the end of line to avoid cascading
                         ;; errors.
-                        (skip-until-end-of-line in))
+                        (when skip (skip-until-end-of-line in)))
                       (repl-handler c err))           ;; Signal the error
          ;; display prompt
          (when interactive?
@@ -512,6 +559,18 @@ doc>
                    (system (substring all 1 (string-length all)))))
 
              (else
+                ;; Flush characters which are present in "repl-flushed-characters".
+                (let loop ((c (peek-char in)))
+                  (set! skip #t)
+                  (if (memq c '(#\newline #eof))
+                      (begin
+                        (read-char in)
+                        (set! skip #f))   ;; Since EOL was already read
+                      (when (memq c (repl-flushed-characters))
+                        (read-char in)
+                        (loop (peek-char in)))))
+
+                ;; Eval the sexpr previously read
                 (call-with-values
                   (lambda () (eval e))
                   (lambda v
