@@ -122,7 +122,8 @@
              (if (const-value Cond)
                  (rewrite-expression Then env)
                  (rewrite-expression Else env))
-             (list (car expr) Cond Then Else))))))
+             (list (car expr) Cond Then Else)))
+       expr)))
 
 
 (compiler:add-rewriter!            ;; 'NOT' rewriter
