@@ -272,7 +272,7 @@ static char *posixly_correct;
 // STklos: #endif
 
 static char *
-my_index (const char *str, int chr)
+my_index (const char *str, int chr)   // STklos: K&R declaration => ANSI prototype
 {
   while (*str)
     {
