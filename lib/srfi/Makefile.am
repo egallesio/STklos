@@ -125,6 +125,7 @@ SRC_STK   = 1.stk   \
             189.stk \
             190.stk \
             193.stk \
+            194.stk \
             195.stk \
             196.stk \
             207.stk \
@@ -247,6 +248,7 @@ SRC_OSTK =  1.ostk   \
             189.ostk \
             190.ostk \
             193.ostk \
+            194.ostk \
             195.ostk \
             196.ostk \
             207.ostk \
@@ -346,6 +348,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 171.ostk: 1.ostk 69.ostk
 189.ostk: 1.ostk
 190.ostk: 158.ostk
+194.ostk: 27.ostk 27.$(SO) 133.ostk 158.ostk ../scheme/flonum.$(SO)
 195.ostk: 35.ostk
 196.ostk: 1.ostk
 207.ostk: 1.ostk 13.ostk 151.ostk 158.ostk
