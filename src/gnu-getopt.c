@@ -79,10 +79,13 @@ int getopt_long_only (int argc,
 
 #undef HAVE_CONFIG_H
 
+#undef __GNU_LIBRARY__    // KLUDGE: force to define the function my_index
+                          // (instead of using strchr), because gcc (at least
+                          // version 15) yields a warning in a perfectly valid
+                          // strchr function usage
 
 #undef __GLIBC__          // KLUDGE: permits to avoid the definiton of ELIDE_CODE
 #define __GLIBC__ 0       // => Consequence: the following code is compiled
-
 
 /* ----------------------------------------------------------------------*/
 /*  The following code is the GNU source UNMODIFIED  (<GNU-CODE>)        */
