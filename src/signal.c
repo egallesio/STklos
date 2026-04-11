@@ -2,7 +2,7 @@
  *
  * s i g n a l . c          -- Signal handling
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -149,7 +149,7 @@ static void sigsegv(int _UNUSED(i))
       "Try to augment stack size (--stack-size option). If the problem persists,\n"
       "fill an issue report on https://github.com/egallesio/STklos/issues\n");
   fflush(stderr);
-  _exit(1);
+  _exit(SIGSEGV);
 }
 
 static void sighup(int _UNUSED(i))
@@ -161,11 +161,22 @@ static void sighup(int _UNUSED(i))
 
 static void sigabort(int _UNUSED(i))
 {
-  /* GMP uses abort() whan it detects problems (mainly number too try).  Try
+  /* GMP uses abort() whan it detects problems (mainly number too big).  Try
    * to trap SIGABRT signals, hoping that next GC will recover the memory used
    */
   STk_error("Received a SIGABRT signal.");
 }
+
+static void sig_cannot_be_trapped(int i)
+{
+  fprintf(stderr, "Received a SIG%s signal (which cannot be trapped).\n"
+                  "Exit.\n",
+          (i == SIGFPE)? "FPE": "ILL");
+  fflush(stderr);
+  _exit(i);
+}
+
+
 
 /* ====================================================================== */
 static void exec_signal_handler(int sig) // Run a Scheme proc. for signal sig
@@ -201,7 +212,9 @@ DEFINE_PRIMITIVE("%default-signal-handler", dflt_sighdlr, subr1, (SCM sig))
     case SIGSEGV: sigsegv(SIGSEGV);  break;
     case SIGABRT: sigabort(SIGABRT); break;
     case SIGHUP:  sighup(SIGHUP);    break;
-  default: STk_error("signal ~S is not managed by this handler", sig);
+    case SIGFPE:
+    case SIGILL:  sig_cannot_be_trapped(n); break;
+    default:      STk_error("signal ~S is not managed by this handler", sig);
   }
   return STk_void;
 }
@@ -219,6 +232,8 @@ DEFINE_PRIMITIVE("%initialize-signals", initialize_signals, subr0, (void))
   SET_DEFAULT_HANDLER(SIGSEGV);
   SET_DEFAULT_HANDLER(SIGINT);
   SET_DEFAULT_HANDLER(SIGABRT);
+  SET_DEFAULT_HANDLER(SIGFPE);
+  SET_DEFAULT_HANDLER(SIGILL);
   SET_DEFAULT_HANDLER(SIGHUP);
 
   return STk_void;
