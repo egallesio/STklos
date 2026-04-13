@@ -26,6 +26,9 @@ The files in this directory show some examples in STklos:
    a number `N`, then runs two dice `N` times, and finally prints a
    histogram of the distribution of outcomes.
 
+- `string-histogram.stk` and `histogram-program.stk` are one
+   example of how R7RS libraries can be written and used.
+
 - `fork-test.stk` is a simple program using the Unix `fork(2)`
   primitive.
 

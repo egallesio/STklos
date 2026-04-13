@@ -1,0 +1,84 @@
+;;;;
+;;;; string-histogram.stk  -- A library to produce histograms of strings
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 19-Mar-2025 09:21 (jpellegrini)
+;;;;
+
+
+;;; Concepts illustrated:
+;;;
+;;; * R7RS libraries and the 'only' modifier for import
+;;; * some string and vector procedures
+;;; * STklos' STRING-POSITION, FORMAT and 1+
+;;;
+;;; The file histogram-program.stk loads and uses this library.
+;;;
+;;; Interesting exercises:
+;;;
+;;; * Use a STklos module instead of an R7RS library. None of the imports
+;;;   will be necessary anymore. But ALL of the base STklos module will be
+;;;   imported...
+;;; * Make string-histogram accept an *exact* horizontal size. For this one
+;;;   needs to calculate the maximum of all counts.
+;;; * Make this case-insensitive.
+;;; * Make the procedures return a string.
+
+;;; You can compile this as an OSTK file:
+;;;
+;;; stklos-compile -o string-histogram.ostk string-histogram.stk
+;;;
+;;; When you do (import (string-histogram)) from Scheme, STklos will look
+;;; for an OSTK file with the name "string-histogram.ostk" -- or an STK
+;;; file with the name "string-histogram.stk".
+
+(define-library (string-histogram)
+  ;; We import (scheme base), and some specific STklos procedures.
+  (import (scheme base)
+          (only SCHEME
+                string-position
+                1+
+                format))
+  ;; And we export our two procedures.
+  (export string-histogram
+          vowel-histogram)
+
+  (begin
+
+    (define (string-histogram s letters)
+      (let ((len (string-length s))
+            (vec (make-vector 5 0)))
+        (string-for-each (lambda (c)
+                           (let ((p (string-position (string c) letters)))
+                             (when p (vector-set! vec p (1+ (vector-ref vec p))))))
+                         s)
+
+        (let ((h (vector-map (lambda (n)
+                               (truncate-quotient (* n 40) len))
+                             vec)))
+          (dotimes (i (string-length letters))
+            (format #t "~a: ~a (~a)\n"
+                    (string-ref letters i)
+                    (make-string (vector-ref h i) #\*)
+                    (vector-ref vec i)))))
+      (void))
+
+    (define (vowel-histogram s) (string-histogram s "aeiou"))))

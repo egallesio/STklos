@@ -18,25 +18,29 @@
 # USA.
 #
 #           Author: Erick Gallesio [eg@unice.fr]
-#    Creation date: ??? 
+#    Creation date: ???
 
 schemedemodir       = $(prefix)/share/@PACKAGE@/@VERSION@/Demos.d
 schemedemo_DATA	    = dice.stk fork-test.stk hello.stk secho.stk \
 		      socket-server.stk socket-client.stk \
 		      socket-server-fork.stk socket-server-thread.stk \
+                      string-histogram.stk string-histogram-program.stk \
 		      threads.stk
+
+schemedemo_OBJS     = string-histogram.ostk
 
 schemedemo_SCRIPTS  = dice fork-test hello secho \
 		      socket-server socket-client \
 		      socket-server-fork socket-server-thread \
+                      string-histogram-program \
 		      threads
 
-SUFFIXES            = .stk
+SUFFIXES            = .stk .ostk
 
 COMP ?= ../utils/tmpcomp
 
 .stk:
-	$(COMP) -o $* $*.stk 
+	$(COMP) -o $* $*.stk
 
 # Override the install target to avoid intallation in destination dir.
 install:
@@ -46,7 +50,7 @@ all:
 
 clean:
 	(cd C-module; make clean)
-	/bin/rm -f $(schemedemo_SCRIPTS) *~
+	/bin/rm -f $(schemedemo_SCRIPTS) $(schemedemo_OBJS) *~
 
 distclean: clean
 	(cd C-module; make distclean)
