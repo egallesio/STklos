@@ -1337,6 +1337,8 @@
 (test/error "lcm" (lcm #\a  1))
 (test/error "lcm" (lcm "a"  1))
 (test/error "lcm" (lcm lcm  1))
+(test/error "lcm" (lcm 3.2))
+
 
 ;; Different argument order, just to be sure:
 (test/error "lcm" (lcm 1 1.2))

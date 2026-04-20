@@ -3048,7 +3048,7 @@ DEFINE_PRIMITIVE("lcm", lcm, vsubr, (int argc, SCM *argv))
   SCM res, gcd;
 
   if (argc == 0) return MAKE_INT(1);
-  if (STk_numberp(*argv) == STk_false) error_bad_number(*argv);
+  if (STk_integerp(*argv) == STk_false) error_bad_number(*argv);
 
   for (res = *argv--; --argc; argv--) {
     /* It's faster to use GMP functions when it makes sense to do so: */
