@@ -826,8 +826,8 @@ void STk_double2Cstr(char *buffer, size_t bufflen, double n)
     strncat(buffer, ".0", bufflen);
   /* Treat special cases of +nan.0 and +inf.0 */
   if (isalpha(buffer[0])) {
-    if (strcmp(buffer, "inf.0") == 0) snprintf(buffer, bufflen, "+inf.0");
-    if (strcmp(buffer, "nan.0") == 0) snprintf(buffer, bufflen,  "+nan.0");
+    if (strcasecmp(buffer, "inf.0") == 0) snprintf(buffer, bufflen, "+inf.0");
+    if (strcasecmp(buffer, "nan.0") == 0) snprintf(buffer, bufflen,  "+nan.0");
   }
 }
 
@@ -1478,10 +1478,10 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
   if ((*str == '-' || *str == '+') && isalpha(str[1])) {
     /* Treat special inf "+values.0" -inf.0 , "+nan.0", "-nan.0"
      * NOTE: R7RS says that -nan.0 is synonym to +nan.0 */
-    if      (strncmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
-    else if (strncmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
-    else if (strncmp(str, MINUS_NaN,6)==0) num = double2real(STk_NaN);
-    else if (strncmp(str, PLUS_NaN,6)==0)  num = double2real(STk_NaN);
+    if      (strncasecmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
+    else if (strncasecmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
+    else if (strncasecmp(str, MINUS_NaN,6)==0) num = double2real(STk_NaN);
+    else if (strncasecmp(str, PLUS_NaN,6)==0)  num = double2real(STk_NaN);
 
     if (num != STk_false) { /* Did we actually read an inf or nan? */
       *end = str + 6;
