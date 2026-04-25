@@ -267,8 +267,12 @@
 
 (test "complex reader" '(1 1) (decompose-complex '1+i))
 (test "complex reader" '(1 1) (decompose-complex '1+1i))
+(test "complex reader" '(1 1) (decompose-complex '1+I))
+(test "complex reader" '(1 1) (decompose-complex '1+1I))
 (test "complex reader" '(1 -1) (decompose-complex '1-i))
 (test "complex reader" '(1 -1) (decompose-complex '1-1i))
+(test "complex reader" '(1 -1) (decompose-complex '1-I))
+(test "complex reader" '(1 -1) (decompose-complex '1-1I))
 (test "complex reader" '(1.0 1) (decompose-complex '1.0+1i))
 (test "complex reader" '(1.0 1.0) (decompose-complex '1.0+1.0i))
 (test "complex reader" '(1e-5 1) (decompose-complex '1e-5+1i))

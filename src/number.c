@@ -1524,8 +1524,8 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
 /* Reads a number from str in the specified base. */
 SCM STk_Cstr2number(char *str, long base)
 {
-  if (strcmp(str, "+i")==0) return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
-  if (strcmp(str, "-i")==0) return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
+  if (strcasecmp(str, "+i")==0) return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
+  if (strcasecmp(str, "-i")==0) return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
   else {
     char *end, *end2 = "";
     char exact = ' ';
@@ -1545,15 +1545,16 @@ SCM STk_Cstr2number(char *str, long base)
       case '\0':
         return a;
       case 'i':
+      case 'I':
         if (*str == '+' || *str == '-')
           if (*(end+1) == '\0') return make_complex(MAKE_INT(0),a);
         break;
       case '+':
       case '-':
-        if (strcmp(end, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
-        if (strcmp(end, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
+        if (strcasecmp(end, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
+        if (strcasecmp(end, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
         b = Cstr2simple_number(end, &exact, &base, &end2);
-        if (*end2 == 'i' && *(end2+1) == '\0') return make_complex(a,b);
+        if ((*end2=='i' || *end2=='I') && *(end2+1)=='\0') return make_complex(a,b);
         break;
       case '@':
         /* end+1, because we want to skip the '@' sign: */
