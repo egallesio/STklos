@@ -2197,7 +2197,7 @@ FUNCALL:  /* (int nargs, int tailp) */
       SCM l, func, *tmp, *argv;
       int len;
 
-      if (nargs == 0) STk_error("no function given to apply");
+      if (nargs < 2) STk_error("apply needs at least 2 arguments");
 
       nargs -= 1;
       argv   = vm->sp + nargs;
