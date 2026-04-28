@@ -832,7 +832,7 @@ STKLOS_BINARY ?= ../src/stklos
 	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
 		-I../src @GCINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@
-	/bin/rm -f $*.o
+	rm -f $*.o
 
 #======================================================================
 
@@ -871,7 +871,7 @@ generate-git-info:
 	   echo "*** Recompile STklos";                            \
 	   (cd ../src && $(MAKE) stklos);                            \
 	   echo "*** Cleaning useless images";                     \
-	   /bin/rm boot.img[0-3] instr[0-3];                       \
+	   rm boot.img[0-3] instr[0-3];                       \
 	else                                                       \
 	   echo "*** Boot file creation failed";                   \
 	   exit 1;                                                 \
@@ -923,13 +923,13 @@ $(DOCDB): $(scheme_sources)
 	$(STKLOS_BINARY) -q -c -f ../doc/extract-doc $(scheme_sources) > $(DOCDB)
 
 clean:
-	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS) ./srfis-data.scm
+	rm -f $(scheme_OBJS) $(scheme_SOLIBS) ./srfis-data.scm
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i && $(MAKE) clean)\
 	done
 
 distclean: clean
-	/bin/rm -f Makefile
+	rm -f Makefile
 	touch boot.stk
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i && $(MAKE) distclean)\

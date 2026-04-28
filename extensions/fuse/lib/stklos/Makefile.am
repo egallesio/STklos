@@ -47,7 +47,7 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
          -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
 	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
-	/bin/rm -f $*.o
+	rm -f $*.o
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk $(SCM_SRCS)
 

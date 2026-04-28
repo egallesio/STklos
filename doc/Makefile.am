@@ -73,11 +73,11 @@ $(DOCDB): $(OTHERDB)
 # Documentation
 #
 clean:
-	/bin/rm -f $(ALLDB)  stklos*.1 *~
+	rm -f $(ALLDB)  stklos*.1 *~
 
 distclean: clean
-	for d in $(SUBDOCS); do (/bin/rm -f $$d/Makefile); done
-	/bin/rm -f Makefile
+	for d in $(SUBDOCS); do (rm -f $$d/Makefile); done
+	rm -f Makefile
 
 uninstall-hook:
 	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
