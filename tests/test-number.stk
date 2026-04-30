@@ -267,8 +267,12 @@
 
 (test "complex reader" '(1 1) (decompose-complex '1+i))
 (test "complex reader" '(1 1) (decompose-complex '1+1i))
+(test "complex reader" '(1 1) (decompose-complex '1+I))
+(test "complex reader" '(1 1) (decompose-complex '1+1I))
 (test "complex reader" '(1 -1) (decompose-complex '1-i))
 (test "complex reader" '(1 -1) (decompose-complex '1-1i))
+(test "complex reader" '(1 -1) (decompose-complex '1-I))
+(test "complex reader" '(1 -1) (decompose-complex '1-1I))
 (test "complex reader" '(1.0 1) (decompose-complex '1.0+1i))
 (test "complex reader" '(1.0 1.0) (decompose-complex '1.0+1.0i))
 (test "complex reader" '(1e-5 1) (decompose-complex '1e-5+1i))
@@ -2699,6 +2703,12 @@
 ;;;
 ;;; Misc
 ;;;
+(test "case for Nan" +nan.0 +NaN.0)
+(test "case for Nan" +nan.0 -NAN.0)
+(test "case for infinity" +inf.0 +InF.0)
+(test "case for infinity" -inf.0 -INF.0)
+
+
 (test "weird number or symbol.1" #t (number? '3s2))
 (test "weird number or symbol.2" #f (number? '3s2x))
 (test "weird number or symbol.3" #t (number? '3#d2+5i))
