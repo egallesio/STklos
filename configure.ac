@@ -547,8 +547,8 @@ then
 fi
 
 
-
-SYSLIBS_LOC=$(dirname $(ldd /bin/ls | grep libc.so | cut -d ' '  -f 3)) 2>/dev/null
+# No more necessary
+#SYSLIBS_LOC=$(dirname $(ldd /bin/ls | grep libc.so | cut -d ' '  -f 3)) 2>/dev/null
 
 
 
