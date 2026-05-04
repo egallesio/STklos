@@ -45,6 +45,6 @@ calc: calc.stk
 	chmod a+x calc
 
 clean: 
-	/bin/rm -f *.ostk calc *~
+	rm -f *.ostk calc *~
 
 doc:

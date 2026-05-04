@@ -19,9 +19,9 @@ install:
 	@echo "Demos are not installed"
 
 clean:
-	/bin/rm -f $(EXE) *~ 
+	rm -f $(EXE) *~ 
 
 distclean-am: clean
-	/bin/rm -f stklos-fuse.so
-	/bin/rm -f Makefile
+	rm -f stklos-fuse.so
+	rm -f Makefile
 

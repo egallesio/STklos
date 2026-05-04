@@ -136,7 +136,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
 		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
-	@/bin/rm -f $*.o
+	@rm -f $*.o
 
 
 #======================================================================
@@ -242,7 +242,7 @@ clean:
 distclean: clean
 	(cd vector && $(MAKE) distclean)
 	(cd regex && $(MAKE) distclean)
-	/bin/rm -f Makefile
+	rm -f Makefile
 
 uninstall-hook:
 	(cd vector && $(MAKE) uninstall)

@@ -46,9 +46,9 @@ all:
 
 clean:
 	(cd C-module; make clean)
-	/bin/rm -f $(schemedemo_SCRIPTS) *~
+	rm -f $(schemedemo_SCRIPTS) *~
 
 distclean: clean
 	(cd C-module; make distclean)
-	/bin/rm -f Makefile
-	/bin/rm -rf .deps
+	rm -f Makefile
+	rm -rf .deps
