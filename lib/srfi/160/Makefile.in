@@ -749,7 +749,7 @@ clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
 
 distclean: clean
-	/bin/rm -f Makefile
+	rm -f Makefile
 
 uninstall-hook:
 	(cd $(PREFIX)$(srfidir) && rm -f $(srfi_sources) ) || true

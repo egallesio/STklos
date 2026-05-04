@@ -32,11 +32,11 @@ install:
 	@echo "Demos are not installed"
 
 clean:
-	/bin/rm -f $(EXE) *~ all-demos
+	rm -f $(EXE) *~ all-demos
 
 distclean-am:
-	/bin/rm -f stklos-gtklos.so
-	/bin/rm -f Makefile
+	rm -f stklos-gtklos.so
+	rm -f Makefile
 
 demo: all
 	./demos

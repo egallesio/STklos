@@ -66,7 +66,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 		-I../../src @GCINC@ @GMPINC@ \
 	-c -o $*.o $*.c
 	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
-	/bin/rm -f $*.o
+	rm -f $*.o
 #======================================================================
 # Dependencies
 derived.ostk: primitive.ostk ../scheme/list.$(SO)
@@ -81,7 +81,7 @@ clean:
 	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
-	/bin/rm -f Makefile
+	rm -f Makefile
 
 uninstall-hook:
 	(cd $(schemedir) && rm -f $(scheme_sources)) || true

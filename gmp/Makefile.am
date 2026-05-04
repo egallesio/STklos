@@ -1,6 +1,6 @@
 # Makefile.am for STklos/gmp
 #
-# Copyright © 2009-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2009-2026 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ check:
 test tests: check
 
 clean:
-	/bin/rm -f *.o *~ libgmp.a .libs/libgmp.a
+	rm -f *.o *~ libgmp.a .libs/libgmp.a
 
 distclean: clean
-	/bin/rm -f config.h stamp-h1
-	/bin/rm -f config.status config.cache config.log configure.lineno \
-		   config.status.lineno
-	/bin/rm -rf ./.deps ./libs ./autom4te.cache
-	/bin/rm -f Makefile
+	rm -f config.h stamp-h1
+	rm -f config.status config.cache config.log configure.lineno \
+	      config.status.lineno
+	rm -rf ./.deps ./libs ./autom4te.cache
+	rm -f Makefile

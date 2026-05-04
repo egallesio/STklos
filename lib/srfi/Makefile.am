@@ -310,7 +310,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
 		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
-	@/bin/rm -f $*.o
+	@rm -f $*.o
 
 #======================================================================
 # Dependencies
@@ -430,7 +430,7 @@ clean:
 	(cd 160 && $(MAKE) clean)
 
 distclean: clean
-	/bin/rm -f Makefile
+	rm -f Makefile
 	(cd 160 && $(MAKE) distclean)
 
 uninstall-hook:

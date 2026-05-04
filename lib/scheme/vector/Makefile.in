@@ -711,7 +711,7 @@ f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
 			-I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
-	@/bin/rm -f $*.o
+	@rm -f $*.o
 
 #======================================================================
 # Dependencies
@@ -738,7 +738,7 @@ clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
 
 distclean: clean
-	/bin/rm -f Makefile $(srfi_interm)
+	rm -f Makefile $(srfi_interm)
 
 uninstall-hook:
 	(cd $(srfidir) && rm -f $(srfi_sources) $(srfi_interm)) || true
