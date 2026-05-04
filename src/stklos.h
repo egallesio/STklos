@@ -36,6 +36,12 @@ extern "C"
 #define _XOPEN_SOURCE 500
 #define _SVID_SOURCE
 #define _POSIX_C_SOURCE 199309L
+#ifdef __APPLE__
+  #ifndef _DARWIN_C_SOURCE
+    #define _DARWIN_C_SOURCE 1 /* otherwise strnprintf is not defined in <stdio.h> */
+  #endif
+#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
