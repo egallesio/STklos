@@ -113,6 +113,20 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Import the primitives defined in STklos base 
+(import (only SCHEME temp-file-prefix
+                     create-temp-file
+                     create-directory
+                     delete-directory
+                     rename-file))
+;; and re-export them (if used in a pure R7RS library)
+(export temp-file-prefix
+        create-temp-file
+        create-directory
+        delete-directory
+        rename-file)
+
+
 (defsymbol
   time/now
   time/unchanged
@@ -205,7 +219,7 @@
 ;; (close-directory directory-object) implemented as primitive
 ;; (real-path path)                   implemented as primitive
 ;; (file-space path-or-port)          implemented as primitive
-;; (temp-file prefix [str])           implemented in STklos base
+;; (temp-file-prefix [str])           implemented in STklos base
 ;; (create-temp-file [prefix])        implemented in STklos base
 
 ;; About create-temp-file:
