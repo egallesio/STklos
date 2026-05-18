@@ -257,9 +257,13 @@ MODULE_ENTRY_START("readline-utils")
   // and since this is the only file written in C interacting with readline,
   // we do this assignment here.
 
-
   rl_readline_name = "stklos";     // To permit STklos parts in the ~/ .inputrc file
-  rl_basic_quote_characters = "\"";// Suppress the simple quote for parent flashing
+
+  if (dlsym(RTLD_DEFAULT, "rl_basic_quote_characters")) {
+    // rl_basic_quote_characters is defined. We are not using a (old?) version of
+    // libedit. =>  we can suppress the simple quote for parent flashing
+    rl_basic_quote_characters = "\"";
+  }
 }
 MODULE_ENTRY_END
 
