@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -436,8 +436,7 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
   len = read_word(port, c, &w, ci, &last, &seen_pipe);
   tok = w.word;
 
-
-  if (seen_pipe < 0) {   // No '|' was used in the worard read.
+  if (seen_pipe < 0) {   // No '|' was used in the word read.
     SCM z = STk_Cstr2number(tok, 10L);
     if (z != STk_false)
       return z;
@@ -486,7 +485,8 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
       // when tok != w.buffer. Is it really worthwhile?
       SCM tmp =  STk_intern(tok);
 
-      if (seen_pipe >= 0) BOXED_INFO(tmp) |= SYMBOL_NEEDS_BARS;
+      if (seen_pipe >= 0)
+        BOXED_INFO(tmp) |= STk_symbol_flags(tok);
       return tmp;
     }
   }
@@ -515,7 +515,6 @@ static SCM read_char(SCM port, int c)
 
   /* convert the character contained in token in a character */
   return MAKE_CHARACTER(STk_string2char(tok));
-
 }
 
 static SCM read_address(SCM port)

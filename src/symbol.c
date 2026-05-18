@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,37 +42,34 @@ static void error_bad_string(SCM str)
   STk_error("bad string ~S", str);
 }
 
+
 int STk_symbol_flags(register const char *s)
 {
-  if (!*s || (*s == '.' && !s[1])) {
-    /* Special symbols || and |.| which always need bars */
+  if (!*s                                            || // empty symbol ||
+      (*s == '.' && !s[1])                           || // dot symbol   |.|
+      (STk_Cstr2number((char*) s, 10L)!=STk_false)   || // valid number
+      (*s == '#'))                                      // starts with a sharp
     return SYMBOL_NEEDS_BARS;
-  } else {
+  else {
     int res = 0;
-    int only_digits = 1;
 
-    if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
+    if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;       // seems to be a keyword
 
     for (; *s; s++) {
-      if (!isdigit(*s) && *s != '_')
-        only_digits = 0;
       if (isupper(*s)) {
         res |= SYMBOL_HAS_UPPER;
         continue;
       }
       if (!strchr(valid_symbol_chars, *s)) {
         res |= SYMBOL_NEEDS_BARS;
-        break;
+        continue;
       }
     }
 
-    if (s[-1] == ':' || only_digits)
-      // seems to be a keyword or a symbol consisting only of digits (and '_')
-      res |= SYMBOL_NEEDS_BARS; 
+    if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword too
     return res;
   }
 }
-
 
 static inline SCM make_uninterned_symbol(const char *name)
 {
