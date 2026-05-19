@@ -120,10 +120,21 @@ static unsigned long sxhash(SCM obj)
   if (!BOXED_OBJP(obj)) return (AS_LONG(obj) >> 2);
 
   switch (BOXED_TYPE(obj)) {
-    case tc_cons:       h = sxhash(CAR(obj));
-                        for(tmp=CDR(obj); CONSP(tmp); tmp=CDR(tmp))
-                          h = HASH_WORD(h, sxhash(CAR(tmp)));
-                        h = HASH_WORD(h, sxhash(tmp));
+    case tc_cons:       int len;
+                        tmp = STk_list_type_and_length(obj, &len);
+                        /* If tmp is a cons, the list is circular! */
+                        if (CONSP(tmp)) {
+                          /* Sum len to h just to make the hash very different from
+                             the hash of the similar non-circular list: */
+                          h = sxhash(CAR(obj)) + (unsigned long) len;
+                          for(tmp=CDR(obj), i=1; i<len; tmp=CDR(tmp), i++)
+                            h = HASH_WORD(h, sxhash(CAR(tmp)));
+                        } else { /* non-circular list: */
+                          h = sxhash(CAR(obj));
+                          for(tmp=CDR(obj); CONSP(tmp); tmp=CDR(tmp))
+                            h = HASH_WORD(h, sxhash(CAR(tmp)));
+                          h = HASH_WORD(h, sxhash(tmp));
+                        }
                         return h;
     case tc_bignum:     return sxhash(STk_number2string(obj, MAKE_INT(16)));
     case tc_real:       return (unsigned long) REAL_VAL(obj);
