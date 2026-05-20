@@ -1,6 +1,7 @@
 ;;; Code from https://t3x.org/s9fes/draw-tree.scm.html
-;; Adaptation for the examples directory starts at the <STklos> tag
-
+;; Adaptation for STklos examples directory starts at the <STklos> tag
+;; Nil's code is not modified.
+;;
 ;; ----------------------------------------------------------------------
 ; Scheme 9 from Empty Space, Function Library
 ; By Nils M Holm, 2009-2012
