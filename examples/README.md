@@ -32,6 +32,10 @@ The files in this directory show some examples in STklos:
 - `threads.stk` is a program with 3 threads. It shows how to use
   threads and mutexes.
 
+- `draw-tree.stk` comes from Nils Holm implementation of the S9 Scheme
+  implementation. It permits to draw the structure of a list as an ASCII
+  chart. 
+
 - `socket-server.stk` is a simple TCP server. Running it displays the
   port to use for communicating with it. This server accepts only one
   connection and it answers its client by returning the entered lines
