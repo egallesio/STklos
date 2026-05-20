@@ -1,6 +1,6 @@
 # Makefile.am for STklos
 #
-# Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
+# Copyright © 1999-2026 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,26 @@
 # USA.
 #
 #           Author: Erick Gallesio [eg@unice.fr]
-#    Creation date: ??? 
+#    Creation date: ???y
 
 schemedemodir       = $(prefix)/share/@PACKAGE@/@VERSION@/Demos.d
-schemedemo_DATA	    = dice.stk fork-test.stk hello.stk secho.stk \
-		      socket-server.stk socket-client.stk \
-		      socket-server-fork.stk socket-server-thread.stk \
-		      threads.stk
+schemedemo_DATA     = dice.stk draw-tree.stk \
+                      fork-test.stk hello.stk secho.stk \
+                      socket-server.stk socket-client.stk \
+                      socket-server-fork.stk socket-server-thread.stk \
+                      threads.stk
 
-schemedemo_SCRIPTS  = dice fork-test hello secho \
-		      socket-server socket-client \
-		      socket-server-fork socket-server-thread \
-		      threads
+schemedemo_SCRIPTS  = dice draw-tree fork-test hello secho \
+                      socket-server socket-client \
+                      socket-server-fork socket-server-thread \
+                      threads
 
 SUFFIXES            = .stk
 
 COMP ?= ../utils/tmpcomp
 
 .stk:
-	$(COMP) -o $* $*.stk 
+	$(COMP) -o $* $*.stk
 
 # Override the install target to avoid intallation in destination dir.
 install:
