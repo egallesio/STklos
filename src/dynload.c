@@ -1,7 +1,7 @@
 /*
  * dynload.c                    -- Dynamic loading stuff
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -108,12 +108,18 @@ void *STk_find_external_function(char *path, char *fname, int error_if_absent)
   return fct;
 }
 
+void *STk_external_symbol_exists(char *symbol)
+{
+  /* This func. permits to restrict the inclusion of "dlfcn.h" to this file only */
+  return dlsym(RTLD_DEFAULT, symbol);
+}
+
 SCM STk_load_object_file(SCM f, char *path, SCM env)
 {
   vm_thread_t *vm = STk_get_current_vm();
   SCM curmod      = vm->current_module;
   InitFunc init_fct;
-  
+
   /* Close the port since we don't need it */
   STk_close_port(f);
 
@@ -121,7 +127,7 @@ SCM STk_load_object_file(SCM f, char *path, SCM env)
   init_fct = STk_find_external_function(path, INIT_FUNC_NAME, TRUE);
   init_fct();
   if (env) vm->current_module = curmod;
-  
+
   return STk_true;
 }
 

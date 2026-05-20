@@ -259,9 +259,9 @@ MODULE_ENTRY_START("readline-utils")
 
   rl_readline_name = "stklos";     // To permit STklos parts in the ~/ .inputrc file
 
-  if (dlsym(RTLD_DEFAULT, "rl_basic_quote_characters")) {
+  if (STk_external_symbol_exists("rl_basic_quote_characters")) {
     // rl_basic_quote_characters is defined. We are not using a (old?) version of
-    // libedit. =>  we can suppress the simple quote for parent flashing
+    // libedit. =>  we can suppress the simple quote for parenthesis flashing
     rl_basic_quote_characters = "\"";
   }
 }

@@ -509,6 +509,7 @@ int STk_init_cpointer(void);
 
 
 void *STk_find_external_function(char *path, char *fname, int error_if_absent);
+void *STk_external_symbol_exists(char *symbol);
 SCM STk_load_object_file(SCM f, char *fname, SCM env);
 SCM STk_info_object_file(char *fname);
 
