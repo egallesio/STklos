@@ -1505,34 +1505,60 @@ FILTER an FILTER! are primitives in STklos
 ;;;;; linear-time algorithm to kill the dups. Or use an algorithm based on
 ;;;;; element-marking. The former gives you O(n lg n), the latter is linear.
 ;;;
-;;; We have implemented a simple element-marking approach using hash tables,
-;;; and it is consistently faster for lists of size larger than 10.
-;;; It does require more space, since besides the list being build we also
-;;; keep a hash table as large as the set of elements, but the difference
-;;; in running time is quite large.
+(define (delete-duplicates lis :optional (elt= equal?))
+  (check-arg procedure? elt= delete-duplicates)
+  (let recur ((lis lis))
+    (if (null-list? lis) lis
+    (let* ((x (car lis))
+           (tail (cdr lis))
+           (new-tail (recur (delete x tail elt=))))
+      (if (eq? tail new-tail) lis (cons x new-tail))))))
 
-(define (delete-duplicates lis :optional (eq equal?))
-  (check-arg procedure? eq delete-duplicates)
+(define (delete-duplicates! lis :optional (elt= equal?))
+  (check-arg procedure? elt= delete-duplicates!)
+  (let recur ((lis lis))
+    (if (null-list? lis) lis
+    (let* ((x (car lis))
+           (tail (cdr lis))
+           (new-tail (recur (delete! x tail elt=))))
+      (if (eq? tail new-tail) lis (cons x new-tail))))))
 
-  (if (null? lis)
-      '()
-      ;; delete-duplicates with expected linear time.
-      (let ((h (make-hash-table eq))
-            (mark #(1))) ;; unique reference, guaranteed to
-                         ;; not be present in lis
-        (let Loop ( (lis lis) )
-          (if (pair? lis)
-              (if (eq? (hash-table-ref/default h (car lis) mark) mark)
-                  ;; not found, include it
-                  (begin (hash-table-set! h (car lis) #t)
-                         (cons (car lis) (Loop (cdr lis))))
-                  ;; found (hash table returned mark), ignore it
-                  (Loop (cdr lis)))
-              lis)))))
 
-;; The reference implementation had duplicated code for these two procedures.
-;; We can just make on alias to the other.
-(define delete-duplicates! delete-duplicates)
+;; FIXME: The following implementation is from PR #371. Unfortunately, it
+;; doesn't work when "eq" keys use differents sockets (in this case the eq
+;; function will not be called. However, it is really more efficient, and
+;; could be used when the comparison function is equal?. That is we would
+;; a mix of the previous code and the following one. 
+;; Need some tests
+;; 
+;; -- ;;; We have implemented a simple element-marking approach using hash tables,
+;; -- ;;; and it is consistently faster for lists of size larger than 10.
+;; -- ;;; It does require more space, since besides the list being build we also
+;; -- ;;; keep a hash table as large as the set of elements, but the difference
+;; -- ;;; in running time is quite large.
+;; --
+;; -- (define (delete-duplicates lis :optional (eq equal?))
+;; --   (check-arg procedure? eq delete-duplicates)
+;; --
+;; --   (if (null? lis)
+;; --       '()
+;; --       ;; delete-duplicates with expected linear time.
+;; --       (let ((h (make-hash-table eq))
+;; --             (mark #(1))) ;; unique reference, guaranteed to
+;; --                          ;; not be present in lis
+;; --         (let Loop ( (lis lis) )
+;; --           (if (pair? lis)
+;; --               (if (eq? (hash-table-ref/default h (car lis) mark) mark)
+;; --                   ;; not found, include it
+;; --                   (begin (hash-table-set! h (car lis) #t)
+;; --                          (cons (car lis) (Loop (cdr lis))))
+;; --                   ;; found (hash table returned mark), ignore it
+;; --                   (Loop (cdr lis)))
+;; --               lis)))))
+;; --
+;; -- ;; The reference implementation had duplicated code for these two procedures.
+;; -- ;; We can just make on alias to the other.
+;; -- (define delete-duplicates! delete-duplicates)
 
 ;;; alist stuff
 ;;;;;;;;;;;;;;;
