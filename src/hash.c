@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2026 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -111,7 +111,12 @@ static unsigned long hash_scheme_string(SCM str)
  * sxhash calculates a "universal" hash value à la CL sxhash  function
  *
  */
-static unsigned long sxhash(SCM obj)
+#define MAX_SXHASH_CYCLES  1000 //used to avoid loops on shared structures
+
+int cpt;
+
+
+static unsigned long sxhash(SCM obj, unsigned long *cpt)
 {
   unsigned long h;
   SCM tmp;
@@ -120,40 +125,36 @@ static unsigned long sxhash(SCM obj)
   if (!BOXED_OBJP(obj)) return (AS_LONG(obj) >> 2);
 
   switch (BOXED_TYPE(obj)) {
-    case tc_cons:       int len;
-                        tmp = STk_list_type_and_length(obj, &len);
-                        /* If tmp is a cons, the list is circular! */
-                        if (CONSP(tmp)) {
-                          /* Sum len to h just to make the hash very different from
-                             the hash of the similar non-circular list: */
-                          h = sxhash(CAR(obj)) + (unsigned long) len;
-                          for(tmp=CDR(obj), i=1; i<len; tmp=CDR(tmp), i++)
-                            h = HASH_WORD(h, sxhash(CAR(tmp)));
-                        } else { /* non-circular list: */
-                          h = sxhash(CAR(obj));
-                          for(tmp=CDR(obj); CONSP(tmp); tmp=CDR(tmp))
-                            h = HASH_WORD(h, sxhash(CAR(tmp)));
-                          h = HASH_WORD(h, sxhash(tmp));
+    case tc_cons:       if (++(*cpt) > MAX_SXHASH_CYCLES) return 0UL;
+                        h = HASH_WORD(sxhash(CAR(obj), cpt), *cpt);
+
+                        for(tmp=CDR(obj); CONSP(tmp); tmp=CDR(tmp)) {
+                          if (++(*cpt) > MAX_SXHASH_CYCLES) break;
+                          h = HASH_WORD(h, sxhash(CAR(tmp), cpt));
                         }
-                        return h;
-    case tc_bignum:     return sxhash(STk_number2string(obj, MAKE_INT(16)));
+
+                        return  HASH_WORD(h, sxhash(tmp, cpt));
+    case tc_bignum:     return sxhash(STk_number2string(obj, MAKE_INT(16)), cpt);
     case tc_real:       return (unsigned long) REAL_VAL(obj);
-    case tc_rational:   return HASH_WORD(sxhash(RATIONAL_NUM(obj)),
-                                         sxhash(RATIONAL_DEN(obj)));
-    case tc_complex:    return HASH_WORD(sxhash(COMPLEX_REAL(obj)),
-                                         sxhash(COMPLEX_IMAG(obj)));
+    case tc_rational:   return HASH_WORD(sxhash(RATIONAL_NUM(obj), cpt),
+                                         sxhash(RATIONAL_DEN(obj), cpt));
+    case tc_complex:    return HASH_WORD(sxhash(COMPLEX_REAL(obj), cpt),
+                                         sxhash(COMPLEX_IMAG(obj), cpt));
     case tc_symbol:     return hash_string(SYMBOL_PNAME(obj));
     case tc_keyword:    return hash_string(KEYWORD_PNAME(obj));
     case tc_string:     return hash_scheme_string(obj);
-    case tc_vector:     h = 0;
-                        for (i=VECTOR_SIZE(obj)-1; i >= 0; i--)
-                          h = HASH_WORD(h, sxhash(VECTOR_DATA(obj)[i]));
+    case tc_vector:     h = HASH_WORD(VECTOR_SIZE(obj), *cpt);
+                        for (i = VECTOR_SIZE(obj) - 1; i >= 0; i--) {
+                          if (++(*cpt) > MAX_SXHASH_CYCLES) break;
+                          h = HASH_WORD(h, sxhash(VECTOR_DATA(obj)[i], cpt));
+                        }
                         return h;
-    case tc_uvector:    h = UVECTOR_TYPE(obj);     /* start with some "entropy" */
-                        for (long i=UVECTOR_SIZE(obj)-1; i >= 0; i--)
-                          h = HASH_WORD(h, sxhash(STk_uvector_get(obj, i)));
+    case tc_uvector:    h = HASH_WORD(VECTOR_SIZE(obj), *cpt + UVECTOR_TYPE(obj));
+                        for (long i=UVECTOR_SIZE(obj)-1; i >= 0; i--) {
+                          if (++(*cpt) > MAX_SXHASH_CYCLES) break;
+                          h = HASH_WORD(h, sxhash(STk_uvector_get(obj, i), cpt+1));
+                        }
                         return h;
-
     default:            /* A complex type (STklos object, user defined type,
                          * hashtable...). In this case we return the type of the
                          * object. This is very inefficient, but it should be
@@ -940,7 +941,8 @@ doc>
 */
 DEFINE_PRIMITIVE("hash-table-hash", hash_hash, subr1, (SCM obj))
 {
-  long int x = sxhash(obj);
+  unsigned long cpt = 0;
+  long int x = sxhash(obj, &cpt);
   return STk_long2integer((x < 0) ? -x : x);
 }
 
