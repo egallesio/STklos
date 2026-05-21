@@ -177,5 +177,16 @@
   (set-cdr! (cddddr L) (cdr L))
   (test "hash circular list" #t (integer? (hash-table-hash L))))
 
+(test "hash circular lists but equal"
+      (hash-table-hash '#0=(a b c . #0#))
+      (hash-table-hash '#1=(a b c a b c a b c . #1#)))
+(test "hash list multiple shared values.1"
+      #t
+      (integer? (hash-table-hash '#0=(#0# . #0#))))
+
+(test "hash list multiple shared values.2"
+      #t
+      (integer? (hash-table-hash '#0=(#0# 1 #1=(2 3 (#0#. #0#)) #1#))))
+
 
 (test-section-end)
