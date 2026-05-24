@@ -166,8 +166,8 @@ doc>
         (format port
                 ".~%The source code is available -- call `procedure-source` on it")))
 
-     ((procedure? x)
-      (format port "a (non closure) procedure"))
+     ((primitive? x)
+      (format port "a primitive procedure)"))
 
      ((eof-object? x)
       (format port "the end-of-file object"))

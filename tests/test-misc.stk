@@ -903,11 +903,23 @@ b|)
 
 
 
+;------------------------------------------------------------------
+(test-subsection "primitive? and closure?")
 
 
+(let ((primitives (list + sqrt map display  (make-parameter -1)))
+      (closures   (list print (lambda () #void) (lambda (x) (-x))))
+      (others     (list 10 "string" 'symbol #\a #void
+                        (current-output-port)))
+      (id (lambda (x) (not (not x)))))
 
 
-
+  (test "closure? on primitive" #f (any   id (map closure? primitives)))
+  (test "not closure"           #f (any   id (map closure? others)))
+  (test "primitive? on closure" #f (any   id (map primitive? closures)))
+  (test "not primitive"         #f (any   id (map primitive? others)))
+  (test "closure? yes"          #t (every id (map closure? closures)))
+  (test "primitive? yes"        #t (every id (map primitive? primitives))))
 
 
 
