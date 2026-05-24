@@ -219,6 +219,8 @@ doc>
               (%icall-name x)
               (%icall-function x)))
 
+     ((%frame? x)
+      (describe-frame x port))
 
      (else
       (let ((user-type-name (%user-type-name x)))
@@ -502,6 +504,22 @@ doc>
 ;;; ======================================================================
 (define-method describe (x)
   (describe x (current-output-port)))
+
+
+;;; ======================================================================
+;;;     Describe for frames
+;;; ======================================================================
+(define (describe-frame f port)
+  (fprintf port "a frame with ~a location~a, with owner ~a, and next frame ~a"
+           (%frame-length f)
+           (if (= (%frame-length f) 1) "" "s")
+           (%frame-owner f)
+           (cond ((module? (%frame-next f))
+                  "a module")
+                 ((%frame? (%frame-next f))
+                  "a frame")
+                 (else "an unknown object (a BUG!)"))))
+
 
 )  ;; End of module DESCRIBE
 
