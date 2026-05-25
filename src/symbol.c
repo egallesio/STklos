@@ -52,10 +52,17 @@ int STk_symbol_flags(register const char *s)
     return SYMBOL_NEEDS_BARS;
   else {
     int res = 0;
+    int digit, underscore, nondigit;
+
+    digit =  underscore = nondigit = 0;
 
     if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;       // seems to be a keyword
 
     for (; *s; s++) {
+      if (isdigit(*s))    digit = 1;
+      else if (*s == '_') underscore = 1;
+      else                nondigit = 1;
+ 
       if (isupper(*s)) {
         res |= SYMBOL_HAS_UPPER;
         continue;
@@ -66,7 +73,14 @@ int STk_symbol_flags(register const char *s)
       }
     }
 
-    if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword too
+    // If the symbol is formed only of digits or '_' (but at least one digit), it
+    // seems to be a number ('1_ of '1_23_). Reader recognizes them, but since it is
+    // ambiguous, we use bars around te symbol
+    // If the symbol ends with a ':', it could be read (eventually) later as a
+    // keyword, depending of keyword-colon-position => use bars.
+    if ((underscore && digit && !nondigit) ||  // seems to be a number with '_'
+        (s[-1] == ':'))                        // seems to be a keyword key:
+        res |= SYMBOL_NEEDS_BARS;
     return res;
   }
 }
