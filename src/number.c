@@ -1314,6 +1314,22 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
   char saved_char = '\0', *original_str = str;
   char *p, *p1, *p2, *p3, *p4;
   SCM res;
+  
+  if ((*str == '-' || *str == '+') && isalpha(str[1])) {
+    SCM n = STk_false;
+    /* Treat special inf "+inf.0" -inf.0 , "+nan.0", "-nan.0"
+     * NOTE: R7RS says that -nan.0 is synonym to +nan.0 */
+    if      (strncasecmp(str, MINUS_INF,6)==0) n = double2real(minus_inf);
+    else if (strncasecmp(str, PLUS_INF,6)==0)  n = double2real(plus_inf);
+    else if (strncasecmp(str, MINUS_NaN,6)==0) n = double2real(STk_NaN);
+    else if (strncasecmp(str, PLUS_NaN,6)==0)  n = double2real(STk_NaN);
+
+    if (n != STk_false) { /* We actually read an inf or nan */
+      if (exact_flag == 'e') STk_error("value ~S cannot be exact", n);
+      *end = str + 6;
+      return n;
+    }
+  }
 
   /* if first char cannot start a number, return #f (not a number => symbol) */
   if (!digitp(*str, base) && *str != '-' && *str != '+' && *str != '.')
@@ -1473,21 +1489,7 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
 {
   int i, radix;
   char *p = str;
-  SCM num = STk_false;
-
-  if ((*str == '-' || *str == '+') && isalpha(str[1])) {
-    /* Treat special inf "+values.0" -inf.0 , "+nan.0", "-nan.0"
-     * NOTE: R7RS says that -nan.0 is synonym to +nan.0 */
-    if      (strncasecmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
-    else if (strncasecmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
-    else if (strncasecmp(str, MINUS_NaN,6)==0) num = double2real(STk_NaN);
-    else if (strncasecmp(str, PLUS_NaN,6)==0)  num = double2real(STk_NaN);
-
-    if (num != STk_false) { /* Did we actually read an inf or nan? */
-      *end = str + 6;
-      return num;
-    }
-  }
+  SCM num;
 
   /* Should we read in a different basis or exactness? */
   radix = 0;
