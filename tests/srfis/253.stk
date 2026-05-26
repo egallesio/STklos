@@ -154,8 +154,8 @@
 (test/error "lambda-check.14" ((lambda-checked ((a integer?)) #t) "hello"))
 (test/error "lambda-check.15" ((lambda-checked (a (b integer?)) #t) "hello" "hi"))
 ;; SRFI 273 return value checks
-(test "lambda-check.16" ((lambda-checked (a (b integer?)) => (integer?) 2) 1))
-(test/error "lambda-check.17" ((lambda-checked (a (b integer?)) => (integer?) #t) 1))
+(test "lambda-check.16" ((lambda-checked ((b integer?)) => (integer?) 2) 1))
+(test/error "lambda-check.17" ((lambda-checked ((b integer?)) => (integer?) #t) 1))
 ;; Rest args. Sample implementation doesn't reliably pass this.
 ;; (test-assert (lambda-checked (a . c) #t))
 ;; (test-assert (lambda-checked ((a integer?) . c) #t))
