@@ -124,6 +124,16 @@
                      (string->number "#x#o13")
                      (string->number "#e#b#i00101")))
 
+(test "inexactness.1 on +inf.0" #t (inexact? #i+inf.0))
+(test "inexactness.1 on -inf.0" #t (inexact? #i-inf.0))
+(test "inexactness.1 on +nan.0" #t (inexact? #i+nan.0))
+(test "inexactness.1 on -nan.0" #t (inexact? #i-nan.0))
+
+(test/error "exactness on +inf.0" (read-from-string "#e+inf.0"))
+(test/error "exactness on -inf.0" (read-from-string "#e-inf.0"))
+(test/error "exactness on +nan.0" (read-from-string "#e+nan.0"))
+(test/error "exactness on -nan.0" (read-from-string "#e-nan.0"))
+
 ;;------------------------------------------------------------------
 (test-subsection "rational reader")
 
