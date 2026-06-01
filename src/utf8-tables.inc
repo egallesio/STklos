@@ -14420,7 +14420,7 @@ static utf8_char blanks_table[] = {
   0x3000,};
 static int blanks_table_length = 17;
 
-#endif // ifndef BAS_CHAR_SET
+#endif // ifndef BASE_CHAR_SET
 #ifndef BASE_CHAR_SET
 static struct utf8_conversion_char fold_table[] = {
       { 0x0041,	 0x0061},	 /* 'A' -> 'a' */
