@@ -96,10 +96,21 @@ struct utf8_conversion_char {
   utf8_char val;
 };
 
+
+struct utf8_special_casing {
+  utf8_char key;
+  utf8_char lower;
+  utf8_char title[3]; // title and upper can use from 1 to 3 characters. The
+  utf8_char upper[3]; // array is padded with a 0 char
+};
+
+
 #include "utf8-tables.inc"
 
-static int search_conversion_table(unsigned int ch, struct utf8_conversion_char table[],
-                                   int len) {
+static int search_conversion_table(unsigned int ch,
+                                   struct utf8_conversion_char table[],
+                                   int len)
+{
   unsigned int min = table[0].key;
   unsigned int max = table[len-1].key;
 
@@ -512,14 +523,18 @@ doc>
 utf8_char STk_to_fold(utf8_char c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    return (res <=0) ? STk_to_lower(c) : (utf8_char) res;
+    // We return the lower case of c when
+    //  - res = -1 (absent of the table)
+    //  - res = 0  (no folding given in the table)
+    //  - res = 1  (we have a 1->n mapping, it will be used in strings but not here)
+    return (res <=1) ? STk_to_lower(c) : (utf8_char) res;
   } else
     return tolower(c);
 }
 
 DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
 {
-  if (!CHARACTERP(c))  error_bad_char(c);
+  if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_CHARACTER(STk_to_fold((utf8_char) CHARACTER_VAL(c)));
 }
 
