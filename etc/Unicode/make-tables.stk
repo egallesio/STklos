@@ -242,11 +242,12 @@
                 (printf "  {0x~A, /* '~A' */\n"
                         (car x)
                         (integer->char (string->number (car x) 16)))
-                ;; print the lower array
+                ;; print the lower array/ For #\x130, Unicode table provides a
+                ;; two letters lower. However, it seems that there is a
+                ;; consensus to use the "tr" mapping where only the first of
+                ;; these two characters is used.
                 (let ((fields (string-split (cadr x))))
-                  (printf "      .lower={0x~A, 0x~A},\n"
-                          (car fields)
-                          (if (= (length fields) 2) (cadr fields) "0000")))
+                  (printf "      .lower=0x~A,\n" (car fields)))
 
                 ;; print the title array
                 (let ((fields (string-split (caddr x))))
