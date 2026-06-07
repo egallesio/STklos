@@ -523,11 +523,7 @@ doc>
 utf8_char STk_to_fold(utf8_char c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    // We return the lower case of c when
-    //  - res = -1 (absent of the table)
-    //  - res = 0  (no folding given in the table)
-    //  - res = 1  (we have a 1->n mapping, it will be used in strings but not here)
-    return (res <=1) ? STk_to_lower(c) : (utf8_char) res;
+    return (res <=0) ? c : (utf8_char) res;
   } else
     return tolower(c);
 }
