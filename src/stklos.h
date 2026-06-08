@@ -434,6 +434,12 @@ utf8_char STk_to_upper(utf8_char c);
 utf8_char STk_to_lower(utf8_char c);
 utf8_char STk_to_fold(utf8_char c);
 
+/* Full  character conversion functions */
+int STk_full_lower(utf8_char in, utf8_char res[3]);
+int STk_full_upper(utf8_char in, utf8_char res[3]);
+int STk_full_fold(utf8_char in, utf8_char res[3]);
+
+
 char *STk_char2string(int c);
 int STk_string2char(char *s);
 int STk_init_char(void);

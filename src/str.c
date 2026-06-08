@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -209,7 +209,7 @@ static utf8_char *string2int(char *s, int len, int *utf8_len, utf8_char(*func)(u
 
   for (tmp = buff; len--; tmp++) {
     s      = STk_utf8_grab_char(s, &ch);
-    ch     = func(ch);
+    if (func) ch = func(ch);
     space += STk_utf8_char_bytes_needed(ch);
     *tmp   = ch;
   }
@@ -217,6 +217,32 @@ static utf8_char *string2int(char *s, int len, int *utf8_len, utf8_char(*func)(u
   *utf8_len = space;
   return buff;
 }
+
+
+
+static utf8_char *new_string2int(char *s, int len, int *utf8_len,
+                                 int(*func)(utf8_char, utf8_char[3]))
+{
+  utf8_char ch, *tmp, *buff = STk_must_malloc_atomic(3 * len * sizeof(utf8_char));
+  int space = 0;
+  utf8_char converted[3] = {};
+
+  for (tmp = buff; len--; ) {
+    int n;
+
+    s = STk_utf8_grab_char(s, &ch);
+    n = func(ch, converted);
+    // If n > 1 we have a 1 ->n conversion (e.g.  "ß" -> "ss")
+    for (int i = 0; i < n; i++) {
+      space  += STk_utf8_char_bytes_needed(converted[i]);
+      *tmp++  = converted[i];
+    }
+  }
+
+  *utf8_len = space;
+  return buff;
+}
+
 
 static SCM make_string_from_int_array(utf8_char *buff, int len, int utf8_len)
 {
@@ -1235,7 +1261,7 @@ doc>
  */
 static SCM string_xxcase(int argc, SCM *argv,
                          int (*toxx)(int),
-                         utf8_char (*towxx)(utf8_char))
+                         int (*towxx)(utf8_char, utf8_char conv[3]))
 {
   SCM s;
   long start, end;
@@ -1248,8 +1274,7 @@ static SCM string_xxcase(int argc, SCM *argv,
     char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
 
     /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towxx);
-
+    wchars = new_string2int(startp, end-start, &len, towxx);
     return make_string_from_int_array(wchars, end-start, len);
   } else {
     char *endp, *p, *q;
@@ -1263,11 +1288,13 @@ static SCM string_xxcase(int argc, SCM *argv,
   }
 }
 
+
+
+
 DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, tolower, STk_to_lower);
+  return string_xxcase(argc, argv, tolower, STk_full_lower);
 }
-
 
 /*
 <doc EXT string-downcase!
@@ -1341,7 +1368,7 @@ doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, toupper, STk_to_upper);
+  return string_xxcase(argc, argv, toupper, STk_full_upper);
 }
 
 /*
@@ -1375,7 +1402,7 @@ doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, tolower, STk_to_fold);
+  return string_xxcase(argc, argv, tolower, STk_full_fold);
 }
 
 /*

@@ -160,11 +160,109 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
   return -1;
 }
 
+static int search_special_list(utf8_char ch) {
+  unsigned int min = specials[0].key;
+  unsigned int max = specials[specials_length-1].key;
+
+  if (min <= ch && ch <= max) {
+    /* seach the value in the table by dichotomy */
+    int left, right, i;
+
+    left = 0; right = specials_length-1;
+    do {
+      i = (left + right) / 2;
+      if (ch == specials[i].key)
+        return i;
+      else
+        if (ch < specials[i].key)
+          right = i-1;
+        else
+          left = i+1;
+    }
+    while (left <= right);
+  }
+  /* not found of not in the interval of special character => return -1 */
+  return -1;
+}
+
+/*
+ * STk_full_upper, STk_full_lower and STk_full_fold are used by the Scheme
+ * string converting functions such as string-upper or string-foldcase.
+ * They take a character as input and return 1 to 3 characters.
+ * For instance  #\xfb03 (the "ﬃ" character will return "FFI" in upper-case
+ *
+ */
+
+int STk_full_upper(utf8_char in, utf8_char res[3])
+{
+  int len = 1;
+  int idx = search_special_list(in);
+
+  if (idx == -1)
+    // Not a spcial folding for this character
+    res[0] = STk_to_upper(in);
+  else {
+    // This char is special. return te result in res (at most 3 characters)
+    res[0] = specials[idx].upper[0];
+
+    if (specials[idx].upper[1]) {
+      // we have a fold with at least 2 characters
+      res[1] = specials[idx].upper[1];
+      len++;
+
+      if (specials[idx].upper[2]) {
+        // fold char is 3 characters long
+        res[2] = specials[idx].upper[2];
+        len++;
+      }
+    }
+  }
+  return len;
+}
+
+
+int STk_full_lower(utf8_char in, utf8_char res[3])
+{
+  // Lower case is simple: the length does not vary
+  res[0] = STk_to_lower(in);
+  return 1;
+}
+
+
+int STk_full_fold(utf8_char in, utf8_char res[3])
+{
+  int len = 1;
+  int idx = search_special_list(in);
+
+  if (idx == -1)
+    // Not a spcial folding for this character
+    res[0] = STk_to_fold(in);
+  else {
+    // This char is special. return te result in res (at most 3 characters)
+    res[0] = STk_to_lower(specials[idx].upper[0]);
+
+    if (specials[idx].upper[1]) {
+      // we have a fold with at least 2 characters
+      res[1] = STk_to_lower(specials[idx].upper[1]);
+      len++;
+
+      if (specials[idx].upper[2]) {
+        // fold char is 3 characters long
+        res[2] = STk_to_lower(specials[idx].upper[2]);
+        len++;
+      }
+    }
+  }
+  return len;
+}
+
+
 // Public version of search_ordered_list
 int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len)
 {
   return search_ordered_list(ch, table, len);
 }
+
 
 /*===========================================================================*\
  *
