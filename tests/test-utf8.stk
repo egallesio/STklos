@@ -1,7 +1,7 @@
 ;;;;                                                    -*- coding utf-8 -*-
 ;;;; test-utf8.stk      -- Test of UTF-8 strings
 ;;;;
-;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -168,9 +168,9 @@
 (test "gambit.G2" "hi" (string-foldcase "HI"))
 (test "gambit.63" "hi" (string-foldcase "hi"))
 
-#; (test "gambit.64" "STRASSE" (string-upcase "Stra\xDF;e"))    ;; not R7
+(test "gambit.64" "STRASSE" (string-upcase "Stra\xDF;e"))
 (test "gambit.65" "stra\xDF;e" (string-downcase "Stra\xDF;e"))
-#;(test "gambit.66" "strasse" (string-foldcase "Stra\xDF;e"))   ;; not R7
+(test "gambit.66" "strasse" (string-foldcase "Stra\xDF;e"))
 (test "gambit.67" "strasse" (string-downcase "STRASSE"))
 
 (unless *is-C?*
