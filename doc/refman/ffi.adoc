@@ -105,7 +105,7 @@ necessary to specify the `:library-name` option.
   world).
 * *_system_* is a function which takes a string as parameter
   and returns an *_int_*.
-* *_ttyname_* is a function whih takes an int and returns a string.
+* *_ttyname_* is a function which takes an int and returns a string.
   Note that in this function the name of the parameter has been omitted
   as within C prototypes.
 
