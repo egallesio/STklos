@@ -203,51 +203,6 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 }
 
 
-static utf8_char *string2int(char *s, int len, int *utf8_len,
-                                 int(*func)(utf8_char, utf8_char[3]))
-{
-  utf8_char ch, *tmp, *buff = STk_must_malloc_atomic(3 * len * sizeof(utf8_char));
-  int space = 0;
-  utf8_char converted[3];
-
-  for (tmp = buff; len--; ) {
-    int n;
-    s = STk_utf8_grab_char(s, &ch);
-
-    n = func(ch, converted);
-    // If n > 1 we have a 1 ->n conversion (e.g.  "ß" -> "ss")
-    for (int i = 0; i < n; i++) {
-      space  += STk_utf8_char_bytes_needed(converted[i]);
-      *tmp++  = converted[i];
-    }
-  }
-
-  *utf8_len = space;
-  return buff;
-}
-
-
-
-static SCM make_string_from_int_array(utf8_char *buff, int len, int utf8_len)
-{
-  SCM z;
-  char *s, *end;
-
-  NEWCELL(z, string);
-  STRING_CHARS(z)  = s = STk_must_malloc_atomic(utf8_len + 1);
-  STRING_SPACE(z)  = STRING_SIZE(z) = utf8_len;
-  STRING_LENGTH(z) = len;
-
-  end = s + utf8_len;
-  while (s < end) {
-    s += STk_char2utf8(*buff++, s);
-  }
-  *s = '\0';
-
- return z;
-}
-
-
 static SCM make_substring(SCM string, long from, long to)
 {
   /* WARNING: from and to must be checked by caller */
@@ -271,37 +226,7 @@ static SCM make_substring(SCM string, long from, long to)
 }
 
 
-static SCM string_xxcase(int argc, SCM *argv,
-                         int (*toxx)(int),
-                         int (*towxx)(utf8_char, utf8_char conv[3]))
-{
-  SCM s;
-  long start, end;
-
-  s = control_index(argc, argv, &start, &end);
-
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
-    utf8_char *wchars;
-    int len;
-    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
-
-    /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towxx);
-    return make_string_from_int_array(wchars, end-start, len);
-  } else {
-    char *endp, *p, *q;
-    SCM  z =  STk_makestring(end-start, NULL);
-
-    endp = STRING_CHARS(s) + end;
-    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-      *q = toxx(*p);
-
-    return z;
-  }
-}
-
-
-static SCM string_dxxcase(int argc, SCM *argv,
+static SCM string_dxxcase(int argc, SCM *argv,       // destructive conversion
                           int (*toxx)(int),
                           int (*towxx)(utf8_char, utf8_char conv[3]))
 {
@@ -358,6 +283,50 @@ static SCM string_dxxcase(int argc, SCM *argv,
 
   return STk_void;
 }
+
+
+static SCM string_xxcase(int argc, SCM *argv,     // non destructive conversion
+                         int (*toxx)(int),
+                         int (*towxx)(utf8_char, utf8_char conv[3]))
+{
+  SCM s;
+  long start, end;
+
+  s = control_index(argc, argv, &start, &end);
+
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
+    SCM tmp_port = STk_open_output_string();
+    char *str = STRING_CHARS(s);
+    utf8_char ch;
+
+    for (int i = 0; i < start; i++)  // Advance to the 1st char to convert
+      str = STk_utf8_grab_char(str, &ch);
+
+    for (int i = start; i < end; i++) { // convert the desired slice
+      utf8_char converted[3];
+      int n;
+ 
+      str = STk_utf8_grab_char(str, &ch);
+      n   = towxx(ch, converted);
+
+      STk_put_character(converted[0], tmp_port);
+      if (n >= 2) STk_put_character(converted[1], tmp_port);
+      if (n == 3) STk_put_character(converted[2], tmp_port);
+    }
+
+    return  STk_get_output_string(tmp_port);
+  } else {
+    char *endp, *p, *q;
+    SCM  z =  STk_makestring(end-start, NULL);
+
+    endp = STRING_CHARS(s) + end;
+    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
+      *q = toxx(*p);
+
+    return z;
+  }
+}
+
 
 
 SCM STk_makestring(int len, const char *init)
