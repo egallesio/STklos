@@ -225,12 +225,12 @@ static utf8_char *new_string2int(char *s, int len, int *utf8_len,
 {
   utf8_char ch, *tmp, *buff = STk_must_malloc_atomic(3 * len * sizeof(utf8_char));
   int space = 0;
-  utf8_char converted[3] = {};
+  utf8_char converted[3];
 
   for (tmp = buff; len--; ) {
     int n;
-
     s = STk_utf8_grab_char(s, &ch);
+
     n = func(ch, converted);
     // If n > 1 we have a 1 ->n conversion (e.g.  "ß" -> "ss")
     for (int i = 0; i < n; i++) {
@@ -242,6 +242,7 @@ static utf8_char *new_string2int(char *s, int len, int *utf8_len,
   *utf8_len = space;
   return buff;
 }
+
 
 
 static SCM make_string_from_int_array(utf8_char *buff, int len, int utf8_len)
@@ -290,6 +291,87 @@ static SCM make_substring(SCM string, long from, long to)
     STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
     return z;
   }
+}
+
+
+static SCM string_xxcase(int argc, SCM *argv,
+                         int (*toxx)(int),
+                         int (*towxx)(utf8_char, utf8_char conv[3]))
+{
+  SCM s;
+  long start, end;
+
+  s = control_index(argc, argv, &start, &end);
+
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
+    utf8_char *wchars;
+    int len;
+    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
+
+    /* collect all characters in an allocated array of int and convert it */
+    wchars = new_string2int(startp, end-start, &len, towxx);
+    return make_string_from_int_array(wchars, end-start, len);
+  } else {
+    char *endp, *p, *q;
+    SCM  z =  STk_makestring(end-start, NULL);
+
+    endp = STRING_CHARS(s) + end;
+    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
+      *q = toxx(*p);
+
+    return z;
+  }
+}
+
+
+static SCM string_dXXcase(int argc, SCM *argv,
+                          int (*toxx)(int),
+                          int (*towxx)(utf8_char, utf8_char conv[3]))
+{
+  SCM s;
+  long start, end;
+
+  s = control_index(argc, argv, &start, &end);
+  if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
+
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {        /* multibyte string */
+    // This is not very efficient: We use here a string port to place the
+    // characters from the beginning of the string, followed by the converted
+    // characters, an finally the end of the string. We use a string port,
+    // since, by nature the converted characters may introduce some new
+    // characters (For instance  #\xfb03 (the "ﬃ" character will return
+    // "FFI" in upper-case
+    SCM tmp_port = STk_open_output_string();
+    SCM out;
+
+    for (int i = 0; i < start; i++)  // copy the first characters
+      STk_display(STk_string_ref(s, MAKE_INT(i)), tmp_port);
+
+
+    for (int i = start; i < end; i++) { // convert the desired slice
+      utf8_char converted[3];
+      utf8_char ch = CHARACTER_VAL(STk_string_ref(s, MAKE_INT(i)));
+      int       n  = towxx(ch, converted);
+
+      STk_display(MAKE_CHARACTER(converted[0]), tmp_port);
+      if (n >= 2) STk_display(MAKE_CHARACTER(converted[1]), tmp_port);
+      if (n == 3) STk_display(MAKE_CHARACTER(converted[2]), tmp_port);
+    }
+
+    for (int i = end; i < STRING_LENGTH(s); i++)  // cop the last characters
+      STk_display(STk_string_ref(s, MAKE_INT(i)), tmp_port);
+
+    out = STk_get_output_string(tmp_port);
+
+    /* replace the content of the string parameter (in s) by out */
+    *((struct string_obj*) s) = *((struct string_obj *)out);
+  } else {                                  /* monobyte string */
+    char *p , *endp = STRING_CHARS(s) + end;
+
+    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toxx(*p);
+  }
+
+  return STk_void;
 }
 
 
@@ -1259,38 +1341,6 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * NOTE: In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
-static SCM string_xxcase(int argc, SCM *argv,
-                         int (*toxx)(int),
-                         int (*towxx)(utf8_char, utf8_char conv[3]))
-{
-  SCM s;
-  long start, end;
-
-  s = control_index(argc, argv, &start, &end);
-
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
-    utf8_char *wchars;
-    int len;
-    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
-
-    /* collect all characters in an allocated array of int and convert it */
-    wchars = new_string2int(startp, end-start, &len, towxx);
-    return make_string_from_int_array(wchars, end-start, len);
-  } else {
-    char *endp, *p, *q;
-    SCM  z =  STk_makestring(end-start, NULL);
-
-    endp = STRING_CHARS(s) + end;
-    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-      *q = toxx(*p);
-
-    return z;
-  }
-}
-
-
-
-
 DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
 {
   return string_xxcase(argc, argv, tolower, STk_full_lower);
@@ -1349,7 +1399,7 @@ static SCM string_dxxcase(int argc, SCM *argv,
 
 DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, tolower, STk_to_lower);
+  return string_dXXcase(argc, argv, tolower, STk_full_lower);
 }
 
 /*
@@ -1382,7 +1432,7 @@ doc>
 */
 DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, toupper, STk_to_upper);
+  return string_dXXcase(argc, argv, toupper, STk_full_upper);
 }
 
 
@@ -1416,7 +1466,7 @@ doc>
 */
 DEFINE_PRIMITIVE("string-foldcase!", string_dfoldcase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, toupper, STk_to_fold);
+  return string_dXXcase(argc, argv, tolower, STk_full_fold);
 
 }
 
