@@ -319,22 +319,30 @@ static SCM string_dxxcase(int argc, SCM *argv,
     // characters (For instance  #\xfb03 (the "ﬃ" character will return
     // "FFI" in upper-case
     SCM tmp_port = STk_open_output_string();
+    char *str = STRING_CHARS(s);
+    utf8_char ch;
 
-    for (int i = 0; i < start; i++)  // copy the first characters
-      STk_put_character(CHARACTER_VAL(STk_string_ref(s, MAKE_INT(i))), tmp_port);
+    for (int i = 0; i < start; i++) { // copy the first characters
+      str = STk_utf8_grab_char(str, &ch);
+      STk_put_character(ch, tmp_port);
+    }
 
     for (int i = start; i < end; i++) { // convert the desired slice
       utf8_char converted[3];
-      utf8_char ch = CHARACTER_VAL(STk_string_ref(s, MAKE_INT(i)));
-      int       n  = towxx(ch, converted);
+      int n;
+
+      str = STk_utf8_grab_char(str, &ch);
+      n   = towxx(ch, converted);
 
       STk_put_character(converted[0], tmp_port);
       if (n >= 2) STk_put_character(converted[1], tmp_port);
       if (n == 3) STk_put_character(converted[2], tmp_port);
     }
 
-    for (int i = end; i < STRING_LENGTH(s); i++)  // cop the last characters
-      STk_put_character(CHARACTER_VAL(STk_string_ref(s, MAKE_INT(i))), tmp_port);
+    for (int i = end; i < STRING_LENGTH(s); i++) {  // copy the last characters
+      str = STk_utf8_grab_char(str, &ch);
+      STk_put_character(ch, tmp_port);
+    }
 
     /* replace the content of the string parameter (in s) by the ouput port  */
     {
