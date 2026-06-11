@@ -330,5 +330,43 @@
         fail))
 
 
+(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi 
+       (str (string-append "ab" (make-string 5 ffi) "cd")))
+  (test "growing foldcase.1"
+        "abffiffiffiffifficd"
+        (string-foldcase str))
+  (test "growing foldcase.2"
+        "bffiffi"
+        (string-foldcase str 1 4))
+  (test "growing foldcase!.1"
+        "abffiffiffiffifficd"
+        (let ((cp (string-copy str)))
+          (string-foldcase! cp)
+          cp))
+  (test "growing foldcase!.2"
+        "abffiffi\xfb03;\xfb03;\xfb03;cd"
+        (let ((cp (string-copy str)))
+          (string-foldcase! cp 1 4)
+          cp)))
+
+(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which ups to ffi 
+       (str (string-append "ab" (make-string 5 ffi) "cd")))
+  (test "growing upcase.1"
+        "ABFFIFFIFFIFFIFFICD"
+        (string-upcase str))
+  (test "growing upcase.2"
+        "BFFIFFI"
+        (string-upcase str 1 4))
+  (test "growing upcase!.1"
+        "ABFFIFFIFFIFFIFFICD"
+        (let ((cp (string-copy str)))
+          (string-upcase! cp)
+          cp))
+  (test "growing upcase!.2"
+        "aBFFIFFI\xfb03;\xfb03;\xfb03;cd"
+        (let ((cp (string-copy str)))
+          (string-upcase! cp 1 4)
+          cp)))
+  
 ;;------------------------------------------------------------------
 (test-section-end)
