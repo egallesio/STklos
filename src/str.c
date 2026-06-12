@@ -179,27 +179,45 @@ static SCM string_xxcase(int argc, SCM *argv,     // non destructive conversion
 {
   SCM s;
   long start, end;
+  int downcasingp = (towxx == STk_full_lower);
 
   s = control_index(argc, argv, &start, &end);
 
   if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
     SCM tmp_port = STk_open_output_string();
     char *str = STRING_CHARS(s);
-    utf8_char ch;
+    utf8_char ch, prev = 0x20; /* 0x20 is the space character */
 
     for (int i = 0; i < start; i++)  // Advance to the 1st char to convert
       str = STk_utf8_grab_char(str, &ch);
 
     for (int i = start; i < end; i++) { // convert the desired slice
-      utf8_char converted[3];
-      int n;
-
       str = STk_utf8_grab_char(str, &ch);
-      n   = towxx(ch, converted);
 
-      STk_put_character(converted[0], tmp_port);
-      if (n >= 2) STk_put_character(converted[1], tmp_port);
-      if (n == 3) STk_put_character(converted[2], tmp_port);
+      if (downcasingp && (ch == 0x3a3)) {
+        /* Special case when downcasing  greek letter upper sigma #\x3a3 (#\Σ) ->
+         *    - #\x3c3 (#\σ) normally
+         *    - #\x3c2  (#\ς) at end of word
+         */
+        if (i == end - 1)
+          // end of word => #\x3c2, except if prev is a space (sigma was alone)
+          STk_put_character(STk_char_whitespacep(prev)? 0x3c3: 0x3c2, tmp_port);
+        else {
+          utf8_char next;
+
+          STk_utf8_grab_char(str, &next);
+          STk_put_character(STk_char_whitespacep(next)? 0x3c2: 0x3c3, tmp_port);
+        }
+      } else {
+        utf8_char converted[3];
+        int n;
+        n   = towxx(ch, converted);
+
+        STk_put_character(converted[0], tmp_port);
+        if (n >= 2) STk_put_character(converted[1], tmp_port);
+        if (n == 3) STk_put_character(converted[2], tmp_port);
+      }
+      prev = ch;
     }
 
     return  STk_get_output_string(tmp_port);

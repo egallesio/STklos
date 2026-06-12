@@ -426,7 +426,12 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(last,*argv) < 0))
  * digits. The whitespace characters are space, tab, line feed, form feed,
  * and carriage return.
 doc>
- */
+*/
+int STk_char_whitespacep(utf8_char ch)
+{
+  return (search_ordered_list(ch, spaces_table, spaces_table_length) != -1);
+}
+
 
 DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);

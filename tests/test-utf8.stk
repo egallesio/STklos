@@ -178,12 +178,12 @@
 
 (test "gambit.69" "\x39E;\x391;\x39F;\x3A3;"
       (string-upcase "\x39E;\x391;\x39F;\x3A3;"))
-#;(test "gambit.70"  "\x3BE;\x3B1;\x3BF;\x3C2;"                 ;; not R7
+(test "gambit.70"  "\x3BE;\x3B1;\x3BF;\x3C2;"
       (string-downcase "\x39E;\x391;\x39F;\x3A3;"))
-#;(test "gambit.71" "\x3BE;\x3B1;\x3BF;\x3C3;\x3C2;"            ;; not R7
+(test "gambit.71" "\x3BE;\x3B1;\x3BF;\x3C3;\x3C2;"
       (string-downcase "\x39E;\x391;\x39F;\x3A3;\x3A3;"))
-#;(test "gambit.72" "\x3BE;\x3B1;\x3BF;\x3C2; \x3C3;"
-      (string-downcase "\x39E;\x391;\x39F;\x3A3; \x3A3;"))      ;; not R7
+(test "gambit.72" "\x3BE;\x3B1;\x3BF;\x3C2; \x3C3;"
+      (string-downcase "\x39E;\x391;\x39F;\x3A3; \x3A3;"))
 (unless *is-C?*
   (test "gambit.73" "\x3BE;\x3B1;\x3BF;\x3C3;"
         (string-foldcase "\x39E;\x391;\x39F;\x3A3;"))
