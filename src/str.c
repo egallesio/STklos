@@ -73,95 +73,6 @@ static void error_bad_sequence(char *str)
 }
 
 
-static int stringcomp(SCM s1, SCM s2)
-{
-  register char *str1, *str2;
-
-  if (!STRINGP(s1)) error_bad_string(s1);
-  if (!STRINGP(s2)) error_bad_string(s2);
-
-  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
-    /* At least one string is multi-bytes */
-    utf8_char ch1, ch2;
-    char *end1, *end2;
-
-    str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
-    str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
-
-    while ((str1 < end1) && (str2 < end2)) {
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
-        error_bad_sequence(STRING_CHARS(s1));
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
-        error_bad_sequence(STRING_CHARS(s2));
-
-      if (ch1 != ch2) return ch1 - ch2;
-    }
-
-    /* str1 < end1 || str2 < end2 */
-    return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
-  } else {
-    /* fast-path for mono-byte strings */
-    register int l1, l2;
-
-    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-         l1 && l2;
-         l1--, str1++, l2--, str2++)
-      if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
-
-    /* l1 == 0 || l2 == 0 */
-    return l1 ? +1 : (l2 ? -1 : 0);
-  }
-}
-
-
-static int stringcompi(SCM s1, SCM s2)
-{
-  register char *str1, *str2;
-
-  if (!STRINGP(s1)) error_bad_string(s1);
-  if (!STRINGP(s2)) error_bad_string(s2);
-
-  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
-    /* At least one string is multi-bytes */
-    utf8_char ch1, ch2;
-    char *end1, *end2;
-
-    str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
-    str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
-
-    while ((str1 < end1) && (str2 < end2)) {
-      char c1low, c2low;
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
-        error_bad_sequence(STRING_CHARS(s1));
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
-        error_bad_sequence(STRING_CHARS(s2));
-
-      c1low = STk_to_lower(ch1);
-      c2low = STk_to_lower(ch2);
-
-      if (c1low != c2low) return c1low - c2low;
-    }
-
-    /* str1 < end1 || str2 < end2 */
-    return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
-  } else {
-    /* fast-path for mono-byte strings */
-    register int l1, l2;
-
-    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-         l1 && l2;
-         l1--, str1++, l2--, str2++)
-      if (tolower(*str1) != tolower(*str2))
-        return (tolower(*str1) - tolower(*str2));
-
-    /* l1 == 0 || l2 == 0 */
-    return l1 ? +1 : (l2 ? -1 : 0);
-  }
-}
-
-
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 {
   SCM s = STk_void;   /* value chosen to avoid a warning of gcc static analysis */
@@ -203,29 +114,7 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 }
 
 
-static SCM make_substring(SCM string, long from, long to)
-{
-  /* WARNING: from and to must be checked by caller */
-  if (STRING_MONOBYTE(string))
-    return STk_makestring(to - from, STRING_CHARS(string)+from);
-  else {
-    /* multi-bytes string */
-    utf8_char c;
-    char *pfrom, *pto;
-    SCM z;
-
-    pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
-
-    for ( ; from < to; from++)
-      pto = STk_utf8_grab_char(pto, &c);
-
-    z = STk_makestring(pto - pfrom, pfrom);
-    STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
-    return z;
-  }
-}
-
-
+/* ========== Casing conversion functions ==========*/
 static SCM string_dxxcase(int argc, SCM *argv,       // destructive conversion
                           int (*toxx)(int),
                           int (*towxx)(utf8_char, utf8_char conv[3]))
@@ -284,7 +173,6 @@ static SCM string_dxxcase(int argc, SCM *argv,       // destructive conversion
   return STk_void;
 }
 
-
 static SCM string_xxcase(int argc, SCM *argv,     // non destructive conversion
                          int (*toxx)(int),
                          int (*towxx)(utf8_char, utf8_char conv[3]))
@@ -305,7 +193,7 @@ static SCM string_xxcase(int argc, SCM *argv,     // non destructive conversion
     for (int i = start; i < end; i++) { // convert the desired slice
       utf8_char converted[3];
       int n;
- 
+
       str = STk_utf8_grab_char(str, &ch);
       n   = towxx(ch, converted);
 
@@ -327,6 +215,109 @@ static SCM string_xxcase(int argc, SCM *argv,     // non destructive conversion
   }
 }
 
+static inline SCM string_fold(SCM s) /* A string-foldcase version for string-ciXX? */
+{
+  return string_xxcase(1, &s, tolower, STk_full_fold);
+}
+
+
+static inline int do_utf8_comp(SCM s1, SCM s2)
+{
+  register char *str1, *str2;
+  utf8_char ch1, ch2;
+  char *end1, *end2;
+
+  str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
+  str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
+
+  while ((str1 < end1) && (str2 < end2)) {
+    if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
+      error_bad_sequence(STRING_CHARS(s1));
+    if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
+      error_bad_sequence(STRING_CHARS(s2));
+
+    if (ch1 != ch2) return ch1 - ch2;
+  }
+
+  /* str1 < end1 || str2 < end2 */
+  return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
+}
+
+
+static int stringcomp(SCM s1, SCM s2)
+{
+  if (!STRINGP(s1)) error_bad_string(s1);
+  if (!STRINGP(s2)) error_bad_string(s2);
+
+  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
+    /* At least one string is multi-bytes */
+    return do_utf8_comp(s1, s2);
+  } else {
+    /* fast-path for mono-byte strings */
+    register char *str1, *str2;
+    register int l1, l2;
+
+    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
+         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+         l1 && l2;
+         l1--, str1++, l2--, str2++)
+      if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
+
+    /* l1 == 0 || l2 == 0 */
+    return l1 ? +1 : (l2 ? -1 : 0);
+  }
+}
+
+static int stringcompi(SCM s1, SCM s2)
+{
+  if (!STRINGP(s1)) error_bad_string(s1);
+  if (!STRINGP(s2)) error_bad_string(s2);
+
+  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
+    /* At least one string is multi-bytes */
+    return do_utf8_comp(string_fold(s1),
+                        string_fold(s2));
+  } else {
+    /* fast-path for mono-byte strings */
+    register char *str1, *str2;
+    register int l1, l2;
+
+    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
+         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+         l1 && l2;
+         l1--, str1++, l2--, str2++)
+      if (tolower(*str1) != tolower(*str2))
+        return (tolower(*str1) - tolower(*str2));
+
+    /* l1 == 0 || l2 == 0 */
+    return l1 ? +1 : (l2 ? -1 : 0);
+  }
+}
+
+
+
+
+static SCM make_substring(SCM string, long from, long to)
+{
+  /* WARNING: from and to must be checked by caller */
+  if (STRING_MONOBYTE(string))
+    return STk_makestring(to - from, STRING_CHARS(string)+from);
+  else {
+    /* multi-bytes string */
+    utf8_char c;
+    char *pfrom, *pto;
+    SCM z;
+
+    pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
+
+    for ( ; from < to; from++)
+      pto = STk_utf8_grab_char(pto, &c);
+
+    z = STk_makestring(pto - pfrom, pfrom);
+    STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
+    return z;
+  }
+}
 
 
 SCM STk_makestring(int len, const char *init)
