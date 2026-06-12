@@ -216,9 +216,9 @@
 (test "gambit.92"  #f (string-ci>? "Z" "z"))
 (test "gambit.93"  #t (string-ci=? "z" "Z"))
 (test "gambit.94"  #f (string-ci=? "z" "a"))
-#;(test "gambit.95"  #t (string-ci=? "Stra\xDF;e" "Strasse"))           ;; Not R7
-#;(test "gambit.96"  #t (string-ci=? "Stra\xDF;e" "STRASSE"))           ;; Not R7
-#;(test "gambit.97"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"         ;; Not R7
+(test "gambit.95"  #t (string-ci=? "Stra\xDF;e" "Strasse"))
+(test "gambit.96"  #t (string-ci=? "Stra\xDF;e" "STRASSE"))
+(test "gambit.97"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"
                                    "\x3BE;\x3B1;\x3BF;\x3C2;"))
 (unless *is-C?*
   (test "gambit.98"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"
@@ -330,7 +330,7 @@
         fail))
 
 
-(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi 
+(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi
        (str (string-append "ab" (make-string 5 ffi) "cd")))
   (test "growing foldcase.1"
         "abffiffiffiffifficd"
@@ -349,7 +349,7 @@
           (string-foldcase! cp 1 4)
           cp)))
 
-(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which ups to ffi 
+(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which ups to ffi
        (str (string-append "ab" (make-string 5 ffi) "cd")))
   (test "growing upcase.1"
         "ABFFIFFIFFIFFIFFICD"
@@ -367,6 +367,6 @@
         (let ((cp (string-copy str)))
           (string-upcase! cp 1 4)
           cp)))
-  
+
 ;;------------------------------------------------------------------
 (test-section-end)
