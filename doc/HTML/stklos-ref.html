@@ -8437,7 +8437,8 @@ returns #t), or #f on any other character.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span> <span class="o">#</span><span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="o">#</span><span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
 <span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
 <span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
 <span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
@@ -26288,7 +26289,7 @@ underscores are accepted in numbers.</p>
 <p>This parameter object permits to change the default behaviour of
 the <code>read</code> primitive used on the current input port , when reading a symbol.
 If this parameter has a true value a symbol is not converted to a default
-case when interned. Since R<sup>7</sup>RS requires that symbol are case insignificant,
+case when interned. Since R<sup>7</sup>RS requires that symbol are case sensitive,
 the default value  of this parameter is <code>#t</code>.</p>
 </div>
 <div class="admonitionblock note">
