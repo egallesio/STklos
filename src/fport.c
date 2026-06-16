@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -887,6 +887,7 @@ static SCM load_file(SCM filename, SCM env)
   /* It's Ok, try now to load file */
   f = STk_open_file(fname, "r");
   if (f != STk_false) {
+    STk_set_current_load_file_and_port(STk_cons(filename, f));
     switch (find_file_nature(f)) {
       case FILE_IS_SOURCE: return STk_load_source_file(f, env);
       case FILE_IS_BCODE:  return STk_load_bcode_file(f, env);
