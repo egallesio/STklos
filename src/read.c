@@ -472,8 +472,6 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
     error_bad_sharp_syntax(port, tok);
   } else {
     /* We have a symbol or a keyword */
-    int colon_pos = PORT_KW_COL_POS(port);
-
     if ((c == ':') && (colon_pos & COLON_BEFORE)) {
       return STk_makekey(tok+1);
     } else if ((tok[len-1]==':') && (colon_pos & COLON_AFTER) && (last!='|')){
@@ -1321,14 +1319,8 @@ static SCM keyword_colon_position_set(SCM value)
   /* Change the way keywords are read in the reading port */
   info = STk_current_load_file_and_port();
   port = (info == STk_false) ? STk_current_input_port(): CDR(info);
-  PORT_KW_COL_POS(port) = colon_pos;
-  
-  return keyword_colon_position_get();
-}
 
-int STk_keyword_colon_convention(void)
-{
-  return colon_pos;
+  return keyword_colon_position_get();
 }
 
 /*
@@ -1457,7 +1449,7 @@ static SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
                         const char *word, SCM _UNUSED(data))
 {
   const char *val=sizeof("keyword-colon-position-") + word; // none, before, ...
-  PORT_KW_COL_POS(port) = colon_position_value(val);
+  colon_pos = colon_position_value(val);
   return NULL;  // NULL since the keword is not returned
 }
 
