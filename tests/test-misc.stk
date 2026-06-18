@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2025 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2020-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -901,14 +901,31 @@ b|)
 
 (test/error "with-handler bad parameter" (with-handler 1 2))
 
+;; Colon position in keyword
+;;
+;; We cannot use here parameterize, since the reading of the test (one sexpr)
+;; is done with the surrounding colon position convention
+(define *colon-pos* (keyword-colon-position 'none))
 
+(keyword-colon-position 'none)
+(test "colon-position none"
+      '(#f #f #t)
+      (list (keyword? ':a) (keyword? 'a:) (keyword? '#:a)))
 
+(keyword-colon-position 'before)
+(test "colon-position none"
+      '(#t #f #t)
+      (list (keyword? ':a) (keyword? 'a:) (keyword? '#:a)))
 
+(keyword-colon-position 'after)
+(test "colon-position none"
+      '(#f #t #t)
+      (list (keyword? ':a) (keyword? 'a:) (keyword? '#:a)))
 
-
-
-
-
+(keyword-colon-position 'both)
+(test "colon-position none"
+      '(#t #t #t)
+      (list (keyword? ':a) (keyword? 'a:) (keyword? '#:a)))
 
 
 ;;------------------------------------------------------------------
