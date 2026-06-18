@@ -1319,13 +1319,8 @@ static SCM keyword_colon_position_set(SCM value)
   /* Change the way keywords are read in the reading port */
   info = STk_current_load_file_and_port();
   port = (info == STk_false) ? STk_current_input_port(): CDR(info);
-  
-  return keyword_colon_position_get();
-}
 
-int STk_keyword_colon_convention(void)
-{
-  return colon_pos;
+  return keyword_colon_position_get();
 }
 
 /*
