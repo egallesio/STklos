@@ -1011,7 +1011,6 @@ struct port_obj {
   char *filename;               /* File name (for file port, a const otherwise) */
   int  line;                    /* Line number  (unused when writing) */
   int  pos;                     /* position from the start of file */
-  int  keyword_colon_pos;       /* position of the ':' in keywords */
   SCM  close_hook;              /* hook called when a file is closed */
 
   /* virtual functions (in the object 'cause the # of ports should be low ) */
@@ -1053,7 +1052,6 @@ struct port_obj {
 #define PORT_LINE(x)       (((struct port_obj *) (x))->line)
 #define PORT_POS(x)        (((struct port_obj *) (x))->pos)
 #define PORT_FNAME(x)      (((struct port_obj *) (x))->filename)
-#define PORT_KW_COL_POS(x) (((struct port_obj *) (x))->keyword_colon_pos)
 #define PORT_CLOSEHOOK(x)  (((struct port_obj *) (x))->close_hook)
 
 #define PORT_PRINT(x)     (((struct port_obj *) (x))->print_it)
