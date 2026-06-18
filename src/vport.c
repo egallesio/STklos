@@ -1,7 +1,7 @@
 /*
  * vport.c                                      -- Virtual Ports
  *
- * Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2005-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -281,7 +281,6 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
   PORT_LINE(z)          = 1;
   PORT_POS(z)           = 0;
   PORT_FNAME(z)         = "virtual input port";
-  PORT_KW_COL_POS(z)    = STk_keyword_colon_convention();
   PORT_CLOSEHOOK(z)     = STk_false;
 
   PORT_PRINT(z)         = vport_print;

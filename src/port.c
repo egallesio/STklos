@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1710,6 +1710,27 @@ DEFINE_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2, (SCM port,SCM 
   return STk_void;
 }
 
+/*
+ * Parameter object %current-load-file-and-port
+ */
+
+static SCM current_file_and_port = STk_false;
+
+SCM STk_current_load_file_and_port(void)
+{
+  return current_file_and_port;
+}
+
+
+SCM STk_set_current_load_file_and_port(SCM info)
+{
+  if (info != STk_false && !(CONSP(info) && STRINGP(CAR(info)) && PORTP(CDR(info))))
+    STk_error("bad loading information ~S", info);
+
+  current_file_and_port = info;
+  return STk_void;
+}
+
 
 /*===========================================================================*\
  *
@@ -1784,6 +1805,11 @@ int STk_init_port(void)
                         STk_set_current_output_port, STk_STklos_module);
   STk_make_C_parameter2("current-error-port", STk_current_error_port,
                         STk_set_current_error_port, STk_STklos_module);
+
+  STk_make_C_parameter2("%current-loading-file-and-port",
+                        STk_current_load_file_and_port,
+                        STk_set_current_load_file_and_port,
+                        STk_STklos_module);
 
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_ci);
