@@ -196,7 +196,6 @@ doc>
 |#
 (define (current-loading-file)
   (let ((info (%current-loading-file-and-port)))
-    (%debug "current-loading-file ~S" info)
     (and info           ;; #f is stdin
          (car info))))
 
