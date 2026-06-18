@@ -194,8 +194,11 @@ doc>
  * Returns the path of the file that is currently being loaded.
 doc>
 |#
-(define-parameter current-loading-file #f)
-
+(define (current-loading-file)
+  (let ((info (%current-loading-file-and-port)))
+    (%debug "current-loading-file ~S" info)
+    (and info           ;; #f is stdin
+         (car info))))
 
 
 #|
@@ -301,15 +304,14 @@ doc>
 
 (define (%try-load fn load-path load-suffixes env)
   (let ((path (%guess-pathname fn load-path load-suffixes))
-        (oldp (current-loading-file))
+        (oldp (%current-loading-file-and-port))
         (res  #f)
         (out  (current-error-port))
         (mod  (current-module)))
     (when (and path (not (file-is-directory? path)))
-      (current-loading-file path)
       (with-handler (lambda (c)
                       (%try-load-conditions (cons c (%try-load-conditions)))
-                      (current-loading-file oldp)
+                      (%current-loading-file-and-port oldp)
                       (%%set-current-module mod)
                       ;; We have lost current environment, an then the value of c :-<
                       (let ((c (car (%try-load-conditions))))
@@ -322,8 +324,8 @@ doc>
                         (%primitive-try-load path env)
                         (%primitive-try-load path)))
           (when *load-verbose* (format out ";; File ~S loaded.\n" path))
-          ;; Restore current-load-path
-          (current-loading-file oldp)
+          ;; Restore current-loading informations
+          (%current-loading-file-and-port oldp)
           ;; Restore the module we had when entering
           (%%set-current-module mod)))
     res))

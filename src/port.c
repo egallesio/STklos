@@ -1716,7 +1716,7 @@ DEFINE_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2, (SCM port,SCM 
 
 static SCM current_file_and_port = STk_false;
 
-SCM current_load_file_and_port(void)
+SCM STk_current_load_file_and_port(void)
 {
   return current_file_and_port;
 }
@@ -1806,8 +1806,10 @@ int STk_init_port(void)
   STk_make_C_parameter2("current-error-port", STk_current_error_port,
                         STk_set_current_error_port, STk_STklos_module);
 
-  STk_make_C_parameter2("%current-loading-file-and-port", current_load_file_and_port,
-                        STk_set_current_load_file_and_port, STk_STklos_module);
+  STk_make_C_parameter2("%current-loading-file-and-port",
+                        STk_current_load_file_and_port,
+                        STk_set_current_load_file_and_port,
+                        STk_STklos_module);
 
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_ci);

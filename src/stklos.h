@@ -1165,6 +1165,8 @@ void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
 void STk_error_bad_io_param(char *fmt, SCM p);
 void STk_error_file_name(char *fmt, SCM fn);
+
+SCM STk_current_load_file_and_port(void);
 SCM STk_set_current_load_file_and_port(SCM info);
 
 int STk_init_port(void);
