@@ -472,7 +472,7 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
     error_bad_sharp_syntax(port, tok);
   } else {
     /* We have a symbol or a keyword */
-    int colon_pos = PORT_KW_COL_POS(port);
+    //int colon_pos = PORT_KW_COL_POS(port);
 
     if ((c == ':') && (colon_pos & COLON_BEFORE)) {
       return STk_makekey(tok+1);
