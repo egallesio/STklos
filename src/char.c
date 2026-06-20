@@ -115,7 +115,7 @@ static int search_conversion_table(unsigned int ch,
   unsigned int max = table[len-1].key;
 
   if (min <= ch && ch <= max) {
-    /* seach the value in the table by dichotomy */
+    /* search the value in the table by dichotomy */
     int left, right, i;
 
     left = 0; right = len-1;
@@ -199,7 +199,7 @@ int STk_full_upper(utf8_char in, utf8_char res[3])
   int idx = search_special_list(in);
 
   if (idx == -1)
-    // Not a spcial folding for this character
+    // Not a special upper for this character
     res[0] = STk_to_upper(in);
   else {
     // This char is special. return te result in res (at most 3 characters)
@@ -223,9 +223,18 @@ int STk_full_upper(utf8_char in, utf8_char res[3])
 
 int STk_full_lower(utf8_char in, utf8_char res[3])
 {
-  // Lower case is simple: the length does not vary
-  res[0] = STk_to_lower(in);
-  return 1;
+  // Lower case is simple: the length does not vary except for character
+  // capital I with a dot above (#\İ code 0x130) which produces two
+  // characters. We do it by hand here to optimize table size.
+  if (in == 0x0130) {
+    res[0] = 0x0069;
+    res[1] = 0x0307;
+    return 2;
+  } else {
+    // all other characters produce only one output character
+    res[0] = STk_to_lower(in);
+    return 1;
+  }
 }
 
 
@@ -235,21 +244,25 @@ int STk_full_fold(utf8_char in, utf8_char res[3])
   int idx = search_special_list(in);
 
   if (idx == -1)
-    // Not a spcial folding for this character
+    // Not a special folding for this character
     res[0] = STk_to_fold(in);
   else {
-    // This char is special. return te result in res (at most 3 characters)
-    res[0] = STk_to_lower(specials[idx].upper[0]);
+    if (in == 0x130)
+      return STk_full_lower(in, res);
+    else {
+      // This char is special. Return the result in res (at most 3 characters)
+      res[0] = STk_to_lower(specials[idx].upper[0]);
 
-    if (specials[idx].upper[1]) {
-      // we have a fold with at least 2 characters
-      res[1] = STk_to_lower(specials[idx].upper[1]);
-      len++;
-
-      if (specials[idx].upper[2]) {
-        // fold char is 3 characters long
-        res[2] = STk_to_lower(specials[idx].upper[2]);
+      if (specials[idx].upper[1]) {
+        // we have a fold with at least 2 characters
+        res[1] = STk_to_lower(specials[idx].upper[1]);
         len++;
+
+        if (specials[idx].upper[2]) {
+          // fold char is 3 characters long
+          res[2] = STk_to_lower(specials[idx].upper[2]);
+          len++;
+        }
       }
     }
   }
