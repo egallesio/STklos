@@ -31,6 +31,7 @@ struct syntax_obj {
   SCM expander_src;
   SCM expander;
   SCM module;
+  SCM env;
 };
 
 
@@ -39,6 +40,7 @@ struct syntax_obj {
 #define SYNTAX_SOURCE(p)   (((struct syntax_obj *) (p))->expander_src)
 #define SYNTAX_EXPANDER(p) (((struct syntax_obj *) (p))->expander)
 #define SYNTAX_MODULE(p)   (((struct syntax_obj *) (p))->module)
+#define SYNTAX_ENV(p)      (((struct syntax_obj *) (p))->env)
 
 
 static inline void verify_syntax(SCM obj)
@@ -48,7 +50,7 @@ static inline void verify_syntax(SCM obj)
 
 
 DEFINE_PRIMITIVE("%make-syntax", make_syntax, subr4,
-                 (SCM name, SCM src, SCM expander, SCM mod))
+                 (SCM name, SCM src, SCM expander, SCM mod, SCM env))
 {
   SCM z;
 
@@ -57,6 +59,8 @@ DEFINE_PRIMITIVE("%make-syntax", make_syntax, subr4,
     STk_error("bad syntax name ~S", name);
   if (mod != STk_false && !SYMBOLP(mod))
     STk_error("bad module name ~S", mod);
+  if (env != STk_false && !ENVIRONMENTP(env))
+    STk_error("bad environment ~S", env);
 
   /* Build the result */
   NEWCELL(z, syntax);
@@ -64,6 +68,7 @@ DEFINE_PRIMITIVE("%make-syntax", make_syntax, subr4,
   SYNTAX_SOURCE(z)   = src;
   SYNTAX_EXPANDER(z) = expander;
   SYNTAX_MODULE(z)   = mod;
+  SYNTAX_ENV(z)      = env;
   return z;
 }
 
@@ -101,6 +106,12 @@ DEFINE_PRIMITIVE("%syntax-module", syntax_module, subr1, (SCM x))
   return SYNTAX_MODULE(x);
 }
 
+DEFINE_PRIMITIVE("%syntax-environment", syntax_environment, subr1, (SCM x))
+{
+  verify_syntax(x);
+  return SYNTAX_ENV(x);
+}
+
 
 static void print_syntax(SCM syntax, SCM port, int _UNUSED(mode))
 {
@@ -124,6 +135,7 @@ int STk_init_syntax(void)
   ADD_PRIMITIVE(syntax_source);
   ADD_PRIMITIVE(syntax_expander);
   ADD_PRIMITIVE(syntax_module);
+  ADD_PRIMITIVE(syntax_environment);
 
   return TRUE;
 }
