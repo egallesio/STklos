@@ -1138,9 +1138,9 @@ static void run_vm(vm_thread_t *vm)
 {
   JBUF jb;
   int16_t tailp;
-  int nargs=0;
-  volatile int offset,
-               have_code_lock = 0;     /* if true, we're patching the code */
+  STk_instr nargs=0;
+  volatile STk_instr offset;           /* Anything returned by fetch_next() should be STk_instr */    
+  volatile int have_code_lock = 0;     /* if true, we're patching the code */
 #ifndef __clang__
   // With clang, we are faster without the "volatile" (which seems quite normal).
   // But, on gcc, omitting the "volatile" (weirdly) produces less efficient code.
@@ -1396,7 +1396,8 @@ CASE(LOCAL_REF3) { vm->val = FRAME_LOCAL(vm->env, 3);        NEXT1;}
 CASE(LOCAL_REF4) { vm->val = FRAME_LOCAL(vm->env, 4);        NEXT1;}
 CASE(LOCAL_REF)  { vm->val = FRAME_LOCAL(vm->env, fetch_next()); NEXT1;}
 CASE(DEEP_LOCAL_REF) {
-  int level, info = fetch_next();
+  int level;
+  STk_instr info = fetch_next();
   SCM e = vm->env;
 
   /* STklos organizes local environments as this: each level has a
@@ -1433,7 +1434,8 @@ CASE(DEEP_LOC_REF_FAR) {
 
 
 CASE(DEEP_LOC_REF_PUSH) {
-  int level, info = fetch_next();
+  int level;
+  STk_instr info = fetch_next();
   SCM e = vm->env;
 
   /* Go down in the dynamic environment */
@@ -1501,7 +1503,8 @@ CASE(LOCAL_SET)  { FRAME_LOCAL(vm->env,fetch_next()) = vm->val; NEXT0;}
 
 
 CASE(DEEP_LOCAL_SET) {
-  int level, info = fetch_next();
+  int level;
+  STk_instr info = fetch_next();
   SCM e = vm->env;
 
   /* Go down in the dynamic environment */
