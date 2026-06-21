@@ -1,0 +1,108 @@
+;;;;
+;;;;
+;;;; 172/functional.stk  -- (SRFI 172 functional) (Two Safer Subsets of R7RS)
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini
+;;;;    Creation date: 19-Aug-2025 11:51
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by John Cowan, it is copyrighted as:
+;;;;
+;;;;;; Copyright © John Cowan (2019).
+;;;;;;
+;;;;;; Permission is hereby granted, free of charge, to any person
+;;;;;; obtaining a copy of this software and associated documentation
+;;;;;; files (the "Software"), to deal in the Software without
+;;;;;; restriction, including without limitation the rights to use,
+;;;;;; copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;; sell copies of the Software, and to permit persons to whom the
+;;;;;; Software is furnished to do so, subject to the following
+;;;;;; conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice
+;;;;;; (including the next paragraph) shall be included in all copies
+;;;;;; or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+
+(define-library (srfi 172 functional)
+  (import SCHEME)
+  ;; (import (scheme base))
+  ;; (import (scheme case-lambda))
+  ;; (import (scheme char))
+  ;; (import (scheme complex))
+  ;; (import (scheme cxr))
+  ;; (import (scheme inexact))
+  ;; (import (scheme lazy))
+  (export
+    - * / + < <= = => > >= abs acos and angle append apply asin
+    assoc assq assv atan begin boolean? boolean=? bytevector
+    bytevector? bytevector-append bytevector-copy
+    bytevector-length bytevector-u8-ref caaaar caaadr
+    caaar caadar caaddr caadr caar cadaar cadadr cadar caddar cadddr
+    caddr cadr call/cc call-with-current-continuation
+    call-with-values car case case-lambda cdaaar cdaadr cdaar cdadar
+    cdaddr cdadr cdar cddaar cddadr cddar cdddar cddddr cdddr cddr cdr
+    ceiling char? char<? char<=? char=? char>? char>=? char->integer
+    char-alphabetic? char-ci<? char-ci<=? char-ci=? char-ci>? char-ci>=?
+    char-downcase char-foldcase char-lower-case? char-numeric? char-upcase
+    char-upper-case? char-whitespace?
+    complex? cond cond-expand cons cos
+    delay delay-force denominator digit-value
+    do dynamic-wind else eof-object eof-object? eq? equal? eqv?
+    error error-object? error-object-irritants error-object-message
+    even? exact exact? exact-integer? exact-integer-sqrt exp expt
+    finite? floor floor/ floor-quotient floor-remainder force for-each
+    gcd get-output-bytevector get-output-string guard if imag-part
+    inexact inexact? infinite? integer? integer->char
+    lambda lcm length let let* let*-values letrec letrec*
+    let-values list list? list->string list->vector list-copy
+    list-ref list-tail log magnitude make-bytevector make-list
+    make-parameter make-polar make-promise make-rectangular make-string
+    make-vector map max member memq memv min modulo nan? negative? newline
+    not null? number? number->string numerator odd? open-input-bytevector
+    open-input-string open-output-bytevector open-output-string or
+    pair? parameterize positive?
+    procedure? promise? quasiquote quote quotient raise raise-continuable
+    rational? rationalize
+    real? real-part remainder
+    reverse round sin sqrt square string string?
+    string<? string<=? string=? string>? string>=? string->list
+    string->number string->utf8 string->vector string-append
+    string-ci<? string-ci<=? string-ci=? string-ci>? string-ci>=?
+    string-copy string-downcase string-foldcase
+    string-for-each string-length string-map string-ref
+    string-upcase substring symbol? symbol=? symbol->string
+    tan truncate truncate/ truncate-quotient
+    truncate-remainder unless unquote unquote-splicing utf8->string values
+    vector vector? vector->list vector->string vector-append vector-copy
+    vector-for-each vector-length vector-map
+    vector-ref when with-exception-handler
+    zero?))
+
+(provide "srfi/172/functional")
