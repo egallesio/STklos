@@ -927,6 +927,22 @@ b|)
       '(#t #t #t)
       (list (keyword? ':a) (keyword? 'a:) (keyword? '#:a)))
 
+;------------------------------------------------------------------
+
+(let ((p (make-parameter 10)))
+  (let ((before (%parameter-immutable? p)))
+    (%parameter-immutable! p)
+    (let ((after (%parameter-immutable? p)))
+      (test "parameter-immutable.1"
+            '(#f #t)
+            (list before after)))))
+
+(let ((p (make-parameter 10)))
+  (p 20)
+  (test "parameter-immutable.2" 20 (p))
+  (%parameter-immutable! p)
+  (test/error "parameter-immutable.3" (p 30)))
+
 
 ;;------------------------------------------------------------------
 (test-section-end)

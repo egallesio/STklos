@@ -79,6 +79,9 @@ SCM STk_set_parameter(SCM param, SCM value)
 
   verify_parameter(param);
 
+  if (BOXED_INFO(param) & PARAMETER_CONST)
+    STk_error("changing the parameter ~s is not allowed", param);
+
   conv = PARAMETER_CONV(param);
 
   if (PARAMETER_C_TYPE(param)) {
@@ -108,6 +111,7 @@ SCM STk_make_C_parameter(char *name, SCM value, SCM (*conv)(SCM new_value),
   PARAMETER_CONV(z)   = (SCM) conv;
   PARAMETER_GETTER(z) = STk_void;
   MUT_INIT(PARAMETER_MUTEX(z));
+  BOXED_INFO(z) &= (~PARAMETER_CONST);
 
   /* Bind it to the given symbol */
   STk_define_variable(STk_intern((char *)name), z, module);
@@ -127,6 +131,7 @@ SCM STk_make_C_parameter2(char *name, SCM (*getter)(void),
   PARAMETER_CONV(z)   = (SCM) conv;
   PARAMETER_GETTER(z) = getter;
   MUT_INIT(PARAMETER_MUTEX(z));
+  BOXED_INFO(z) &= (~PARAMETER_CONST);
 
   /* Bind it to the given symbol */
   STk_define_variable(STk_intern(name), z, module);
@@ -168,7 +173,18 @@ DEFINE_PRIMITIVE("%set-parameter-name!", set_parameter_name, subr2, (SCM obj, SC
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("%parameter-immutable!", parameter_immutable, subr1, (SCM obj))
+{
+  verify_parameter(obj);
+  BOXED_INFO(obj) |= PARAMETER_CONST;
+  return STk_void;
+}
 
+DEFINE_PRIMITIVE("%parameter-immutable?", parameter_immutable_p, subr1, (SCM obj))
+{
+  verify_parameter(obj);
+  return MAKE_BOOLEAN(BOXED_INFO(obj) & PARAMETER_CONST);
+}
 
 /*
 <doc EXT make-parameter
@@ -276,6 +292,7 @@ int STk_init_parameter(void)
   ADD_PRIMITIVE(parameterp);
   ADD_PRIMITIVE(parameter_name);
   ADD_PRIMITIVE(set_parameter_name);
-
+  ADD_PRIMITIVE(parameter_immutable);
+  ADD_PRIMITIVE(parameter_immutable_p);
   return TRUE;
 }

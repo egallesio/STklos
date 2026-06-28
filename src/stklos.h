@@ -962,6 +962,7 @@ int STk_init_object(void);
   ------------------------------------------------------------------------------
 */
 
+#define PARAMETER_CONST      (1 << 0)
 int STk_init_parameter(void);
 
 SCM STk_get_parameter(SCM param);
