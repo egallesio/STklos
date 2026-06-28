@@ -156,6 +156,11 @@ doc>
             (format port "~a ~svector of length ~s" a-an tag
                     (%uvector-length x)))))
 
+     ((parameter? x)
+      (format port "a parameter")
+      (when (%parameter-name x)
+        (format port " whose name is ~a" (%parameter-name x))))
+
      ((closure? x)
       (format port "a closure")
       ;; We don't need to show the formals, because they're already
