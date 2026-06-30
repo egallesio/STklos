@@ -303,6 +303,18 @@
     ;; 262 Extensible pattern matcher
     ;; 263 Prototype Object System
     (264 "String Syntax for Scheme Regular Expressions" () "srfi-264")
+    ;; 265 The CFG Language
+    ;; 266 The expr syntax
+    (267 "Raw String Syntax" () "srfi-267")
+    ;; 268 Multidimensional Array Literals
+    ;; 269 Portable Test Definitions
+    ;; 270 Hexadecimal Floating-Point Constants
+    ;; 271 Random port libraries
+    ;; 272 Pretty Printing
+    ;; 273 Extensions to Data (Type-)Checking
+    ;; 274 Extended List Conversion Procedures
+    ;; 275 URIs and IRIs
+    ;; 276 Type-specific Flonum Libraries
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
