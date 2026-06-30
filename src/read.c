@@ -871,6 +871,66 @@ static SCM read_srfi207_bytevector(SCM port, int constant)
   return z;
 }
 
+static SCM read_srfi_267(SCM port, struct read_context *ctx) {
+  size_t max_delim_size=100;
+  char *delim= STk_must_malloc(max_delim_size+1);
+
+  delim[0] = '"';
+  int c;
+  int i = 1;
+  int k = 2;
+  do {
+    if (i > max_delim_size) {
+      max_delim_size *= k;
+      delim = STk_must_realloc(delim, max_delim_size);
+      k++;
+    }
+    /* Read until a double quote, so we get the delimiter: */
+    c = STk_getc(port);
+    delim[i] = c;
+    i++;
+  } while(c != '"');
+  i--; /* So i will be the size */
+
+  /* delim now contains the delimiter, including the double quotes. */
+
+  /* We include a zero in order to use strncmp on delim: */
+  delim[i+1]=0;
+
+  size_t max_string_size = 500 + max_delim_size;
+  char *str = STk_must_malloc(max_string_size);
+
+  /* We need to read at least the size of the delimiter, because that
+     is how the char sequence must end ( DELIM .... DELIM ) so we
+     already put some chatecters in the buffer. */
+  int j;
+  for(j=0; j<=i; j++)
+    str[j] = STk_getc(port);
+  /* The for loop increments j one time more than what we want. */
+  j--;
+
+  k = 2;
+
+  /* j is the index to the last charecter read, so we compare the last
+     i+1 chars to the delimiter by taking the last chatacters
+     of str and comparing them to the delimiter. */
+  while(strncmp(delim,&(str[j-i]), i+1)) {
+    if (j > max_string_size) {
+      max_string_size *= k;
+      str = STk_must_realloc(str, max_string_size);
+      k++;
+    }
+
+    /* read one more: */
+    j++;
+    str[j] = STk_getc(port);
+  }
+
+  /* Finish the string and return! */
+  str[j-i] = 0;
+  return  STk_Cstring2string(str);
+}
+
 static SCM read_vector(SCM port, struct read_context *ctx)
 {
   SCM v = STk_list2vector(read_list(port, ')', ctx));
@@ -911,11 +971,13 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
   int c = STk_getc(port);
 
   switch(c) {
+    case '"':  return read_srfi_267(port, ctx);
+
     case '\\': return read_char(port, STk_getc(port));
 
     case '(' : return read_vector(port, ctx);
 
-   case '!' : {
+  case '!' : {
       SCM word;
 
       // Force case insensitive for reading #!xxx
