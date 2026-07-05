@@ -1,7 +1,7 @@
 ;;;;                                                    -*- coding utf-8 -*-
 ;;;; test-utf8.stk      -- Test of UTF-8 strings
 ;;;;
-;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -168,9 +168,9 @@
 (test "gambit.G2" "hi" (string-foldcase "HI"))
 (test "gambit.63" "hi" (string-foldcase "hi"))
 
-#; (test "gambit.64" "STRASSE" (string-upcase "Stra\xDF;e"))    ;; not R7
+(test "gambit.64" "STRASSE" (string-upcase "Stra\xDF;e"))
 (test "gambit.65" "stra\xDF;e" (string-downcase "Stra\xDF;e"))
-#;(test "gambit.66" "strasse" (string-foldcase "Stra\xDF;e"))   ;; not R7
+(test "gambit.66" "strasse" (string-foldcase "Stra\xDF;e"))
 (test "gambit.67" "strasse" (string-downcase "STRASSE"))
 
 (unless *is-C?*
@@ -178,12 +178,12 @@
 
 (test "gambit.69" "\x39E;\x391;\x39F;\x3A3;"
       (string-upcase "\x39E;\x391;\x39F;\x3A3;"))
-#;(test "gambit.70"  "\x3BE;\x3B1;\x3BF;\x3C2;"                 ;; not R7
+(test "gambit.70"  "\x3BE;\x3B1;\x3BF;\x3C2;"
       (string-downcase "\x39E;\x391;\x39F;\x3A3;"))
-#;(test "gambit.71" "\x3BE;\x3B1;\x3BF;\x3C3;\x3C2;"            ;; not R7
+(test "gambit.71" "\x3BE;\x3B1;\x3BF;\x3C3;\x3C2;"
       (string-downcase "\x39E;\x391;\x39F;\x3A3;\x3A3;"))
-#;(test "gambit.72" "\x3BE;\x3B1;\x3BF;\x3C2; \x3C3;"
-      (string-downcase "\x39E;\x391;\x39F;\x3A3; \x3A3;"))      ;; not R7
+(test "gambit.72" "\x3BE;\x3B1;\x3BF;\x3C2; \x3C3;"
+      (string-downcase "\x39E;\x391;\x39F;\x3A3; \x3A3;"))
 (unless *is-C?*
   (test "gambit.73" "\x3BE;\x3B1;\x3BF;\x3C3;"
         (string-foldcase "\x39E;\x391;\x39F;\x3A3;"))
@@ -216,9 +216,9 @@
 (test "gambit.92"  #f (string-ci>? "Z" "z"))
 (test "gambit.93"  #t (string-ci=? "z" "Z"))
 (test "gambit.94"  #f (string-ci=? "z" "a"))
-#;(test "gambit.95"  #t (string-ci=? "Stra\xDF;e" "Strasse"))           ;; Not R7
-#;(test "gambit.96"  #t (string-ci=? "Stra\xDF;e" "STRASSE"))           ;; Not R7
-#;(test "gambit.97"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"         ;; Not R7
+(test "gambit.95"  #t (string-ci=? "Stra\xDF;e" "Strasse"))
+(test "gambit.96"  #t (string-ci=? "Stra\xDF;e" "STRASSE"))
+(test "gambit.97"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"
                                    "\x3BE;\x3B1;\x3BF;\x3C2;"))
 (unless *is-C?*
   (test "gambit.98"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"
@@ -329,6 +329,44 @@
         '()
         fail))
 
+
+(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi
+       (str (string-append "ab" (make-string 5 ffi) "cd")))
+  (test "growing foldcase.1"
+        "abffiffiffiffifficd"
+        (string-foldcase str))
+  (test "growing foldcase.2"
+        "bffiffi"
+        (string-foldcase str 1 4))
+  (test "growing foldcase!.1"
+        "abffiffiffiffifficd"
+        (let ((cp (string-copy str)))
+          (string-foldcase! cp)
+          cp))
+  (test "growing foldcase!.2"
+        "abffiffi\xfb03;\xfb03;\xfb03;cd"
+        (let ((cp (string-copy str)))
+          (string-foldcase! cp 1 4)
+          cp)))
+
+(let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which ups to ffi
+       (str (string-append "ab" (make-string 5 ffi) "cd")))
+  (test "growing upcase.1"
+        "ABFFIFFIFFIFFIFFICD"
+        (string-upcase str))
+  (test "growing upcase.2"
+        "BFFIFFI"
+        (string-upcase str 1 4))
+  (test "growing upcase!.1"
+        "ABFFIFFIFFIFFIFFICD"
+        (let ((cp (string-copy str)))
+          (string-upcase! cp)
+          cp))
+  (test "growing upcase!.2"
+        "aBFFIFFI\xfb03;\xfb03;\xfb03;cd"
+        (let ((cp (string-copy str)))
+          (string-upcase! cp 1 4)
+          cp)))
 
 ;;------------------------------------------------------------------
 (test-section-end)

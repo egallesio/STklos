@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,95 +73,6 @@ static void error_bad_sequence(char *str)
 }
 
 
-static int stringcomp(SCM s1, SCM s2)
-{
-  register char *str1, *str2;
-
-  if (!STRINGP(s1)) error_bad_string(s1);
-  if (!STRINGP(s2)) error_bad_string(s2);
-
-  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
-    /* At least one string is multi-bytes */
-    utf8_char ch1, ch2;
-    char *end1, *end2;
-
-    str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
-    str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
-
-    while ((str1 < end1) && (str2 < end2)) {
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
-        error_bad_sequence(STRING_CHARS(s1));
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
-        error_bad_sequence(STRING_CHARS(s2));
-
-      if (ch1 != ch2) return ch1 - ch2;
-    }
-
-    /* str1 < end1 || str2 < end2 */
-    return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
-  } else {
-    /* fast-path for mono-byte strings */
-    register int l1, l2;
-
-    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-         l1 && l2;
-         l1--, str1++, l2--, str2++)
-      if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
-
-    /* l1 == 0 || l2 == 0 */
-    return l1 ? +1 : (l2 ? -1 : 0);
-  }
-}
-
-
-static int stringcompi(SCM s1, SCM s2)
-{
-  register char *str1, *str2;
-
-  if (!STRINGP(s1)) error_bad_string(s1);
-  if (!STRINGP(s2)) error_bad_string(s2);
-
-  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
-    /* At least one string is multi-bytes */
-    utf8_char ch1, ch2;
-    char *end1, *end2;
-
-    str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
-    str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
-
-    while ((str1 < end1) && (str2 < end2)) {
-      char c1low, c2low;
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
-        error_bad_sequence(STRING_CHARS(s1));
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
-        error_bad_sequence(STRING_CHARS(s2));
-
-      c1low = STk_to_lower(ch1);
-      c2low = STk_to_lower(ch2);
-
-      if (c1low != c2low) return c1low - c2low;
-    }
-
-    /* str1 < end1 || str2 < end2 */
-    return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
-  } else {
-    /* fast-path for mono-byte strings */
-    register int l1, l2;
-
-    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-         l1 && l2;
-         l1--, str1++, l2--, str2++)
-      if (tolower(*str1) != tolower(*str2))
-        return (tolower(*str1) - tolower(*str2));
-
-    /* l1 == 0 || l2 == 0 */
-    return l1 ? +1 : (l2 ? -1 : 0);
-  }
-}
-
-
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 {
   SCM s = STk_void;   /* value chosen to avoid a warning of gcc static analysis */
@@ -202,47 +113,207 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
   return s;
 }
 
-static utf8_char *string2int(char *s, int len, int *utf8_len, utf8_char(*func)(utf8_char))
-{
-  utf8_char ch, *tmp, *buff = STk_must_malloc_atomic(len * sizeof(utf8_char));
-  int space = 0;
 
-  for (tmp = buff; len--; tmp++) {
-    s      = STk_utf8_grab_char(s, &ch);
-    ch     = func(ch);
-    space += STk_utf8_char_bytes_needed(ch);
-    *tmp   = ch;
+/* ========== Casing conversion functions ==========*/
+static SCM string_dxxcase(int argc, SCM *argv,       // destructive conversion
+                          int (*toxx)(int),
+                          int (*towxx)(utf8_char, utf8_char conv[3]))
+{
+  SCM s;
+  long start, end;
+
+  s = control_index(argc, argv, &start, &end);
+  if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
+
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {        /* multibyte string */
+    // This is not very efficient: We use here a string port to place the
+    // characters from the beginning of the string, followed by the converted
+    // characters, an finally the end of the string. We use a string port,
+    // since, by nature the converted characters may introduce some new
+    // characters (For instance  #\xfb03 (the "ﬃ" character will return
+    // "FFI" in upper-case
+    SCM tmp_port = STk_open_output_string();
+    char *str = STRING_CHARS(s);
+    utf8_char ch;
+
+    for (int i = 0; i < start; i++) { // copy the first characters
+      str = STk_utf8_grab_char(str, &ch);
+      STk_put_character(ch, tmp_port);
+    }
+
+    for (int i = start; i < end; i++) { // convert the desired slice
+      utf8_char converted[3];
+      int n;
+
+      str = STk_utf8_grab_char(str, &ch);
+      n   = towxx(ch, converted);
+
+      STk_put_character(converted[0], tmp_port);
+      if (n >= 2) STk_put_character(converted[1], tmp_port);
+      if (n == 3) STk_put_character(converted[2], tmp_port);
+    }
+
+    for (int i = end; i < STRING_LENGTH(s); i++) {  // copy the last characters
+      str = STk_utf8_grab_char(str, &ch);
+      STk_put_character(ch, tmp_port);
+    }
+
+    /* replace the content of the string parameter (in s) by the ouput port  */
+    {
+      SCM out = STk_get_output_string(tmp_port);
+
+      *((struct string_obj*) s) = *((struct string_obj *)out);
+    }
+  } else {                                  /* monobyte string */
+    char *p , *endp = STRING_CHARS(s) + end;
+
+    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toxx(*p);
   }
 
-  *utf8_len = space;
-  return buff;
+  return STk_void;
 }
 
-static SCM make_string_from_int_array(utf8_char *buff, int len, int utf8_len)
+static SCM string_xxcase(int argc, SCM *argv,     // non destructive conversion
+                         int (*toxx)(int),
+                         int (*towxx)(utf8_char, utf8_char conv[3]))
 {
-  SCM z;
-  char *s, *end;
+  SCM s;
+  long start, end;
+  int downcasingp = (towxx == STk_full_lower);
 
-  NEWCELL(z, string);
-  STRING_CHARS(z)  = s = STk_must_malloc_atomic(utf8_len + 1);
-  STRING_SPACE(z)  = STRING_SIZE(z) = utf8_len;
-  STRING_LENGTH(z) = len;
+  s = control_index(argc, argv, &start, &end);
 
-  end = s + utf8_len;
-  while (s < end) {
-    s += STk_char2utf8(*buff++, s);
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
+    SCM tmp_port = STk_open_output_string();
+    char *str = STRING_CHARS(s);
+    utf8_char ch, prev = 0x20; /* 0x20 is the space character */
+
+    for (int i = 0; i < start; i++)  // Advance to the 1st char to convert
+      str = STk_utf8_grab_char(str, &ch);
+
+    for (int i = start; i < end; i++) { // convert the desired slice
+      str = STk_utf8_grab_char(str, &ch);
+
+      if (downcasingp && (ch == 0x3a3)) {
+        /* Special case when downcasing  greek letter upper sigma #\x3a3 (#\Σ) ->
+         *    - #\x3c3 (#\σ) normally
+         *    - #\x3c2  (#\ς) at end of word
+         */
+        if (i == end - 1)
+          // end of word => #\x3c2, except if prev is a space (sigma was alone)
+          STk_put_character(STk_char_whitespacep(prev)? 0x3c3: 0x3c2, tmp_port);
+        else {
+          utf8_char next;
+
+          STk_utf8_grab_char(str, &next);
+          STk_put_character(STk_char_whitespacep(next)? 0x3c2: 0x3c3, tmp_port);
+        }
+      } else {
+        utf8_char converted[3];
+        int n;
+        n   = towxx(ch, converted);
+
+        STk_put_character(converted[0], tmp_port);
+        if (n >= 2) STk_put_character(converted[1], tmp_port);
+        if (n == 3) STk_put_character(converted[2], tmp_port);
+      }
+      prev = ch;
+    }
+
+    return  STk_get_output_string(tmp_port);
+  } else {
+    char *endp, *p, *q;
+    SCM  z =  STk_makestring(end-start, NULL);
+
+    endp = STRING_CHARS(s) + end;
+    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
+      *q = toxx(*p);
+
+    return z;
   }
-  *s = '\0';
-
- return z;
 }
 
-
-static void copy_array(utf8_char *buff, int len, char *from)
+static inline SCM string_fold(SCM s) /* A string-foldcase version for string-ciXX? */
 {
-  while (len--)
-    from += STk_char2utf8(*buff++, from);
+  return string_xxcase(1, &s, tolower, STk_full_fold);
 }
+
+
+static inline int do_utf8_comp(SCM s1, SCM s2)
+{
+  register char *str1, *str2;
+  utf8_char ch1, ch2;
+  char *end1, *end2;
+
+  str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
+  str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
+
+  while ((str1 < end1) && (str2 < end2)) {
+    if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
+      error_bad_sequence(STRING_CHARS(s1));
+    if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
+      error_bad_sequence(STRING_CHARS(s2));
+
+    if (ch1 != ch2) return ch1 - ch2;
+  }
+
+  /* str1 < end1 || str2 < end2 */
+  return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
+}
+
+
+static int stringcomp(SCM s1, SCM s2)
+{
+  if (!STRINGP(s1)) error_bad_string(s1);
+  if (!STRINGP(s2)) error_bad_string(s2);
+
+  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
+    /* At least one string is multi-bytes */
+    return do_utf8_comp(s1, s2);
+  } else {
+    /* fast-path for mono-byte strings */
+    register char *str1, *str2;
+    register int l1, l2;
+
+    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
+         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+         l1 && l2;
+         l1--, str1++, l2--, str2++)
+      if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
+
+    /* l1 == 0 || l2 == 0 */
+    return l1 ? +1 : (l2 ? -1 : 0);
+  }
+}
+
+static int stringcompi(SCM s1, SCM s2)
+{
+  if (!STRINGP(s1)) error_bad_string(s1);
+  if (!STRINGP(s2)) error_bad_string(s2);
+
+  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
+    /* At least one string is multi-bytes */
+    return do_utf8_comp(string_fold(s1),
+                        string_fold(s2));
+  } else {
+    /* fast-path for mono-byte strings */
+    register char *str1, *str2;
+    register int l1, l2;
+
+    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
+         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+         l1 && l2;
+         l1--, str1++, l2--, str2++)
+      if (tolower(*str1) != tolower(*str2))
+        return (tolower(*str1) - tolower(*str2));
+
+    /* l1 == 0 || l2 == 0 */
+    return l1 ? +1 : (l2 ? -1 : 0);
+  }
+}
+
+
+
 
 static SCM make_substring(SCM string, long from, long to)
 {
@@ -1233,41 +1304,10 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * NOTE: In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
-static SCM string_xxcase(int argc, SCM *argv,
-                         int (*toxx)(int),
-                         utf8_char (*towxx)(utf8_char))
-{
-  SCM s;
-  long start, end;
-
-  s = control_index(argc, argv, &start, &end);
-
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
-    utf8_char *wchars;
-    int len;
-    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
-
-    /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towxx);
-
-    return make_string_from_int_array(wchars, end-start, len);
-  } else {
-    char *endp, *p, *q;
-    SCM  z =  STk_makestring(end-start, NULL);
-
-    endp = STRING_CHARS(s) + end;
-    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-      *q = toxx(*p);
-
-    return z;
-  }
-}
-
 DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, tolower, STk_to_lower);
+  return string_xxcase(argc, argv, tolower, STk_full_lower);
 }
-
 
 /*
 <doc EXT string-downcase!
@@ -1282,47 +1322,9 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
  * @end lisp
 doc>
 */
-static SCM string_dxxcase(int argc, SCM *argv,
-                          int (*toxx)(int),
-                          utf8_char (*towxx)(utf8_char))
-{
-  SCM s;
-  long i, start, end;
-
-  s    = control_index(argc, argv, &start, &end);
-  if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
-
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {        /* multibyte string */
-    utf8_char *wchars;
-    int len;
-    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
-    char *endp   = STk_utf8_index(STRING_CHARS(s), end, STRING_SIZE(s));
-
-    /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towxx);
-    if (len == endp-startp) {
-      copy_array(wchars, end-start, startp);
-    }
-    else {
-      /* This code is inefficient, but it seems that the converted case
-         character always use the same length encoding. It is likely that this
-         code is never used in practice
-      */
-      for (i= start; i < end; i++)
-        STk_string_set(s, MAKE_INT(i), MAKE_CHARACTER(*wchars++));
-    }
-  } else {                                  /* monobyte string */
-    char *p , *endp = STRING_CHARS(s) + end;
-
-    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toxx(*p);
-  }
-
-  return STk_void;
-}
-
 DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, tolower, STk_to_lower);
+  return string_dxxcase(argc, argv, tolower, STk_full_lower);
 }
 
 /*
@@ -1341,7 +1343,7 @@ doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, toupper, STk_to_upper);
+  return string_xxcase(argc, argv, toupper, STk_full_upper);
 }
 
 /*
@@ -1355,7 +1357,7 @@ doc>
 */
 DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, toupper, STk_to_upper);
+  return string_dxxcase(argc, argv, toupper, STk_full_upper);
 }
 
 
@@ -1375,7 +1377,7 @@ doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, tolower, STk_to_fold);
+  return string_xxcase(argc, argv, tolower, STk_full_fold);
 }
 
 /*
@@ -1389,7 +1391,7 @@ doc>
 */
 DEFINE_PRIMITIVE("string-foldcase!", string_dfoldcase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, toupper, STk_to_fold);
+  return string_dxxcase(argc, argv, tolower, STk_full_fold);
 
 }
 

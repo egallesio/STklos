@@ -12,7 +12,7 @@
 
 (define exact inexact->exact)
 
-(define string-foldcase string-downcase)
+;//(define string-foldcase string-downcase)  ;; Why????
 
 (define (make-comparison=/< = <)
   (lambda (a b)

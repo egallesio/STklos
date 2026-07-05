@@ -1,7 +1,7 @@
 ;;;;
 ;;;; make-tables.stk    -- Make UTF-8 tables
 ;;;;
-;;;; Copyright � 2011-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2011-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -34,6 +34,7 @@
 (define symbols      '())
 (define titlecase    '())
 (define puncts       '())  ;; Punctuations
+(define specials     '())  ;; Special casing
 
 ;;; ======================================================================
 ;;;  print-assoc & print-list
@@ -43,14 +44,20 @@
   (for-each (lambda (x)
               (let ((key (car x))
                     (value (cdr x)))
-                (if (string? value)
-                    (printf "      { 0x~A,\t 0x~A},\t /* '~A' -> '~A' */\n"
-                            key
-                            value
-                            (integer->char (string->number key 16))
-                            (integer->char (string->number value 16)))
-                    (printf "      { 0x~A,\t ~A},\t /* '~A' */\n"
-                            key value (integer->char (string->number key 16))))))
+                (cond
+                 ((string? value)
+                  ;; General case "A" -> "a"
+                  (printf "      { 0x~A,\t 0x~A},\t /* '~A' -> '~A' */\n"
+                          key
+                          value
+                          (integer->char (string->number key 16))
+                          (if (string=? value "1")
+                              "<see in fold-table>"
+                              (integer->char (string->number value 16)))))
+                 ((number? value)
+                  ;; User for digits '1' -> 1 or '٢' -> 2
+                  (printf "      { 0x~A,\t ~A},\t /* '~A' */\n"
+                          key value (integer->char (string->number key 16)))))))
             (reverse lst))
   (printf "};\n")
   (printf "static int ~A_length = ~A;\n\n" name (length lst)))
@@ -120,9 +127,14 @@
                  (set! lower (cons (cons char "0") lower)))
                (set! letters (cons char letters)))
 
-              ((member category '("Lt" "Lm"))        ;; Titlecase, Modifier
+              ((equal? category "Lt")                  ;; Titlecase
                (set! letters (cons char letters))
-               (set! titlecase (cons char titlecase)))
+               (set! titlecase (cons char titlecase))
+               (set! lower (cons (cons char low) lower)))
+
+              ((equal? category "Lm")                  ;; Modifier
+               (set! letters (cons char letters))
+               #;(set! titlecase (cons char titlecase)))
 
               ((member category                      ;; Punctuation
                        '("Pc" "Pd" "Ps" "Pe" "Pi" "Pf" "Po"))
@@ -143,22 +155,23 @@
                  ;; SRFI-14 differenciates blanks and white spaces
                  (set! blanks (cons char blanks)))))
 
-            (Loop (read-line)))))
+            (Loop (read-line))))))))
 
-      ;; Print hash-tables
-      (printf "#ifndef BASE_CHAR_SET\n")
-          (print-assoc upper   "upper_table")
-          (print-assoc lower   "lower_table")
-          (print-assoc digits   "digits_table")
-          (print-list letters   "letters_table")
-          (print-list spaces    "spaces_table")
-      (printf "#else\n")
-          (print-list all       "all_table")
-          (print-list puncts    "puncts_table")
-          (print-list symbols   "symbols_table")
-          (print-list titlecase "titlecase_table")
-          (print-list blanks    "blanks_table")
-      (printf "#endif // ifndef BAS_CHAR_SET\n"))))
+(define (write-UnicodeData)
+  ;; Print the previous read table
+  (printf "#ifndef BASE_CHAR_SET\n")
+  (print-assoc upper   "upper_table")
+  (print-assoc lower   "lower_table")
+  (print-assoc digits   "digits_table")
+  (print-list letters   "letters_table")
+  (print-list spaces    "spaces_table")
+  (printf "#else\n")
+  (print-list all       "all_table")
+  (print-list puncts    "puncts_table")
+  (print-list symbols   "symbols_table")
+  (print-list titlecase "titlecase_table")
+  (print-list blanks    "blanks_table")
+  (printf "#endif // ifndef BASE_CHAR_SET\n"))
 
 
 
@@ -173,28 +186,103 @@
         (cond
           ((eof-object? l)
            'nothing)
+
+          ((or (zero? (string-length l)) (char=? (string-ref l 0) #\#))
+           ;; This is a comment line
+           (Loop (read-line)))
+
+          (else
+           (let* ((res (regexp-match "^([0-9A-Fa-f]+); (.); ([0-9A-Fa-f ]+);" l))
+                  (from (cadr res))
+                  (type (caddr res))
+                  (to   (cadddr res)))
+             ;; (printf "From = ~S to = ~S type = ~S\n" from to type)
+             (when (member type '("C" "S"))
+               (set! folds (cons (cons from to) folds)))
+             (Loop (read-line)))))))))
+
+(define (write-CaseFolding)
+  (printf "#ifndef BASE_CHAR_SET\n")
+  (print-assoc folds "fold_table")
+  (printf "#endif\n"))
+
+;;; ======================================================================
+;;;  SpecialCasing.txt
+;;; ======================================================================
+(define (read-SpecialCasing)
+   (with-input-from-file "SpecialCasing.txt"
+     (lambda ()
+       (let Loop ((l (read-line)))
+         ;(printf "Line = ~S\n" l)
+         (cond
+          ((eof-object? l)
+           'nothing)
           ((or (zero? (string-length l)) (char=? (string-ref l 0) #\#))
            ;; This is a comment line
            (Loop (read-line)))
           (else
-           (let* ((res (regexp-match "^([0-9A-Fa-f]+); (.); ([0-9A-Fa-f]+)" l))
-                  (from (cadr res))
-                  (type (caddr res))
-                  (to   (cadddr res)))
-             ;;(printf "From = ~S to = ~S type = ~S\n" from to type)
-             (when (member type '("C" "S"))
-               (let ((low (assoc from lower)))
-                 (unless (and low (string=? (cdr low) to))
-                   (set! folds (cons (cons from to) folds)))))
-             (Loop (read-line))))))
-      (printf "#ifndef BASE_CHAR_SET\n")
-      (print-assoc folds "fold_table")
-      (printf "#endif\n"))))
+           (let* ((fields (string-split l ";")))
+             (when (= (length fields) 5)
+               ;; We keep only the lines with 5 fields (the other ones contains
+               ;; a condition list which explain some context condition). They
+               ;; are not used for STklos.
+               (set! specials (cons fields  specials)))
+
+             (Loop (read-line)))))))))
 
 
+(define (write-SpecialCasing)
+  (let ((specials (sort specials
+                        (lambda (x y) (string<? (car x) (car y))))))
+    (printf "#ifndef BASE_CHAR_SET\n")
+    (printf "static struct utf8_special_casing specials[] = {\n")
+    (for-each (lambda (x)
+                ;; print the key
+                (printf "  {0x~A, /* '~A' */\n"
+                        (car x)
+                        (integer->char (string->number (car x) 16)))
+                ;; print the lower array/ For #\x130, Unicode table provides a
+                ;; two letters lower. However, it seems that there is a
+                ;; consensus to use the "tr" mapping where only the first of
+                ;; these two characters is used.
+                (let ((fields (string-split (cadr x))))
+                  (printf "      .lower=0x~A,\n" (car fields)))
+
+                ;; print the title array
+                (let ((fields (string-split (caddr x))))
+                  (printf "      .title={0x~A, 0x~A, 0x~A},\n"
+                          (car fields)
+                          (if (>= (length fields) 2) (cadr fields) "0000")
+                          (if (=  (length fields) 3) (caddr fields) "0000")))
+
+                ;; print the title array
+                (let ((fields (string-split (cadddr x))))
+                  (printf "      .upper={0x~A, 0x~A, 0x~A}"
+                          (car fields)
+                          (if (>= (length fields) 2) (cadr fields) "0000")
+                          (if (=  (length fields) 3) (caddr fields) "0000")))
+
+                (printf "},\n"))
+              specials)
+
+    (printf "};\n")
+    (printf "static int specials_length = ~A;\n" (length specials))
+    (printf "#endif /* BASE_CHAR_SET */\n")))
+
+
+;;; ======================================================================
+;;;  Main
+;;; ======================================================================
 (define (main argv)
+  ;; Read the Unicode files
+  (read-UnicodeData)
+  (read-CaseFolding)
+  (read-SpecialCasing)
+
+  ;; Write the built tables
   (with-output-to-file "../../src/utf8-tables.inc"
     (lambda ()
       (printf "/* WARNING: This file was generated!!! Do not modify it. -*- mode: c -*- */\n\n")
-      (read-UnicodeData)
-      (read-CaseFolding))))
+      (write-UnicodeData)
+      (write-CaseFolding)
+      (write-SpecialCasing))))

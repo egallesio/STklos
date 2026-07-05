@@ -434,11 +434,18 @@ utf8_char STk_to_upper(utf8_char c);
 utf8_char STk_to_lower(utf8_char c);
 utf8_char STk_to_fold(utf8_char c);
 
+/* Full  character conversion functions */
+int STk_full_lower(utf8_char in, utf8_char res[3]);
+int STk_full_upper(utf8_char in, utf8_char res[3]);
+int STk_full_fold(utf8_char in, utf8_char res[3]);
+
+int STk_char_whitespacep(utf8_char ch);
+
 char *STk_char2string(int c);
 int STk_string2char(char *s);
+int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len);
 int STk_init_char(void);
 
-int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len);
 
 /*
   ------------------------------------------------------------------------------

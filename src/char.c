@@ -2,7 +2,7 @@
  *
  * c h a r . c                          -- Characters management
  *
- * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -96,15 +96,26 @@ struct utf8_conversion_char {
   utf8_char val;
 };
 
+
+struct utf8_special_casing {
+  utf8_char key;
+  utf8_char lower;
+  utf8_char title[3]; // title and upper can use from 1 to 3 characters. The
+  utf8_char upper[3]; // array is padded with a 0 char
+};
+
+
 #include "utf8-tables.inc"
 
-static int search_conversion_table(unsigned int ch, struct utf8_conversion_char table[],
-                                   int len) {
+static int search_conversion_table(unsigned int ch,
+                                   struct utf8_conversion_char table[],
+                                   int len)
+{
   unsigned int min = table[0].key;
   unsigned int max = table[len-1].key;
 
   if (min <= ch && ch <= max) {
-    /* seach the value in the table by dichotomy */
+    /* search the value in the table by dichotomy */
     int left, right, i;
 
     left = 0; right = len-1;
@@ -149,11 +160,122 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
   return -1;
 }
 
+static int search_special_list(utf8_char ch) {
+  unsigned int min = specials[0].key;
+  unsigned int max = specials[specials_length-1].key;
+
+  if (min <= ch && ch <= max) {
+    /* seach the value in the table by dichotomy */
+    int left, right, i;
+
+    left = 0; right = specials_length-1;
+    do {
+      i = (left + right) / 2;
+      if (ch == specials[i].key)
+        return i;
+      else
+        if (ch < specials[i].key)
+          right = i-1;
+        else
+          left = i+1;
+    }
+    while (left <= right);
+  }
+  /* not found of not in the interval of special character => return -1 */
+  return -1;
+}
+
+/*
+ * STk_full_upper, STk_full_lower and STk_full_fold are used by the Scheme
+ * string converting functions such as string-upper or string-foldcase.
+ * They take a character as input and return 1 to 3 characters.
+ * For instance  #\xfb03 (the "ﬃ" character will return "FFI" in upper-case
+ *
+ */
+
+int STk_full_upper(utf8_char in, utf8_char res[3])
+{
+  int len = 1;
+  int idx = search_special_list(in);
+
+  if (idx == -1)
+    // Not a special upper for this character
+    res[0] = STk_to_upper(in);
+  else {
+    // This char is special. return te result in res (at most 3 characters)
+    res[0] = specials[idx].upper[0];
+
+    if (specials[idx].upper[1]) {
+      // we have a fold with at least 2 characters
+      res[1] = specials[idx].upper[1];
+      len++;
+
+      if (specials[idx].upper[2]) {
+        // fold char is 3 characters long
+        res[2] = specials[idx].upper[2];
+        len++;
+      }
+    }
+  }
+  return len;
+}
+
+
+int STk_full_lower(utf8_char in, utf8_char res[3])
+{
+  // Lower case is simple: the length does not vary except for character
+  // capital I with a dot above (#\İ code 0x130) which produces two
+  // characters. We do it by hand here to optimize table size.
+  if (in == 0x0130) {
+    res[0] = 0x0069;
+    res[1] = 0x0307;
+    return 2;
+  } else {
+    // all other characters produce only one output character
+    res[0] = STk_to_lower(in);
+    return 1;
+  }
+}
+
+
+int STk_full_fold(utf8_char in, utf8_char res[3])
+{
+  int len = 1;
+  int idx = search_special_list(in);
+
+  if (idx == -1)
+    // Not a special folding for this character
+    res[0] = STk_to_fold(in);
+  else {
+    if (in == 0x130)
+      return STk_full_lower(in, res);
+    else {
+      // This char is special. Return the result in res (at most 3 characters)
+      res[0] = STk_to_lower(specials[idx].upper[0]);
+
+      if (specials[idx].upper[1]) {
+        // we have a fold with at least 2 characters
+        res[1] = STk_to_lower(specials[idx].upper[1]);
+        len++;
+
+        if (specials[idx].upper[2]) {
+          // fold char is 3 characters long
+          res[2] = STk_to_lower(specials[idx].upper[2]);
+          len++;
+        }
+      }
+    }
+  }
+  return len;
+}
+
+
 // Public version of search_ordered_list
 int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len)
 {
   return search_ordered_list(ch, table, len);
 }
+
 
 /*===========================================================================*\
  *
@@ -317,7 +439,12 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(last,*argv) < 0))
  * digits. The whitespace characters are space, tab, line feed, form feed,
  * and carriage return.
 doc>
- */
+*/
+int STk_char_whitespacep(utf8_char ch)
+{
+  return (search_ordered_list(ch, spaces_table, spaces_table_length) != -1);
+}
+
 
 DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);
@@ -380,7 +507,6 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c)) {
  * argument if it is a numeric digit (that is, if char-numeric?
  * returns #t), or #f on any other character.
  * @lisp
- * (digit-value
  * (digit-value #\3)        => 3
  * (digit-value #\x0664)    => 4
  * (digit-value #\x0AE6)    => 0
@@ -513,19 +639,19 @@ doc>
 utf8_char STk_to_fold(utf8_char c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    return (res <=0) ? STk_to_lower(c) : (utf8_char) res;
+    return (res <=0) ? c : (utf8_char) res;
   } else
     return tolower(c);
 }
 
 DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
 {
-  if (!CHARACTERP(c))  error_bad_char(c);
+  if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_CHARACTER(STk_to_fold((utf8_char) CHARACTER_VAL(c)));
 }
 
 /* ----------------------------------------------------------------------
- * UTF8 support for char-sets 
+ * UTF8 support for char-sets
  * ---------------------------------------------------------------------- */
 
 static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
