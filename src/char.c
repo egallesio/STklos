@@ -104,6 +104,44 @@ struct utf8_special_casing {
   utf8_char upper[3]; // array is padded with a 0 char
 };
 
+/* See https://www.unicode.org/L2/L1999/UnicodeData.html for a description of
+   character categories */
+
+enum utf8_category {
+  /* Normative Categories*/ 
+  _Lu_, /* Letter, Uppercase */
+  _Ll_, /* Letter, Lowercase */
+  _Lt_, /* Letter, Titlecase */
+  _Mn_, /* Mark, Non-Spacing */
+  _Mc_, /* Mark, Spacing Combining */
+  _Me_, /* Mark, Enclosing */
+  _Nd_, /* Number, Decimal Digit */
+  _Nl_, /* Number, Letter */
+  _No_, /* Number, Other */
+  _Zs_, /* Separator, Space */
+  _Zl_, /* Separator, Line */
+  _Zp_, /* Separator, Paragraph */
+  _Cc_, /* Other, Control */
+  _Cf_, /* Other, Format */
+  _Cs_, /* Other, Surrogate */
+  _Co_, /* Other, Private Use */
+  _Cn_, /* Other, Not Assigned (no characters in the file have this property) */
+
+  /* Informative Categories */
+  _Lm_, /* Letter, Modifier*/
+  _Lo_, /* Letter, Other*/
+  _Pc_, /* Punctuation, Connector*/
+  _Pd_, /* Punctuation, Dash*/
+  _Ps_, /* Punctuation, Open*/
+  _Pe_, /* Punctuation, Close*/
+  _Pi_, /* Punctuation, Initial quote (may behave like Ps or Pe depending on usage)*/
+  _Pf_, /* Punctuation, Final quote (may behave like Ps or Pe depending on usage)*/
+  _Po_, /* Punctuation, Other*/
+  _Sm_, /* Symbol, Math*/
+  _Sc_, /* Symbol, Currency*/
+  _Sk_, /* Symbol, Modifier*/
+  _So_, /* Symbol, Other*/
+};
 
 #include "utf8-tables.inc"
 
