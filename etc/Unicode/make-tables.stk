@@ -187,9 +187,10 @@
 
 (define (write-UnicodeDataBis)
   ;; Print the previous read tables
-  (let ((big (sort big (lambda (x y) (string<? (car x) (car y))))))
+  (let ((big (sort big (lambda (x y)
+                         (< (string->number (car x) 16)
+                            (string->number (car y) 16))))))
     ;; print the big table
-    (printf "struct utf8_descr { utf8_char key; utf8_char low; utf8_char up};\n")
     (printf "static struct utf8_descr big_table[] = {\n")
 
     (for-each (lambda (x)
@@ -198,10 +199,11 @@
                         (caddr x)
                         (cadddr x)))
               big)
-    (printf "};\n\n")
+    (printf "};\n")
+    (printf "static int big_table_length = ~a;\n\n" (length big))
 
     ;; print the category table
-    (printf "static enum utf8_category categories[]= {\n")
+    (printf "static enum utf8_category char_category[]= {\n")
     (let ((idx 0))
       (for-each (lambda (x)
                   (set! idx (1+ idx))
