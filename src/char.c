@@ -104,11 +104,19 @@ struct utf8_special_casing {
   utf8_char upper[3]; // array is padded with a 0 char
 };
 
-/* See https://www.unicode.org/L2/L1999/UnicodeData.html for a description of
-   character categories */
+
+/* The big table of characters */
+struct utf8_descr {
+  utf8_char key;   /* the character */
+  utf8_char low;   /* its  correponding lower case */
+  utf8_char up;    /* and upper case */
+};
 
 enum utf8_category {
-  /* Normative Categories*/ 
+  /* See https://www.unicode.org/L2/L1999/UnicodeData.html for a description of
+   *  character categories
+   */
+  /* Normative Categories*/
   _Lu_, /* Letter, Uppercase */
   _Ll_, /* Letter, Lowercase */
   _Lt_, /* Letter, Titlecase */
@@ -128,22 +136,56 @@ enum utf8_category {
   _Cn_, /* Other, Not Assigned (no characters in the file have this property) */
 
   /* Informative Categories */
-  _Lm_, /* Letter, Modifier*/
-  _Lo_, /* Letter, Other*/
-  _Pc_, /* Punctuation, Connector*/
-  _Pd_, /* Punctuation, Dash*/
-  _Ps_, /* Punctuation, Open*/
-  _Pe_, /* Punctuation, Close*/
-  _Pi_, /* Punctuation, Initial quote (may behave like Ps or Pe depending on usage)*/
-  _Pf_, /* Punctuation, Final quote (may behave like Ps or Pe depending on usage)*/
-  _Po_, /* Punctuation, Other*/
-  _Sm_, /* Symbol, Math*/
-  _Sc_, /* Symbol, Currency*/
-  _Sk_, /* Symbol, Modifier*/
-  _So_, /* Symbol, Other*/
+  _Lm_, /* Letter, Modifier */
+  _Lo_, /* Letter, Other */
+  _Pc_, /* Punctuation, Connector */
+  _Pd_, /* Punctuation, Dash */
+  _Ps_, /* Punctuation, Open */
+  _Pe_, /* Punctuation, Close */
+  _Pi_, /* Punctuation, Initial quote (may behave like Ps or Pe depending on usage) */
+  _Pf_, /* Punctuation, Final quote (may behave like Ps or Pe depending on usage) */
+  _Po_, /* Punctuation, Other */
+  _Sm_, /* Symbol, Math */
+  _Sc_, /* Symbol, Currency */
+  _Sk_, /* Symbol, Modifier */
+  _So_, /* Symbol, Other */
+
+  /* STklos fictive categories */
+  _Lo_Ll_ /* Lo and Ll such as #\xaa: FEMININE ORDINAL INDICATOR (#\ª) */
 };
 
 #include "utf8-tables.inc"
+
+
+static int search_character(unsigned int ch,
+                            struct utf8_descr table[],
+                            int len)
+{
+  unsigned int min = table[0].key;
+  unsigned int max = table[len-1].key;
+
+  if (min <= ch && ch <= max) {
+    /* search the value in the table by dichotomy */
+    int left, right, i;
+
+    left = 0; right = len-1;
+    do {
+      i = (left + right) / 2;
+      if (ch == table[i].key)
+        return i;
+      else
+        if (ch < table[i].key)
+          right = i-1;
+        else
+          left = i+1;
+    }
+    while (left <= right);
+  }
+  /* not found of not in the interval of special character => return -1 */
+  return -1;
+}
+
+
 
 static int search_conversion_table(unsigned int ch,
                                    struct utf8_conversion_char table[],
@@ -486,27 +528,50 @@ int STk_char_whitespacep(utf8_char ch)
 
 DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8)
-    return MAKE_BOOLEAN(-1 != search_ordered_list(CHARACTER_VAL(c),
-                                                  letters_table,
-                                                  letters_table_length));
+  if (STk_use_utf8) {
+    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+
+    if (idx >= 0) {
+      char c = char_category[idx];
+
+      return MAKE_BOOLEAN(c == _Lu_ || c == _Ll_ || c == _Lt_ ||
+                          c == _Lm_ || c == _Lm_ || c == _Lo_ ||
+                          c == _Nl_);      /* number-letters such as roman IX */
+    }
+    else
+      return STk_false;
+  }
   else
     return MAKE_BOOLEAN(isalpha(CHARACTER_VAL(c)));
 }
 
 
-DEFINE_PRIMITIVE("char-numeric?", char_isdigit, subr1, (SCM c)) {
+DEFINE_PRIMITIVE("char-numeric?", char_isdigit, subr1, (SCM c))
+{
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8)
-    return MAKE_BOOLEAN(-1 != search_conversion_table(CHARACTER_VAL(c),
-                                                      digits_table,
-                                                      digits_table_length));
+  if (STk_use_utf8) {
+    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+
+    if (idx >= 0) {
+      char c = char_category[idx];
+
+      return MAKE_BOOLEAN(c == _Nd_ || c == _Nl_ || c == _No_);
+    }
+    else
+      return STk_false;
+  }
   else
     return MAKE_BOOLEAN(isdigit(CHARACTER_VAL(c)));
 }
 
 
-DEFINE_PRIMITIVE("char-whitespace?", char_isspace, subr1, (SCM c)) {
+DEFINE_PRIMITIVE("char-whitespace?", char_isspace, subr1, (SCM c))
+{
+  /* We use here a specialized table rather than the big table, because
+   * category is not sufficient (we need to see the field bidir to determine
+   * if the character is a whitespace).
+   * Anyway this table is very small.
+   */
   if (!CHARACTERP(c)) error_bad_char(c);
   if (STk_use_utf8)
     return MAKE_BOOLEAN(-1 != search_ordered_list(CHARACTER_VAL(c),
@@ -516,23 +581,36 @@ DEFINE_PRIMITIVE("char-whitespace?", char_isspace, subr1, (SCM c)) {
     return MAKE_BOOLEAN(isspace(CHARACTER_VAL(c)));
 }
 
-DEFINE_PRIMITIVE("char-upper-case?", char_isupper, subr1, (SCM c)) {
+DEFINE_PRIMITIVE("char-upper-case?", char_isupper, subr1, (SCM c))
+{
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8)
-    return MAKE_BOOLEAN(-1 != search_conversion_table(CHARACTER_VAL(c),
-                                                      upper_table,
-                                                      upper_table_length));
+  if (STk_use_utf8) {
+    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+
+    if (idx >= 0)
+      return MAKE_BOOLEAN(char_category[idx] == _Lu_);
+    else
+      return STk_false;
+  }
   else
     return MAKE_BOOLEAN(isupper(CHARACTER_VAL(c)));
 }
 
 
-DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c)) {
+DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c))
+{
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8)
-    return MAKE_BOOLEAN(-1 != search_conversion_table(CHARACTER_VAL(c),
-                                                      lower_table,
-                                                      lower_table_length));
+  if (STk_use_utf8) {
+    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+
+    if (idx >= 0) {
+      char c = char_category[idx];
+
+      return MAKE_BOOLEAN(c == _Ll_ || c == _Lo_Ll_);
+    }
+    else
+      return STk_false;
+  }
   else
     return MAKE_BOOLEAN(islower(CHARACTER_VAL(c)));
 }
