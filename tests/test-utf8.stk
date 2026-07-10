@@ -329,6 +329,27 @@
         '()
         fail))
 
+;; ----------------------------------------------------------------------
+;; Tests after re-implementing the UTF8 tables  
+
+
+(test "letter and numeric at the same time !!"
+      #t
+      (let ((x #\x2167)) ;; Roman 8 #\Ⅷ is both a letter and a number
+        (and (char-numeric? x)
+             (char-alphabetic? x))))
+(test "weird numeric.1"
+      #t
+      (char-numeric? #\x2154)) ;; the character 2/3 #\⅔
+
+(test "weird numeric.2"
+      #t
+      (char-numeric? #\x2460)) ;; the rounded 1 #\①
+
+(test "weird numeric.3"
+      #t
+      (char-numeric? #\xb2))  ;; superscript 2
+
 
 (let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi
        (str (string-append "ab" (make-string 5 ffi) "cd")))
@@ -367,6 +388,10 @@
         (let ((cp (string-copy str)))
           (string-upcase! cp 1 4)
           cp)))
+
+
+
+
 
 ;;------------------------------------------------------------------
 (test-section-end)
