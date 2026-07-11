@@ -154,33 +154,35 @@ enum utf8_category {
   _Lo_Ll_ /* Lo and Ll such as #\xaa: FEMININE ORDINAL INDICATOR (#\ª) */
 };
 
+
+#define CH_UPPER(ct)   ((ct) == _Lu_)
+#define CH_LOWER(ct)   ((ct) == _Ll_ || (ct) == _Lo_Ll_)
+#define CH_LETTER(ct)  ((ct) == _Lu_ || (ct) == _Ll_ || (ct) == _Lt_ ||    \
+                        (ct) == _Lm_ || (ct) == _Lm_ || (ct) == _Lo_ ||    \
+                        (ct) == _Nl_) /* number-letters such as roman IX */
+
+
 #include "utf8-tables.inc"
 
 
-static int search_character(unsigned int ch,
-                            struct utf8_descr table[],
-                            int len)
+static int search_character(unsigned int ch)   /* search a character in big_table */
 {
-  unsigned int min = table[0].key;
-  unsigned int max = table[len-1].key;
+  /* search the value in the table by dichotomy */
+  int left, right, i;
 
-  if (min <= ch && ch <= max) {
-    /* search the value in the table by dichotomy */
-    int left, right, i;
-
-    left = 0; right = len-1;
-    do {
-      i = (left + right) / 2;
-      if (ch == table[i].key)
-        return i;
+  left = 0; right = big_table_length-1;
+  do {
+    i = (left + right) / 2;
+    if (ch == big_table[i].key)
+      return i;
+    else
+      if (ch < big_table[i].key)
+        right = i-1;
       else
-        if (ch < table[i].key)
-          right = i-1;
-        else
-          left = i+1;
-    }
-    while (left <= right);
+        left = i+1;
   }
+  while (left <= right);
+
   /* not found of not in the interval of special character => return -1 */
   return -1;
 }
@@ -529,14 +531,11 @@ int STk_char_whitespacep(utf8_char ch)
 DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);
   if (STk_use_utf8) {
-    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+    int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
       char c = char_category[idx];
-
-      return MAKE_BOOLEAN(c == _Lu_ || c == _Ll_ || c == _Lt_ ||
-                          c == _Lm_ || c == _Lm_ || c == _Lo_ ||
-                          c == _Nl_);      /* number-letters such as roman IX */
+      return MAKE_BOOLEAN(CH_LETTER(c));
     }
     else
       return STk_false;
@@ -580,10 +579,12 @@ DEFINE_PRIMITIVE("char-upper-case?", char_isupper, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
   if (STk_use_utf8) {
-    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+    int idx = search_character(CHARACTER_VAL(c));
 
-    if (idx >= 0)
-      return MAKE_BOOLEAN(char_category[idx] == _Lu_);
+    if (idx >= 0) {
+      char c = char_category[idx];
+      return MAKE_BOOLEAN(CH_UPPER(c));
+    }
     else
       return STk_false;
   }
@@ -596,12 +597,11 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
   if (STk_use_utf8) {
-    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
+    int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
       char c = char_category[idx];
-
-      return MAKE_BOOLEAN(c == _Ll_ || c == _Lo_Ll_);
+      return MAKE_BOOLEAN(CH_LOWER(c));
     }
     else
       return STk_false;
@@ -710,16 +710,16 @@ doc>
  */
 utf8_char STk_to_upper(utf8_char c) {
   if (STk_use_utf8) {
-    int res = search_conversion_table(c, lower_table, lower_table_length);
-    return (res <= 0) ? c : (utf8_char) res;   // -1: not a lowercase, 0 lower without upper
+    int idx = search_character(c);
+    return (idx <= 0) ? c: (utf8_char) big_table[idx].up;
   } else
     return toupper(c);
 }
 
 utf8_char STk_to_lower(utf8_char c) {
   if (STk_use_utf8) {
-    int res = search_conversion_table(c, upper_table, upper_table_length);
-    return (res <=0) ? c : (utf8_char) res;    // -1: not a lowercase, 0 lower without lower
+    int idx = search_character(c);
+    return (idx <= 0) ? c: (utf8_char) big_table[idx].low;
   } else
     return tolower(c);
 }
@@ -736,6 +736,8 @@ DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
   if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_CHARACTER(STk_to_lower((utf8_char) CHARACTER_VAL(c)));
 }
+
+
 /*
 <doc EXT char-foldcase
  * (char-foldcase char)
@@ -765,6 +767,38 @@ DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
  * UTF8 support for char-sets
  * ---------------------------------------------------------------------- */
 
+enum search_type { lowers, uppers, letters};
+
+// FIXME: static SCM make_list_from_big_table(enum search_type st)
+// FIXME: {
+// FIXME:   SCM res = STk_nil;
+// FIXME: 
+// FIXME:   for (int i = 0; i < big_table_length; i++) {
+// FIXME:     char c = char_category[i];
+// FIXME: 
+// FIXME:     switch (st) {
+// FIXME:       case lowers:
+// FIXME:         if (c == _Ll_ || c == _Lo_Ll_)
+// FIXME:           res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+// FIXME:         break;
+// FIXME:       case uppers:
+// FIXME:         if (c == _Lu_)
+// FIXME:           res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+// FIXME:         break;
+// FIXME:       case letters:
+// FIXME:         if (c == _Lu_ || c == _Ll_ || c == _Lt_ ||
+// FIXME:             c == _Lm_ || c == _Lm_ || c == _Lo_ ||
+// FIXME:             c == _Nl_)
+// FIXME:           res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+// FIXME:         break;
+// FIXME: 
+// FIXME:     }
+// FIXME:   }
+// FIXME:   return res;
+// FIXME: }
+
+
+
 static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
 {
   SCM lst = STk_nil;
@@ -788,23 +822,46 @@ static inline SCM make_char_list2(utf8_char *tab, int len)
 
 DEFINE_PRIMITIVE("%uppers-list", uppers_list, subr0, (void))
 {
-  return make_char_list1(upper_table, upper_table_length);
-}
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    char c = char_category[i];
+    if (CH_UPPER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+ }
+
+
 
 DEFINE_PRIMITIVE("%lowers-list", lowers_list, subr0, (void))
 {
-  return make_char_list1(lower_table, lower_table_length);
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    char c = char_category[i];
+    if (CH_LOWER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
 }
+
+
+DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
+{
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    char c = char_category[i];
+    if (CH_LETTER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+}
+
 
 DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
 {
   return make_char_list1(digits_table, digits_table_length);
 }
 
-DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
-{
-  return make_char_list2(letters_table, letters_table_length);
-}
 
 DEFINE_PRIMITIVE("%spaces-list", spaces_list, subr0, (void))
 {

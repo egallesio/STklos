@@ -368,6 +368,9 @@
               (char-numeric? x)
               (digit-value x))))
 
+(test "FEMININE ORDINAL INDICATOR  (Lo)"
+      #t
+      (char-alphabetic? #\xaa))
 ;; --------------------
 (let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi
        (str (string-append "ab" (make-string 5 ffi) "cd")))

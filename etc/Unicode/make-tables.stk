@@ -25,9 +25,9 @@
 
 (define all          '())
 (define digits       '())
-(define lower        '())
-(define upper        '())
-(define letters      '())
+(define lower        '())       ;; FIXME:
+(define upper        '())       ;; FIXME:
+(define letters      '())       ;; FIXME:
 (define spaces       '())
 (define blanks       '())
 (define folds        '())
@@ -174,27 +174,27 @@
               (set! all (cons char all)))
 
             (cond
-              ((equal? category "Lu")                 ;; Letter, Uppercase
-               (let ((v (if (string=? low "") "0" low)))
-                 (set! upper (cons (cons char v) upper))
-                 (set! letters (cons char letters))))
+;;//              ((equal? category "Lu")                 ;; Letter, Uppercase
+;;//               (let ((v (if (string=? low "") "0" low)))
+;;//                 (set! upper (cons (cons char v) upper))
+;;//                 (set! letters (cons char letters))))
+;;//
+;;//              ((equal? category "Ll")                  ;; Letter, Lowercase
+;;//               (let ((v (if (string=? up "") "0" up)))
+;;//                 (set! lower (cons (cons char v) lower))
+;;//                 (set! letters (cons char letters))))
 
-              ((equal? category "Ll")                  ;; Letter, Lowercase
-               (let ((v (if (string=? up "") "0" up)))
-                 (set! lower (cons (cons char v) lower))
-                 (set! letters (cons char letters))))
-
-              ((equal? category "Lo")                  ;; Letter, Other
-               (when (or (string-find? "<super>" decomp)
-                         (string-find? "<sub>"   decomp))
-                 ;; FIXME: Sufficient?
-                 (set! lower (cons (cons char "0") lower)))
-               (set! letters (cons char letters)))
+;;//              ((equal? category "Lo")                  ;; Letter, Other
+;;//               (when (or (string-find? "<super>" decomp)
+;;//                         (string-find? "<sub>"   decomp))
+;;//                 ;; FIXME: Sufficient?
+;;//                 (set! lower (cons (cons char "0") lower)))
+;;//               (set! letters (cons char letters)))
 
               ((equal? category "Lt")                  ;; Titlecase
-               (set! letters (cons char letters))
+               #;(set! letters (cons char letters))
                (set! titlecase (cons char titlecase))
-               (set! lower (cons (cons char low) lower)))
+               #;(set! lower (cons (cons char low) lower)))
 
               ((equal? category "Lm")                  ;; Modifier
                (set! letters (cons char letters))
@@ -231,10 +231,10 @@
 (define (write-UnicodeData)
   ;; Print the previous read table
   (printf "#ifndef BASE_CHAR_SET\n")
-  (print-assoc upper   "upper_table")
-  (print-assoc lower   "lower_table")
+                                        ; (print-assoc upper   "upper_table")
+                                        ; (print-assoc lower   "lower_table")
   (print-assoc digits   "digits_table")
-  (print-list letters   "letters_table")
+                                        ; (print-list letters   "letters_table")
   (print-list spaces    "spaces_table")
   (printf "#else\n")
   (print-list all       "all_table")
@@ -253,25 +253,27 @@
                             (string->number (car y) 16))))))
     ;; print the big table
     (printf "static struct utf8_descr big_table[] = {\n")
-
-    (for-each (lambda (x)
-                (printf "  {0x~a, 0x~a, 0x~a},\n"
-                        (car x)
-                        (caddr x)
-                        (cadddr x)))
-              big)
-    (printf "};\n")
-    (printf "static int big_table_length = ~a;\n\n" (length big))
-
-    ;; print the category table
-    (printf "static enum utf8_category char_category[]= {\n")
-    (let ((idx 0))
+    (let ((cpt 0))
       (for-each (lambda (x)
-                  (set! idx (1+ idx))
-                  (printf "~a,~a" (cadr x) (if (= (modulo idx 10) 9) "\n" " ")))
+                  (printf "  {0x~a, 0x~a, 0x~a},"
+                          (car x)
+                          (caddr x)
+                          (cadddr x))
+                  (when (= (modulo cpt 2) 1) (newline))
+                  (set! cpt (fx+ 1 cpt)))
                 big))
-    (printf "};\n\n")
-    (printf "#endif // BASE_CHAR_SET\n\n")))
+    (printf "};\n")
+    (printf "static int big_table_length = ~a;\n\n" (length big)))
+
+  ;; print the category table
+  (printf "static enum utf8_category char_category[]= {\n")
+  (let ((cpt 0))
+    (for-each (lambda (x)
+                (printf "~a,~a" (cadr x) (if (= (modulo cpt 10) 9) "\n" " "))
+                (set! cpt (1+ cpt)))
+              big))
+  (printf "};\n\n")
+  (printf "#endif // BASE_CHAR_SET\n\n"))
 
 
 
