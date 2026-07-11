@@ -108,7 +108,7 @@
                  (up       (vector-ref res 12))
                  (low      (vector-ref res 13))
                  (tag      (cond
-                            ((and (string=? "Lo")
+                            ((and (string=? category "Lo")
                                   (or (string-find? "<super>" decomp)
                                       (string-find? "<sub>"   decomp)))
                              ;; Letter other which are also lowercase
@@ -123,6 +123,52 @@
                                   (if (string=? low "") char low)
                                   (if (string=? up  "") char up))
                             big))
+
+            ;; --------
+            (case tag
+              ;; Normative categories
+              ((_Lu_) 'nothing)                 ;; Letter, Uppercase
+              ((_Ll_) 'nothing)                 ;; Letter, Lowercase
+              ((_Lt_) 'nothing)                 ;; Letter, Titlecase
+              ((_Mn_) 'nothing)                 ;; Mark, Non-Spacing
+              ((_Mc_) 'nothing)                 ;; Mark, Spacing Combining
+              ((_Me_) 'nothing)                 ;; Mark, Enclosing
+              ((_Nd_)                           ;; Number, Decimal Digit
+               ;; Add char in digit table
+               (set! digits
+                     (cons (cons char (string->number dvalue))
+                           digits)))
+              ((_Nl_) 'nothing)                 ;; Number, Letter
+              ((_No_) 'nothing)                 ;; Number, Other
+              ((_Zs_) 'nothing)                 ;; Separator, Space
+              ((_Zl_) 'nothing)                 ;; Separator, Line
+              ((_Zp_) 'nothing)                 ;; Separator, Paragraph
+              ((_Cc_) 'nothing)                 ;; Other, Control
+              ((_Cf_) 'nothing)                 ;; Other, Format
+              ((_Cs_) 'nothing)                 ;; Other, Surrogate
+              ((_Co_) 'nothing)                 ;; Other, Private Use
+              ((_Cn_) 'nothing)                 ;; Other, Not Assigned (not used)
+
+              ;; Informative categories
+              ((_Lm_) 'nothing)                 ;; Letter, Modifier
+              ((_Lo_) 'nothing)                 ;; Letter, Other
+              ((_Pc_) 'nothing)                 ;; Punctuation, Connector
+              ((_Pd_) 'nothing)                 ;; Punctuation, Dash
+              ((_Ps_) 'nothing)                 ;; Punctuation, Open
+              ((_Pe_) 'nothing)                 ;; Punctuation, Close
+              ((_Pi_) 'nothing)                 ;; Punctuation, Initial quote
+              ((_Pf_) 'nothing)                 ;; Punctuation, Final quote
+              ((_Po_) 'nothing)                 ;; Punctuation, Other
+              ((_Sm_) 'nothing)                 ;; Symbol, Math
+              ((_Sc_) 'nothing)                 ;; Symbol, Currency
+              ((_Sk_) 'nothing)                 ;; Symbol, Modifier
+              ((_So_) 'nothing)                 ;; Symbol, Other
+
+              ;; STklos fictive categories
+              ((_Lo_Ll_) 'nothing)
+              (else
+               (die (format "Unknown category (~S) seen in ~S" tag l))))
+
 
             (unless (string=? category "Cs") ;; Not a character: (surrogate pair)
               (set! all (cons char all)))
@@ -162,8 +208,15 @@
                         '("Sm" "Sc" "Sk" "So"))
                (set! symbols (cons char symbols)))
 
-              ((equal? category "Nd")                ;; Digit
-               (set! digits (cons (cons char (string->number dvalue)) digits)))
+;;//              ((equal? category "Nd")                ;; Digit
+;;//               (set! digits (cons (cons char (string->number dvalue)) digits)))
+
+              ((equal? category "No")                ;; Number other
+;;               (when  (or (string-find? "<super>" decomp)
+;;                          (string-find? "<sub>"   decomp))
+;;                 (unless (string=? dvalue "")
+;;                   (set! digits (cons (cons char (string->number dvalue)) digits))))
+               )
 
               ((or (member category                 ;; White Space
                             '("Zs" "Zl" "Zp"))

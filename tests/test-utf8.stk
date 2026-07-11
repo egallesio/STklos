@@ -330,27 +330,45 @@
         fail))
 
 ;; ----------------------------------------------------------------------
-;; Tests after re-implementing the UTF8 tables  
+;; Tests after re-implementing the UTF8 tables
 
 
-(test "letter and numeric at the same time !!"
-      #t
-      (let ((x #\x2167)) ;; Roman 8 #\Ⅷ is both a letter and a number
-        (and (char-numeric? x)
-             (char-alphabetic? x))))
-(test "weird numeric.1"
-      #t
-      (char-numeric? #\x2154)) ;; the character 2/3 #\⅔
+;; Roman 8 #\Ⅷ is both a letter and a number
+;; However except Chez Scheme, which consider it as numeric and
+;; alphabetic, all other Schemes seems to differenciate them
+;; R7Rs seems to restrict numerics to "Nd" category only.
+;; Moreover, we'll have problem with (digit-value #\Ⅻ) since
+;; it should return 12 (Note: chez does not have
 
-(test "weird numeric.2"
-      #t
-      (char-numeric? #\x2460)) ;; the rounded 1 #\①
+(test "Roman numeral.1"
+      '(#t #f #f)
+      (let ((x #\x2167)) ;; Roman 8 #\Ⅷ 
+        (list (char-alphabetic? x)
+              (char-numeric? x)
+              (digit-value x))))
 
-(test "weird numeric.3"
-      #t
-      (char-numeric? #\xb2))  ;; superscript 2
+(test "Fraction.1"
+        '(#f #f #f)
+        (let ((x #\x2154)) ;; Two third  #\⅔) 
+          (list (char-alphabetic? x)
+                (char-numeric? x)
+                (digit-value x))))
 
+(test "Rounded digit.1"
+        '(#f #f #f)
+        (let ((x #\x2460)) ;; the rounded 1 #\①
+          (list (char-alphabetic? x)
+                (char-numeric? x)
+                (digit-value x))))
 
+(test "Superscript"
+      '(#f #f #f)
+      (let ((x #\xb2))  ;; superscript 2
+        (list (char-alphabetic? x)
+              (char-numeric? x)
+              (digit-value x))))
+
+;; --------------------
 (let* ((ffi #\xfb03)  ;; The ligature ffi (1 char) which folds to ffi
        (str (string-append "ab" (make-string 5 ffi) "cd")))
   (test "growing foldcase.1"

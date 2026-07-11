@@ -546,20 +546,15 @@ DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
 }
 
 
-DEFINE_PRIMITIVE("char-numeric?", char_isdigit, subr1, (SCM c))
-{
+DEFINE_PRIMITIVE("char-numeric?", char_isdigit, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8) {
-    int idx = search_character(CHARACTER_VAL(c), big_table, big_table_length);
-
-    if (idx >= 0) {
-      char c = char_category[idx];
-
-      return MAKE_BOOLEAN(c == _Nd_ || c == _Nl_ || c == _No_);
-    }
-    else
-      return STk_false;
-  }
+  if (STk_use_utf8)
+    /* We don't use here the big table since we have an association list
+     * for the digit-value primitive. Furthermore, this table is shorter
+     */
+    return MAKE_BOOLEAN(-1 != search_conversion_table(CHARACTER_VAL(c),
+                                                      digits_table,
+                                                      digits_table_length));
   else
     return MAKE_BOOLEAN(isdigit(CHARACTER_VAL(c)));
 }
