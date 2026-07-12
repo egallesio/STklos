@@ -75,17 +75,17 @@ DEFINE_PRIMITIVE("%title-case-list", title_case_list, subr0, (void))
 //   return make_char_list(blanks_table, blanks_table_length);
 // }
 
-DEFINE_PRIMITIVE("%valid-char-code?", valid_char_code, subr1, (SCM val))
-{
-  int c;
-
-  if (!INTP(val)) STk_error("bad character code value ~S", val);
-  c = INT_VAL(val);
-
-  return MAKE_BOOLEAN((STk_use_utf8)?
-                      STk_valid_utf8_char_codep(c, all_table, all_table_length):
-                      (c >= 0 && c < 256));
-}
+//DEFINE_PRIMITIVE("%valid-char-code?", valid_char_code, subr1, (SCM val))
+//{
+//  int c;
+//
+//  if (!INTP(val)) STk_error("bad character code value ~S", val);
+//  c = INT_VAL(val);
+//
+//  return MAKE_BOOLEAN((STk_use_utf8)?
+//                      STk_valid_utf8_char_codep(c, all_table, all_table_length):
+//                      (c >= 0 && c < 256));
+//}
 
 
 MODULE_ENTRY_START("scheme/charset")
@@ -98,7 +98,7 @@ MODULE_ENTRY_START("scheme/charset")
   ADD_PRIMITIVE_IN_MODULE(title_case_list, module);
   // ADD_PRIMITIVE_IN_MODULE(blanks_list, module);
 
-  ADD_PRIMITIVE_IN_MODULE(valid_char_code, module);
+  // ADD_PRIMITIVE_IN_MODULE(valid_char_code, module);
 
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);

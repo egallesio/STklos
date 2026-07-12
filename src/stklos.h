@@ -443,7 +443,6 @@ int STk_char_whitespacep(utf8_char ch);
 
 char *STk_char2string(int c);
 int STk_string2char(char *s);
-int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len);
 int STk_init_char(void);
 
 

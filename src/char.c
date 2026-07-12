@@ -221,30 +221,6 @@ static int search_conversion_table(unsigned int ch,
   return -1;
 }
 
-static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
-  unsigned int min = table[0];
-  unsigned int max = table[len-1];
-
-  if (min <= ch && ch <= max) {
-    /* seach the value in the table by dichotomy */
-    int left, right, i;
-
-    left = 0; right = len-1;
-    do {
-      i = (left + right) / 2;
-      if (ch == table[i])
-        return table[i];
-      else
-        if (ch < table[i])
-          right = i-1;
-        else
-          left = i+1;
-    }
-    while (left <= right);
-  }
-  /* not found of not in the interval of special character => return -1 */
-  return -1;
-}
 
 static int search_special_list(utf8_char ch) {
   unsigned int min = specials[0].key;
@@ -354,14 +330,6 @@ int STk_full_fold(utf8_char in, utf8_char res[3])
   }
   return len;
 }
-
-
-// Public version of search_ordered_list
-int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len)
-{
-  return search_ordered_list(ch, table, len);
-}
-
 
 /*===========================================================================*\
  *
@@ -768,11 +736,73 @@ DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
   return MAKE_CHARACTER(STk_to_fold((utf8_char) CHARACTER_VAL(c)));
 }
 
+
+/*
+<doc EXT char-utf8-category
+ * (char-utf8-category ch)
+ *
+ * Return the general UTF8 category associated to a character as a symbol.
+ * For a complete description of the values this function can return, see
+ * https://www.unicode.org/L2/L1999/UnicodeData.html[Unicode documentation].
+ *
+ * @lisp
+ * (char-utf8-category #\\a)     => Ll     ;; lowercase letter
+ * (char-utf8-category #\\A)     => Lu     ;; uppercase letter
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("char-utf8-category", char_utf8_category, subr1, (SCM ch))
+{
+  if (!CHARACTERP(ch)) error_bad_char(ch);
+  if (STk_use_utf8) {
+    int idx = search_character(CHARACTER_VAL(ch));
+
+    if (idx >= 0) {
+      switch (big_table[idx].cat) {
+        case _Lu_: return STk_intern("Lu");
+        case _Ll_: return STk_intern("Ll");
+        case _Lt_: return STk_intern("Lt");
+        case _Mn_: return STk_intern("Mn");
+        case _Mc_: return STk_intern("Mc");
+        case _Me_: return STk_intern("Me");
+        case _Nd_: return STk_intern("Nd");
+        case _Nl_: return STk_intern("Nl");
+        case _No_: return STk_intern("No");
+        case _Zs_: return STk_intern("Zs");
+        case _Zl_: return STk_intern("Zl");
+        case _Zp_: return STk_intern("Zp");
+        case _Cc_: return STk_intern("Cc");
+        case _Cf_: return STk_intern("Cf");
+        case _Cs_: return STk_intern("Cs");
+        case _Co_: return STk_intern("Co");
+        case _Cn_: return STk_intern("Cn");
+
+        case _Lm_: return STk_intern("Lm");
+        case _Lo_: return STk_intern("Lo");
+        case _Pc_: return STk_intern("Pc");
+        case _Pd_: return STk_intern("Pd");
+        case _Ps_: return STk_intern("Ps");
+        case _Pe_: return STk_intern("Pe");
+        case _Pi_: return STk_intern("Pi");
+        case _Pf_: return STk_intern("Pf");
+        case _Po_: return STk_intern("Po");
+        case _Sm_: return STk_intern("Sm");
+        case _Sc_: return STk_intern("Sc");
+        case _Sk_: return STk_intern("Sk");
+        case _So_: return STk_intern("So");
+
+        case _Lo_Ll_: return STk_intern("Lo");   // "Lo_ll"
+        case _Cc_Ws_: return STk_intern("Cc");   // "Cc_Ws"
+      }
+    }
+  }
+  return STk_false;
+}
+
+
 /* ----------------------------------------------------------------------
  * UTF8 support for char-sets
  * ---------------------------------------------------------------------- */
-
-enum search_type { lowers, uppers, letters};
 
 static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
 {
@@ -792,6 +822,19 @@ static inline SCM make_char_list2(utf8_char *tab, int len)
     lst = STk_cons(MAKE_CHARACTER(tab[i]), lst);
   }
   return lst;
+}
+
+
+DEFINE_PRIMITIVE("%valid-char-code?", valid_char_code, subr1, (SCM val))
+{
+  int c;
+
+  if (!INTP(val)) STk_error("bad character code value ~S", val);
+  c = INT_VAL(val);
+
+  return MAKE_BOOLEAN((STk_use_utf8)?
+                      (search_character(c) != -1):
+                      (c >= 0 && c < 256));
 }
 
 
@@ -860,70 +903,6 @@ DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
 }
 
 
-/*
-<doc EXT char-utf8-category
- * (char-utf8-category ch)
- *
- * Return the general UTF8 category associated to a character as a symbol.
- * For a complete description of the values this function can return, see
- * https://www.unicode.org/L2/L1999/UnicodeData.html[Unicode documentation].
- *
- * @lisp
- * (char-utf8-category #\\a)     => Ll     ;; lowercase letter
- * (char-utf8-category #\\A)     => Lu     ;; uppercase letter
- * @end lisp
-doc>
-*/
-
-DEFINE_PRIMITIVE("char-utf8-category", char_utf8_category, subr1, (SCM ch))
-{
-  if (!CHARACTERP(ch)) error_bad_char(ch);
-  if (STk_use_utf8) {
-    int idx = search_character(CHARACTER_VAL(ch));
-
-    if (idx >= 0) {
-      switch (big_table[idx].cat) {
-        case _Lu_: return STk_intern("Lu");
-        case _Ll_: return STk_intern("Ll");
-        case _Lt_: return STk_intern("Lt");
-        case _Mn_: return STk_intern("Mn");
-        case _Mc_: return STk_intern("Mc");
-        case _Me_: return STk_intern("Me");
-        case _Nd_: return STk_intern("Nd");
-        case _Nl_: return STk_intern("Nl");
-        case _No_: return STk_intern("No");
-        case _Zs_: return STk_intern("Zs");
-        case _Zl_: return STk_intern("Zl");
-        case _Zp_: return STk_intern("Zp");
-        case _Cc_: return STk_intern("Cc");
-        case _Cf_: return STk_intern("Cf");
-        case _Cs_: return STk_intern("Cs");
-        case _Co_: return STk_intern("Co");
-        case _Cn_: return STk_intern("Cn");
-
-        case _Lm_: return STk_intern("Lm");
-        case _Lo_: return STk_intern("Lo");
-        case _Pc_: return STk_intern("Pc");
-        case _Pd_: return STk_intern("Pd");
-        case _Ps_: return STk_intern("Ps");
-        case _Pe_: return STk_intern("Pe");
-        case _Pi_: return STk_intern("Pi");
-        case _Pf_: return STk_intern("Pf");
-        case _Po_: return STk_intern("Po");
-        case _Sm_: return STk_intern("Sm");
-        case _Sc_: return STk_intern("Sc");
-        case _Sk_: return STk_intern("Sk");
-        case _So_: return STk_intern("So");
-
-        case _Lo_Ll_: return STk_intern("Lo");   // "Lo_ll"
-        case _Cc_Ws_: return STk_intern("Cc");   // "Cc_Ws"
-      }
-    }
-  }
-  return STk_false;
-}
-
-
 
 int STk_init_char(void)
 {
@@ -956,8 +935,11 @@ int STk_init_char(void)
   ADD_PRIMITIVE(char_upcase);
   ADD_PRIMITIVE(char_downcase);
   ADD_PRIMITIVE(char_foldcase);
+  ADD_PRIMITIVE(char_utf8_category);
+
 
   /* Support for char-sets */
+  ADD_PRIMITIVE(valid_char_code);
   ADD_PRIMITIVE(uppers_list);
   ADD_PRIMITIVE(lowers_list);
   ADD_PRIMITIVE(digits_list);
@@ -965,8 +947,8 @@ int STk_init_char(void)
   ADD_PRIMITIVE(digits_list);
   ADD_PRIMITIVE(blanks_list);
   ADD_PRIMITIVE(all_list);
-  
 
-  ADD_PRIMITIVE(char_utf8_category);
+
+
   return TRUE;
 }
