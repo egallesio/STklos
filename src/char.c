@@ -144,7 +144,8 @@ enum utf8_category {
   _So_, /* Symbol, Other */
 
   /* STklos fictive categories */
-  _Lo_Ll_ /* Lo and Ll such as #\xaa: FEMININE ORDINAL INDICATOR (#\ª) */
+  _Lo_Ll_, /* Lo and Ll such as #\xaa: FEMININE ORDINAL INDICATOR (#\ª) */
+  _Cc_Ws_  /* A control character which is also a white space */
 };
 
 /* The big table of characters */
@@ -152,7 +153,7 @@ struct utf8_descr {
   utf8_char key;            /* the character */
   utf8_char low;            /* its  correponding lower case */
   utf8_char up;             /* and upper case */
-  enum utf8_category cat;   /* its Unicode catgory */
+  enum utf8_category cat;   /* its Unicode category */
 };
 
 #define CH_UPPER(ct)   ((ct) == _Lu_)
@@ -160,7 +161,8 @@ struct utf8_descr {
 #define CH_LETTER(ct)  ((ct) == _Lu_ || (ct) == _Ll_ || (ct) == _Lo_Ll_ ||   \
                         (ct) == _Lt_ || (ct) == _Lm_ || (ct) == _Lo_    ||   \
                         (ct) == _Nl_) /* number-letters such as roman IX */
-
+#define CH_WHITESP(ct) ((ct) == _Zs_ || (ct) == _Zl_ || (ct) == _Zp_   ||    \
+                        (ct) == _Cc_Ws_) /* controls which are spaces */
 
 #include "utf8-tables.inc"
 
@@ -522,12 +524,6 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(last,*argv) < 0))
  * and carriage return.
 doc>
 */
-int STk_char_whitespacep(utf8_char ch)
-{
-  return (search_ordered_list(ch, spaces_table, spaces_table_length) != -1);
-}
-
-
 DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);
   if (STk_use_utf8) {
@@ -559,21 +555,28 @@ DEFINE_PRIMITIVE("char-numeric?", char_isdigit, subr1, (SCM c)) {
 }
 
 
+int STk_char_whitespacep(utf8_char ch)
+{
+  if (STk_use_utf8) {
+    int idx = search_character(ch);
+
+    if (idx >= 0) {
+      char c = big_table[idx].cat;
+      return CH_WHITESP(c);
+    }
+    else
+      return 0;
+  }
+  else
+    return isspace(ch);
+}
+
 DEFINE_PRIMITIVE("char-whitespace?", char_isspace, subr1, (SCM c))
 {
-  /* We use here a specialized table rather than the big table, because
-   * category is not sufficient (we need to see the field bidir to determine
-   * if the character is a whitespace).
-   * Anyway this table is very small.
-   */
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8)
-    return MAKE_BOOLEAN(-1 != search_ordered_list(CHARACTER_VAL(c),
-                                                  spaces_table,
-                                                  spaces_table_length));
-  else
-    return MAKE_BOOLEAN(isspace(CHARACTER_VAL(c)));
+  return  MAKE_BOOLEAN(STk_char_whitespacep(CHARACTER_VAL(c)));
 }
+
 
 DEFINE_PRIMITIVE("char-upper-case?", char_isupper, subr1, (SCM c))
 {
@@ -768,36 +771,6 @@ DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
  * ---------------------------------------------------------------------- */
 
 enum search_type { lowers, uppers, letters};
-
-// FIXME: static SCM make_list_from_big_table(enum search_type st)
-// FIXME: {
-// FIXME:   SCM res = STk_nil;
-// FIXME: 
-// FIXME:   for (int i = 0; i < big_table_length; i++) {
-// FIXME:     char c = char_category[i];
-// FIXME: 
-// FIXME:     switch (st) {
-// FIXME:       case lowers:
-// FIXME:         if (c == _Ll_ || c == _Lo_Ll_)
-// FIXME:           res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
-// FIXME:         break;
-// FIXME:       case uppers:
-// FIXME:         if (c == _Lu_)
-// FIXME:           res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
-// FIXME:         break;
-// FIXME:       case letters:
-// FIXME:         if (c == _Lu_ || c == _Ll_ || c == _Lt_ ||
-// FIXME:             c == _Lm_ || c == _Lm_ || c == _Lo_ ||
-// FIXME:             c == _Nl_)
-// FIXME:           res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
-// FIXME:         break;
-// FIXME: 
-// FIXME:     }
-// FIXME:   }
-// FIXME:   return res;
-// FIXME: }
-
-
 
 static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
 {

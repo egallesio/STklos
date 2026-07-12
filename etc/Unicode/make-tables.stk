@@ -113,6 +113,20 @@
                                       (string-find? "<sub>"   decomp)))
                              ;; Letter other which are also lowercase
                              '_Lo_Ll_)
+                            ((and (string=? category "Cc")
+                                  (member char '(;; Cc + bidir="B"
+                                                 "000A"       ;; LINE FEED (LF)
+                                                 "000D"       ;; CARRIAGE RETURN (CR)
+                                                 "0085"       ;; NEXT LINE (NEL)
+
+                                                 ;; Cc + bidir="S"
+                                                 "0009"       ;; CHARACTER TABULATION
+                                                 "000B"       ;; LINE TABULATION
+
+                                                 ;; Cc + bidir="WS"
+                                                 "000C")))    ;; FORM FEED (FF)
+                             ;; A Control which is a space
+                             '_Cc_Ws_)
                             (else (symbol-append '_ category '_)))))
 
             ;; (eprintf "res = ~S\n" res)
@@ -166,6 +180,7 @@
 
               ;; STklos fictive categories
               ((_Lo_Ll_) 'nothing)
+              ((_Cc_Ws_) 'nothing)
               (else
                (die (format "Unknown category (~S) seen in ~S" tag l))))
 
@@ -235,7 +250,7 @@
                                         ; (print-assoc lower   "lower_table")
   (print-assoc digits   "digits_table")
                                         ; (print-list letters   "letters_table")
-  (print-list spaces    "spaces_table")
+                                        ; (print-list spaces    "spaces_table")
   (printf "#else\n")
   (print-list all       "all_table")
   (print-list puncts    "puncts_table")
