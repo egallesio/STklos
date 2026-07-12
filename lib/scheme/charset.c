@@ -1,7 +1,7 @@
 /*
  * charset.c   -- Implementation of (scheme charset)
  *
- * Copyright © 2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2023-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,10 +50,10 @@ static inline SCM make_char_list(utf8_char *tab, int len)
 }
 
 
-DEFINE_PRIMITIVE("%all-list", all_list, subr0, (void))
-{
-  return make_char_list(all_table, all_table_length);
-}
+// DEFINE_PRIMITIVE("%all-list", all_list, subr0, (void))
+// {
+//   return make_char_list(all_table, all_table_length);
+// }
 
 DEFINE_PRIMITIVE("%punctuations-list", punctuations_list, subr0, (void))
 {
@@ -70,10 +70,10 @@ DEFINE_PRIMITIVE("%title-case-list", title_case_list, subr0, (void))
   return make_char_list(titlecase_table, titlecase_table_length);
 }
 
-DEFINE_PRIMITIVE("%blanks-list", blanks_list, subr0, (void))
-{
-  return make_char_list(blanks_table, blanks_table_length);
-}
+// DEFINE_PRIMITIVE("%blanks-list", blanks_list, subr0, (void))
+// {
+//   return make_char_list(blanks_table, blanks_table_length);
+// }
 
 DEFINE_PRIMITIVE("%valid-char-code?", valid_char_code, subr1, (SCM val))
 {
@@ -92,11 +92,11 @@ MODULE_ENTRY_START("scheme/charset")
 {
   SCM module = STk_create_module(STk_intern("scheme/charset"));
 
-  ADD_PRIMITIVE_IN_MODULE(all_list, module);
+  // ADD_PRIMITIVE_IN_MODULE(all_list, module);
   ADD_PRIMITIVE_IN_MODULE(punctuations_list, module);
   ADD_PRIMITIVE_IN_MODULE(symbols_list, module);
   ADD_PRIMITIVE_IN_MODULE(title_case_list, module);
-  ADD_PRIMITIVE_IN_MODULE(blanks_list, module);
+  // ADD_PRIMITIVE_IN_MODULE(blanks_list, module);
 
   ADD_PRIMITIVE_IN_MODULE(valid_char_code, module);
 

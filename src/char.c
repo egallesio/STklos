@@ -164,6 +164,8 @@ struct utf8_descr {
 #define CH_WHITESP(ct) ((ct) == _Zs_ || (ct) == _Zl_ || (ct) == _Zp_   ||    \
                         (ct) == _Cc_Ws_) /* controls which are spaces */
 
+#define CH_BLANK(ct)    ((ct) == _Zs_) /* SRFI 14 differenciates blans and spaces */
+
 #include "utf8-tables.inc"
 
 
@@ -828,7 +830,30 @@ DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
   return res;
 }
 
+DEFINE_PRIMITIVE("%blanks-list", blanks_list, subr0, (void))
+{
+  SCM res = STk_nil;
 
+  for (int i = 0; i < big_table_length; i++) {
+    char c = big_table[i].cat;
+    if (CH_BLANK(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+}
+
+
+DEFINE_PRIMITIVE("%all-list", all_list, subr0, (void))
+{
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+}
+
+
+// FIXME: intern
 DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
 {
   return make_char_list1(digits_table, digits_table_length);
@@ -853,7 +878,6 @@ doc>
 DEFINE_PRIMITIVE("char-utf8-category", char_utf8_category, subr1, (SCM ch))
 {
   if (!CHARACTERP(ch)) error_bad_char(ch);
-  // FIXME
   if (STk_use_utf8) {
     int idx = search_character(CHARACTER_VAL(ch));
 
@@ -939,6 +963,9 @@ int STk_init_char(void)
   ADD_PRIMITIVE(digits_list);
   ADD_PRIMITIVE(letters_list);
   ADD_PRIMITIVE(digits_list);
+  ADD_PRIMITIVE(blanks_list);
+  ADD_PRIMITIVE(all_list);
+  
 
   ADD_PRIMITIVE(char_utf8_category);
   return TRUE;

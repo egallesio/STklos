@@ -252,11 +252,11 @@
                                         ; (print-list letters   "letters_table")
                                         ; (print-list spaces    "spaces_table")
   (printf "#else\n")
-  (print-list all       "all_table")
+                                        ; (print-list all       "all_table")
   (print-list puncts    "puncts_table")
   (print-list symbols   "symbols_table")
   (print-list titlecase "titlecase_table")
-  (print-list blanks    "blanks_table")
+                                        ; (print-list blanks    "blanks_table")
   (printf "#endif // ifndef BASE_CHAR_SET\n"))
 
 
