@@ -64,6 +64,11 @@
   (printf "};\n")
   (printf "static int ~A_length = ~A;\n\n" name (length lst)))
 
+
+
+
+
+
 (define (print-list lst name)
   (printf "static utf8_char ~A[] = {" name)
   (let Loop ((i 0)
@@ -248,7 +253,7 @@
   (printf "#ifndef BASE_CHAR_SET\n")
                                         ; (print-assoc upper   "upper_table")
                                         ; (print-assoc lower   "lower_table")
-  (print-assoc digits   "digits_table")
+                                        ; (print-assoc digits   "digits_table")
                                         ; (print-list letters   "letters_table")
                                         ; (print-list spaces    "spaces_table")
   (printf "#else\n")
@@ -260,13 +265,16 @@
   (printf "#endif // ifndef BASE_CHAR_SET\n"))
 
 
+
+
+
 (define (write-UnicodeDataBis)
   ;; Print the previous read tables
   (printf "#ifndef BASE_CHAR_SET\n")
   (let ((big (sort big (lambda (x y)
                          (< (string->number (car x) 16)
                             (string->number (car y) 16))))))
-    ;; print the big table
+    ;; ========== print the big table
     (printf "static struct utf8_descr big_table[] = {\n")
     (let ((cpt 0))
       (for-each (lambda (x)
@@ -275,7 +283,20 @@
                   (set! cpt (fx+ 1 cpt)))
                 big))
     (printf "};\n")
-    (printf "static int big_table_length = ~a;\n\n" (length big)))
+    (printf "static int big_table_length = ~a;\n\n" (length big))
+
+    ;; ========== print the digit association list
+    struct utf8_conversion_char 
+    (printf "static struct utf8_conversion_char digits_table[] = {\n")
+    (let ((cpt 0))
+      (for-each (lambda (x)
+                  (printf " {0x~a, 0x~a}," (car x) (cdr x))
+                  (when (= (modulo cpt 5) 4) (newline))
+                  (when (= (modulo cpt 10) 9) (newline))
+                  (set! cpt (fx+ 1 cpt)))
+                (reverse digits)))
+    (printf "};\n")
+    (printf "static int digits_table_length = ~a;\n\n" (length digits)))
   (printf "#endif // BASE_CHAR_SET\n\n"))
 
 
