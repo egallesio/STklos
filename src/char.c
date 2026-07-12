@@ -621,10 +621,10 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c))
  * argument if it is a numeric digit (that is, if char-numeric?
  * returns #t), or #f on any other character.
  * @lisp
- * (digit-value #\3)        => 3
- * (digit-value #\x0664)    => 4
- * (digit-value #\x0AE6)    => 0
- * (digit-value #\x0EA6)    => #f
+ * (digit-value #\\3)        => 3
+ * (digit-value #\\x0664)    => 4
+ * (digit-value #\\x0AE6)    => 0
+ * (digit-value #\\x0EA6)    => #f
  * @end lisp
 doc>
  */
@@ -835,10 +835,70 @@ DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
 }
 
 
-DEFINE_PRIMITIVE("%spaces-list", spaces_list, subr0, (void))
+/*
+<doc EXT char-utf8-category
+ * (char-utf8-category ch)
+ *
+ * Return the general UTF8 category associated to a character as a symbol.
+ * For a complete description of the values this function can return, see
+ * https://www.unicode.org/L2/L1999/UnicodeData.html[Unicode documentation].
+ *
+ * @lisp
+ * (char-utf8-category #\\a)     => Ll     ;; lowercase letter
+ * (char-utf8-category #\\A)     => Lu     ;; uppercase letter
+ * @end lisp
+doc>
+*/
+
+DEFINE_PRIMITIVE("char-utf8-category", char_utf8_category, subr1, (SCM ch))
 {
-  return make_char_list2(spaces_table, spaces_table_length);
+  if (!CHARACTERP(ch)) error_bad_char(ch);
+  // FIXME
+  if (STk_use_utf8) {
+    int idx = search_character(CHARACTER_VAL(ch));
+
+    if (idx >= 0) {
+      switch (big_table[idx].cat) {
+        case _Lu_: return STk_intern("Lu");
+        case _Ll_: return STk_intern("Ll");
+        case _Lt_: return STk_intern("Lt");
+        case _Mn_: return STk_intern("Mn");
+        case _Mc_: return STk_intern("Mc");
+        case _Me_: return STk_intern("Me");
+        case _Nd_: return STk_intern("Nd");
+        case _Nl_: return STk_intern("Nl");
+        case _No_: return STk_intern("No");
+        case _Zs_: return STk_intern("Zs");
+        case _Zl_: return STk_intern("Zl");
+        case _Zp_: return STk_intern("Zp");
+        case _Cc_: return STk_intern("Cc");
+        case _Cf_: return STk_intern("Cf");
+        case _Cs_: return STk_intern("Cs");
+        case _Co_: return STk_intern("Co");
+        case _Cn_: return STk_intern("Cn");
+
+        case _Lm_: return STk_intern("Lm");
+        case _Lo_: return STk_intern("Lo");
+        case _Pc_: return STk_intern("Pc");
+        case _Pd_: return STk_intern("Pd");
+        case _Ps_: return STk_intern("Ps");
+        case _Pe_: return STk_intern("Pe");
+        case _Pi_: return STk_intern("Pi");
+        case _Pf_: return STk_intern("Pf");
+        case _Po_: return STk_intern("Po");
+        case _Sm_: return STk_intern("Sm");
+        case _Sc_: return STk_intern("Sc");
+        case _Sk_: return STk_intern("Sk");
+        case _So_: return STk_intern("So");
+
+        case _Lo_Ll_: return STk_intern("Lo");   // "Lo_ll"
+        case _Cc_Ws_: return STk_intern("Cc");   // "Cc_Ws"
+      }
+    }
+  }
+  return STk_false;
 }
+
 
 
 int STk_init_char(void)
@@ -879,5 +939,7 @@ int STk_init_char(void)
   ADD_PRIMITIVE(digits_list);
   ADD_PRIMITIVE(letters_list);
   ADD_PRIMITIVE(digits_list);
+
+  ADD_PRIMITIVE(char_utf8_category);
   return TRUE;
 }

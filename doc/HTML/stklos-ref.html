@@ -8437,10 +8437,35 @@ returns #t), or #f on any other character.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span> <span class="o">#</span><span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_char-utf8-category'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(char-utf8-category ch) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the general UTF8 category associated to a character as a symbol.
+For a complete description of the values this function can return, see
+<a href="https://www.unicode.org/L2/L1999/UnicodeData.html">Unicode documentation</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">char-utf8-category</span> <span class="sc">#\a</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">Ll</span>     <span class="c1">;; lowercase letter</span>
+<span class="p">(</span><span class="nf">char-utf8-category</span> <span class="sc">#\A</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">Lu</span>     <span class="c1">;; uppercase letter</span></code></pre>
 </div>
 </div>
 </div>
