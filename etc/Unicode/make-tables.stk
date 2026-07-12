@@ -119,9 +119,9 @@
 
             ;; Register the character in the big table
             (set! big (cons (list char
-                                  tag
                                   (if (string=? low "") char low)
-                                  (if (string=? up  "") char up))
+                                  (if (string=? up  "") char up)
+                                  tag)
                             big))
 
             ;; --------
@@ -255,24 +255,12 @@
     (printf "static struct utf8_descr big_table[] = {\n")
     (let ((cpt 0))
       (for-each (lambda (x)
-                  (printf "  {0x~a, 0x~a, 0x~a},"
-                          (car x)
-                          (caddr x)
-                          (cadddr x))
+                  (apply printf "  {0x~a, 0x~a, 0x~a, ~a}," x)
                   (when (= (modulo cpt 2) 1) (newline))
                   (set! cpt (fx+ 1 cpt)))
                 big))
     (printf "};\n")
     (printf "static int big_table_length = ~a;\n\n" (length big)))
-
-  ;; print the category table
-  (printf "static enum utf8_category char_category[]= {\n")
-  (let ((cpt 0))
-    (for-each (lambda (x)
-                (printf "~a,~a" (cadr x) (if (= (modulo cpt 10) 9) "\n" " "))
-                (set! cpt (1+ cpt)))
-              big))
-  (printf "};\n\n")
   (printf "#endif // BASE_CHAR_SET\n\n"))
 
 

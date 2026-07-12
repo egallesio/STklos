@@ -105,13 +105,6 @@ struct utf8_special_casing {
 };
 
 
-/* The big table of characters */
-struct utf8_descr {
-  utf8_char key;   /* the character */
-  utf8_char low;   /* its  correponding lower case */
-  utf8_char up;    /* and upper case */
-};
-
 enum utf8_category {
   /* See https://www.unicode.org/L2/L1999/UnicodeData.html for a description of
    *  character categories
@@ -154,11 +147,18 @@ enum utf8_category {
   _Lo_Ll_ /* Lo and Ll such as #\xaa: FEMININE ORDINAL INDICATOR (#\ª) */
 };
 
+/* The big table of characters */
+struct utf8_descr {
+  utf8_char key;            /* the character */
+  utf8_char low;            /* its  correponding lower case */
+  utf8_char up;             /* and upper case */
+  enum utf8_category cat;   /* its Unicode catgory */
+};
 
 #define CH_UPPER(ct)   ((ct) == _Lu_)
 #define CH_LOWER(ct)   ((ct) == _Ll_ || (ct) == _Lo_Ll_)
-#define CH_LETTER(ct)  ((ct) == _Lu_ || (ct) == _Ll_ || (ct) == _Lt_ ||    \
-                        (ct) == _Lm_ || (ct) == _Lm_ || (ct) == _Lo_ ||    \
+#define CH_LETTER(ct)  ((ct) == _Lu_ || (ct) == _Ll_ || (ct) == _Lo_Ll_ ||   \
+                        (ct) == _Lt_ || (ct) == _Lm_ || (ct) == _Lo_    ||   \
                         (ct) == _Nl_) /* number-letters such as roman IX */
 
 
@@ -534,7 +534,7 @@ DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
     int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
-      char c = char_category[idx];
+      char c = big_table[idx].cat;
       return MAKE_BOOLEAN(CH_LETTER(c));
     }
     else
@@ -582,7 +582,7 @@ DEFINE_PRIMITIVE("char-upper-case?", char_isupper, subr1, (SCM c))
     int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
-      char c = char_category[idx];
+      char c = big_table[idx].cat;
       return MAKE_BOOLEAN(CH_UPPER(c));
     }
     else
@@ -600,7 +600,7 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c))
     int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
-      char c = char_category[idx];
+      char c = big_table[idx].cat;
       return MAKE_BOOLEAN(CH_LOWER(c));
     }
     else
@@ -825,12 +825,11 @@ DEFINE_PRIMITIVE("%uppers-list", uppers_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = char_category[i];
+    char c = big_table[i].cat;
     if (CH_UPPER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
   }
   return res;
  }
-
 
 
 DEFINE_PRIMITIVE("%lowers-list", lowers_list, subr0, (void))
@@ -838,7 +837,7 @@ DEFINE_PRIMITIVE("%lowers-list", lowers_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = char_category[i];
+    char c = big_table[i].cat;
     if (CH_LOWER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
   }
   return res;
@@ -850,7 +849,7 @@ DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = char_category[i];
+    char c = big_table[i].cat;
     if (CH_LETTER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
   }
   return res;
