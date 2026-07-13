@@ -118,16 +118,14 @@
                                 _Lo_Ll_ _Cc_Ws_))
               (die (format "Unknown category (~S) seen in ~S" tag l)))
 
-            ;; FIXME
-            #;(unless (string=? category "Cs") ;; Not a character: (surrogate pair)
-              (set! all (cons char all)))
-
-            ;; Register the character in the big table
-            (set! big (cons (list char
-                                  (if (string=? low "") char low)
-                                  (if (string=? up  "") char up)
-                                  tag)
-                            big))
+            ;; Register the character in the big table (if it is not a
+            ;; surrogate pair boundary, which are not valid UTF8 characters)
+            (unless (eq? tag '_Cs_)
+              (set! big (cons (list char
+                                    (if (string=? low "") char low)
+                                    (if (string=? up  "") char up)
+                                    tag)
+                              big)))
 
             ;; If character is a digit, add it too to the digits table
             (when (eq? tag '_Nd_)
