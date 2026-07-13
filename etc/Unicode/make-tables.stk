@@ -23,23 +23,13 @@
 ;;;;    Creation date: 11-Aug-2011 00:16 (eg)
 ;;;;
 
-(define all          '())
-(define digits       '())
-(define lower        '())       ;; FIXME:
-(define upper        '())       ;; FIXME:
-(define letters      '())       ;; FIXME:
-(define spaces       '())
-(define blanks       '())
-(define folds        '())
-(define symbols      '())
-(define titlecase    '())
-(define puncts       '())  ;; Punctuations
-(define specials     '())  ;; Special casing
-
-(define big          '())
+(define big          '())       ;; The table of all characters
+(define digits       '())       ;; The table of digits values
+(define specials     '())       ;; Special casing
+(define folds        '())       ;; The table of foldings
 
 ;;; ======================================================================
-;;;  print-assoc & print-list
+;;;  print-assoc
 ;;; ======================================================================
 (define (print-assoc lst name)
   (printf "static struct utf8_conversion_char ~A[] = {\n" name)
@@ -65,24 +55,8 @@
   (printf "static int ~A_length = ~A;\n\n" name (length lst)))
 
 
-
-
-
-
-(define (print-list lst name)
-  (printf "static utf8_char ~A[] = {" name)
-  (let Loop ((i 0)
-             (l (reverse lst)))
-    (unless (null? l)
-      (when (zero? (modulo i 8))
-        (newline))
-      (printf"  0x~A," (car l))
-      (Loop (+ i 1) (cdr l))))
-  (printf "};\n")
-  (printf "static int ~A_length = ~A;\n\n" name (length lst)))
-
 ;;; ======================================================================
-;;; UnicodeData.txt`
+;;; UnicodeData.txt
 ;;; ======================================================================
 (define (split str)                     ;; split a line on the ";"
   (let ((max (string-length str)))
@@ -136,6 +110,18 @@
 
             ;; (eprintf "res = ~S\n" res)
 
+            ;;Verify that tag is correct
+            (unless (memq tag '(_Lu_ _Ll_ _Lt_ _Mn_ _Mc_ _Me_ _Nd_ _Nl_ _No_ _Zs_
+                                _Zl_ _Zp_ _Cc_ _Cf_ _Cs_ _Co_ _Cn_ _Lm_ _Lo_ _Pc_
+                                _Pd_ _Ps_ _Pe_ _Pi_ _Pf_ _Po_ _Sm_ _Sc_ _Sk_ _So_
+                                ;; STklos fictive categories
+                                _Lo_Ll_ _Cc_Ws_))
+              (die (format "Unknown category (~S) seen in ~S" tag l)))
+
+            ;; FIXME
+            #;(unless (string=? category "Cs") ;; Not a character: (surrogate pair)
+              (set! all (cons char all)))
+
             ;; Register the character in the big table
             (set! big (cons (list char
                                   (if (string=? low "") char low)
@@ -143,134 +129,17 @@
                                   tag)
                             big))
 
-            ;; --------
-            (case tag
-              ;; Normative categories
-              ((_Lu_) 'nothing)                 ;; Letter, Uppercase
-              ((_Ll_) 'nothing)                 ;; Letter, Lowercase
-              ((_Lt_) 'nothing)                 ;; Letter, Titlecase
-              ((_Mn_) 'nothing)                 ;; Mark, Non-Spacing
-              ((_Mc_) 'nothing)                 ;; Mark, Spacing Combining
-              ((_Me_) 'nothing)                 ;; Mark, Enclosing
-              ((_Nd_)                           ;; Number, Decimal Digit
-               ;; Add char in digit table
-               (set! digits
+            ;; If character is a digit, add it too to the digits table
+            (when (eq? tag '_Nd_)
+              (set! digits
                      (cons (cons char (string->number dvalue))
-                           digits)))
-              ((_Nl_) 'nothing)                 ;; Number, Letter
-              ((_No_) 'nothing)                 ;; Number, Other
-              ((_Zs_) 'nothing)                 ;; Separator, Space
-              ((_Zl_) 'nothing)                 ;; Separator, Line
-              ((_Zp_) 'nothing)                 ;; Separator, Paragraph
-              ((_Cc_) 'nothing)                 ;; Other, Control
-              ((_Cf_) 'nothing)                 ;; Other, Format
-              ((_Cs_) 'nothing)                 ;; Other, Surrogate
-              ((_Co_) 'nothing)                 ;; Other, Private Use
-              ((_Cn_) 'nothing)                 ;; Other, Not Assigned (not used)
+                           digits))))
 
-              ;; Informative categories
-              ((_Lm_) 'nothing)                 ;; Letter, Modifier
-              ((_Lo_) 'nothing)                 ;; Letter, Other
-              ((_Pc_) 'nothing)                 ;; Punctuation, Connector
-              ((_Pd_) 'nothing)                 ;; Punctuation, Dash
-              ((_Ps_) 'nothing)                 ;; Punctuation, Open
-              ((_Pe_) 'nothing)                 ;; Punctuation, Close
-              ((_Pi_) 'nothing)                 ;; Punctuation, Initial quote
-              ((_Pf_) 'nothing)                 ;; Punctuation, Final quote
-              ((_Po_) 'nothing)                 ;; Punctuation, Other
-              ((_Sm_) 'nothing)                 ;; Symbol, Math
-              ((_Sc_) 'nothing)                 ;; Symbol, Currency
-              ((_Sk_) 'nothing)                 ;; Symbol, Modifier
-              ((_So_) 'nothing)                 ;; Symbol, Other
-
-              ;; STklos fictive categories
-              ((_Lo_Ll_) 'nothing)
-              ((_Cc_Ws_) 'nothing)
-              (else
-               (die (format "Unknown category (~S) seen in ~S" tag l))))
-
-
-            (unless (string=? category "Cs") ;; Not a character: (surrogate pair)
-              (set! all (cons char all)))
-
-            (cond
-;;//              ((equal? category "Lu")                 ;; Letter, Uppercase
-;;//               (let ((v (if (string=? low "") "0" low)))
-;;//                 (set! upper (cons (cons char v) upper))
-;;//                 (set! letters (cons char letters))))
-;;//
-;;//              ((equal? category "Ll")                  ;; Letter, Lowercase
-;;//               (let ((v (if (string=? up "") "0" up)))
-;;//                 (set! lower (cons (cons char v) lower))
-;;//                 (set! letters (cons char letters))))
-
-;;//              ((equal? category "Lo")                  ;; Letter, Other
-;;//               (when (or (string-find? "<super>" decomp)
-;;//                         (string-find? "<sub>"   decomp))
-;;//                 ;; FIXME: Sufficient?
-;;//                 (set! lower (cons (cons char "0") lower)))
-;;//               (set! letters (cons char letters)))
-
-              ((equal? category "Lt")                  ;; Titlecase
-               #;(set! letters (cons char letters))
-               (set! titlecase (cons char titlecase))
-               #;(set! lower (cons (cons char low) lower)))
-
-              ((equal? category "Lm")                  ;; Modifier
-               (set! letters (cons char letters))
-               #;(set! titlecase (cons char titlecase)))
-
-              ((member category                      ;; Punctuation
-                       '("Pc" "Pd" "Ps" "Pe" "Pi" "Pf" "Po"))
-               (set! puncts (cons char puncts)))
-
-              ((member category                     ;; Symbols
-                        '("Sm" "Sc" "Sk" "So"))
-               (set! symbols (cons char symbols)))
-
-;;//              ((equal? category "Nd")                ;; Digit
-;;//               (set! digits (cons (cons char (string->number dvalue)) digits)))
-
-              ((equal? category "No")                ;; Number other
-;;               (when  (or (string-find? "<super>" decomp)
-;;                          (string-find? "<sub>"   decomp))
-;;                 (unless (string=? dvalue "")
-;;                   (set! digits (cons (cons char (string->number dvalue)) digits))))
-               )
-
-              ((or (member category                 ;; White Space
-                            '("Zs" "Zl" "Zp"))
-                   (member bidir '("B" "WS" "S")))
-               (set! spaces (cons char spaces))
-               (when (equal? category "Zs")
-                 ;; SRFI-14 differenciates blanks and white spaces
-                 (set! blanks (cons char blanks)))))
-
-            (Loop (read-line))))))))
+          ;; Analyse next line
+          (Loop (read-line)))))))
 
 (define (write-UnicodeData)
-  ;; Print the previous read table
-  (printf "#ifndef BASE_CHAR_SET\n")
-                                        ; (print-assoc upper   "upper_table")
-                                        ; (print-assoc lower   "lower_table")
-                                        ; (print-assoc digits   "digits_table")
-                                        ; (print-list letters   "letters_table")
-                                        ; (print-list spaces    "spaces_table")
-  (printf "#else\n")
-                                        ; (print-list all       "all_table")
-                                        ; (print-list puncts    "puncts_table")
-                                        ;(print-list symbols   "symbols_table")
-                                        ; (print-list titlecase "titlecase_table")
-                                        ; (print-list blanks    "blanks_table")
-  (printf "#endif // ifndef BASE_CHAR_SET\n"))
-
-
-
-
-
-(define (write-UnicodeDataBis)
-  ;; Print the previous read tables
-  (printf "#ifndef BASE_CHAR_SET\n")
+  ;; Print the tables built when reading UnicodeData.txt
   (let ((big (sort big (lambda (x y)
                          (< (string->number (car x) 16)
                             (string->number (car y) 16))))))
@@ -296,9 +165,7 @@
                   (set! cpt (fx+ 1 cpt)))
                 (reverse digits)))
     (printf "};\n")
-    (printf "static int digits_table_length = ~a;\n\n" (length digits)))
-  (printf "#endif // BASE_CHAR_SET\n\n"))
-
+    (printf "static int digits_table_length = ~a;\n\n" (length digits))))
 
 
 ;;; ======================================================================
@@ -411,8 +278,5 @@
       (printf "/* WARNING: This file was generated!!! Do not modify it. -*- mode: c -*- */\n\n")
       (write-UnicodeData)
       (write-CaseFolding)
-      (write-SpecialCasing)
+      (write-SpecialCasing))))
 
-
-      (write-UnicodeDataBis)
-      )))
