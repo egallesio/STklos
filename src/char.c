@@ -165,6 +165,12 @@ struct utf8_descr {
                         (ct) == _Cc_Ws_) /* controls which are spaces */
 
 #define CH_BLANK(ct)    ((ct) == _Zs_) /* SRFI 14 differenciates blans and spaces */
+#define CH_PUNCT(ct)    ((ct) == _Pc_ || (ct) == _Pd_ || (ct) == _Ps_ ||     \
+                         (ct) == _Pe_ || (ct) == _Pi_ || (ct) == _Pf_ ||     \
+                         (ct) == _Po_)
+#define CH_SYMBOL(ct)   ((ct) == _Sm_ || (ct) == _Sc_ || (ct) == _Sk_ ||     \
+                         (ct) == _So_)
+#define CH_TITLE(ct)    ((ct) == _Lt_)
 
 #include "utf8-tables.inc"
 
@@ -741,8 +747,8 @@ DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
 <doc EXT char-utf8-category
  * (char-utf8-category ch)
  *
- * Return the general UTF8 category associated to a character as a symbol.
- * For a complete description of the values this function can return, see
+ * Return the general UTF8 category associated to a character as a Scheme
+ * symbol. For a complete description of the values this function can return, see
  * https://www.unicode.org/L2/L1999/UnicodeData.html[Unicode documentation].
  *
  * @lisp
@@ -885,6 +891,42 @@ DEFINE_PRIMITIVE("%blanks-list", blanks_list, subr0, (void))
 }
 
 
+DEFINE_PRIMITIVE("%punctuations-list", puncts_list, subr0, (void))
+{
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    char c = big_table[i].cat;
+    if (CH_PUNCT(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+}
+
+
+DEFINE_PRIMITIVE("%symbols-list", symbols_list, subr0, (void))
+{
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    char c = big_table[i].cat;
+    if (CH_SYMBOL(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+}
+
+
+DEFINE_PRIMITIVE("%title-case-list", title_case_list, subr0, (void))
+{
+  SCM res = STk_nil;
+
+  for (int i = 0; i < big_table_length; i++) {
+    char c = big_table[i].cat;
+    if (CH_TITLE(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+  }
+  return res;
+}
+
+
 DEFINE_PRIMITIVE("%all-list", all_list, subr0, (void))
 {
   SCM res = STk_nil;
@@ -944,10 +986,12 @@ int STk_init_char(void)
   ADD_PRIMITIVE(lowers_list);
   ADD_PRIMITIVE(digits_list);
   ADD_PRIMITIVE(letters_list);
-  ADD_PRIMITIVE(digits_list);
   ADD_PRIMITIVE(blanks_list);
+  ADD_PRIMITIVE(puncts_list);
+  ADD_PRIMITIVE(symbols_list);
+  ADD_PRIMITIVE(title_case_list);
   ADD_PRIMITIVE(all_list);
-
+  ADD_PRIMITIVE(digits_list);
 
 
   return TRUE;

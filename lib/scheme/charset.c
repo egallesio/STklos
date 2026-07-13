@@ -55,20 +55,20 @@ static inline SCM make_char_list(utf8_char *tab, int len)
 //   return make_char_list(all_table, all_table_length);
 // }
 
-DEFINE_PRIMITIVE("%punctuations-list", punctuations_list, subr0, (void))
-{
-  return make_char_list(puncts_table, puncts_table_length);
-}
+//DEFINE_PRIMITIVE("%punctuations-list", punctuations_list, subr0, (void))
+//{
+//  return make_char_list(puncts_table, puncts_table_length);
+//}
 
-DEFINE_PRIMITIVE("%symbols-list", symbols_list, subr0, (void))
-{
-  return make_char_list(symbols_table, symbols_table_length);
-}
+//DEFINE_PRIMITIVE("%symbols-list", symbols_list, subr0, (void))
+//{
+//  return make_char_list(symbols_table, symbols_table_length);
+//}
 
-DEFINE_PRIMITIVE("%title-case-list", title_case_list, subr0, (void))
-{
-  return make_char_list(titlecase_table, titlecase_table_length);
-}
+//DEFINE_PRIMITIVE("%title-case-list", title_case_list, subr0, (void))
+//{
+//  return make_char_list(titlecase_table, titlecase_table_length);
+//}
 
 // DEFINE_PRIMITIVE("%blanks-list", blanks_list, subr0, (void))
 // {
@@ -93,9 +93,9 @@ MODULE_ENTRY_START("scheme/charset")
   SCM module = STk_create_module(STk_intern("scheme/charset"));
 
   // ADD_PRIMITIVE_IN_MODULE(all_list, module);
-  ADD_PRIMITIVE_IN_MODULE(punctuations_list, module);
-  ADD_PRIMITIVE_IN_MODULE(symbols_list, module);
-  ADD_PRIMITIVE_IN_MODULE(title_case_list, module);
+  //ADD_PRIMITIVE_IN_MODULE(punctuations_list, module);
+  // ADD_PRIMITIVE_IN_MODULE(symbols_list, module);
+  // ADD_PRIMITIVE_IN_MODULE(title_case_list, module);
   // ADD_PRIMITIVE_IN_MODULE(blanks_list, module);
 
   // ADD_PRIMITIVE_IN_MODULE(valid_char_code, module);
