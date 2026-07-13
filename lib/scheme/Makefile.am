@@ -73,6 +73,7 @@ R7_OBJS =  base.ostk            \
 # ----------------------------------------------------------------------
 LARGE_STK  = stream.stk     \
              box.stk        \
+             charset.stk    \
              set.stk        \
              list-queue.stk \
              hash-table.stk \
@@ -89,6 +90,7 @@ LARGE_STK  = stream.stk     \
 
 LARGE_OBJS = stream.ostk     \
              box.ostk        \
+             charset.ostk    \
              set.ostk        \
              list-queue.ostk \
              hash-table.ostk \
@@ -101,12 +103,12 @@ LARGE_OBJS = stream.ostk     \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c \
-              charset.c   rlist.c
-LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk \
-              charset.stk rlist.stk
-LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) \
-              charset.$(SO) rlist.$(SO)
+LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c \
+              bytevector.c rlist.c
+LARGE_C_STK = list.stk        ilist.stk   flonum.stk   sort.stk   vector.stk   \
+              bytevector.stk  rlist.stk
+LARGE_SHOBJ = list.$(SO)       ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) \
+              bytevector.$(SO) rlist.$(SO)
 
 
 
@@ -162,8 +164,7 @@ stream.ostk:     ../streams/primitive.ostk ../streams/derived.ostk
 set.ostk: ../srfi/69.ostk comparator.ostk
 
 charset.stk: ../srfi/217.ostk
-charset.$(SO): charset-incl.c
-charset-incl.c: charset.stk
+
 
 
 ../srfi/69.ostk:
@@ -201,9 +202,6 @@ sort-incl.c: sort.stk
 vector.$(SO): vector-incl.c
 vector-incl.c: vector.stk
 
-charset.$(SO): charset-incl.c
-charset-incl.c: charset.stk
-
 rlist.$(SO): rlist-incl.c
 rlist-incl.c: rlist.stk
 
@@ -213,7 +211,7 @@ ideque.ostk: generator.ostk list.$(SO)
 text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
-            charset.$(SO) bitwise.ostk
+            charset.ostk bitwise.ostk
 
 
 list-inc.c:       list.stk
@@ -222,7 +220,7 @@ flonum-inc.c:     flonum.stk
 sort-inc.c:       sort.stk
 vector-inc.c:     vector.stk
 bytevector-inc.c: bytevector.stk
-charset-inc.c:    charset.stk
+
 
 
 # ======================================================================
