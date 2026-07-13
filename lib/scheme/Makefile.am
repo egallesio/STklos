@@ -115,7 +115,7 @@ LARGE_SHOBJ = list.$(SO)       ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) 
 #----------------------------------------------------------------------
 SRC_STK     = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
 SRC_C_STK   = $(LARGE_C_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) 
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
 
 SOURCES = $(SRC_STK) $(LARGE_C)
 
