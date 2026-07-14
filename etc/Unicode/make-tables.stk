@@ -29,33 +29,6 @@
 (define folds        '())       ;; The table of foldings
 
 ;;; ======================================================================
-;;;  print-assoc
-;;; ======================================================================
-(define (print-assoc lst name)
-  (printf "static struct utf8_conversion_char ~A[] = {\n" name)
-  (for-each (lambda (x)
-              (let ((key (car x))
-                    (value (cdr x)))
-                (cond
-                 ((string? value)
-                  ;; General case "A" -> "a"
-                  (printf "      { 0x~A,\t 0x~A},\t /* '~A' -> '~A' */\n"
-                          key
-                          value
-                          (integer->char (string->number key 16))
-                          (if (string=? value "1")
-                              "<see in fold-table>"
-                              (integer->char (string->number value 16)))))
-                 ((number? value)
-                  ;; User for digits '1' -> 1 or '٢' -> 2
-                  (printf "      { 0x~A,\t ~A},\t /* '~A' */\n"
-                          key value (integer->char (string->number key 16)))))))
-            (reverse lst))
-  (printf "};\n")
-  (printf "static int ~A_length = ~A;\n\n" name (length lst)))
-
-
-;;; ======================================================================
 ;;; UnicodeData.txt
 ;;; ======================================================================
 (define (split str)                     ;; split a line on the ";"
@@ -122,8 +95,8 @@
             ;; surrogate pair boundary, which are not valid UTF8 characters)
             (unless (eq? tag '_Cs_)
               (set! big (cons (list char
-                                    (if (string=? low "") char low)
-                                    (if (string=? up  "") char up)
+                                    (if (string=? low "") "0" low)
+                                    (if (string=? up  "") "0" up)
                                     tag)
                               big)))
 
@@ -142,28 +115,56 @@
                          (< (string->number (car x) 16)
                             (string->number (car y) 16))))))
     ;; ========== print the big table
-    (printf "static struct utf8_descr big_table[] = {\n")
     (let ((cpt 0))
+      (printf "static struct utf8_descr big_table[] = {\n")
       (for-each (lambda (x)
-                  (apply printf "  {0x~a, 0x~a, 0x~a, ~a}," x)
-                  (when (= (modulo cpt 2) 1) (newline))
+                  (printf " {0x~a, ~a}," (car x) (cadddr x))
+                  (when (= (modulo cpt 5) 4) (newline))
                   (set! cpt (fx+ 1 cpt)))
-                big))
-    (printf "};\n")
-    (printf "static int big_table_length = ~a;\n\n" (length big))
+                big)
+      (printf "};\n")
+      (printf "static int big_table_length = ~a;\n\n" (length big)))
 
     ;; ========== print the digit association list
-    struct utf8_conversion_char 
-    (printf "static struct utf8_conversion_char digits_table[] = {\n")
     (let ((cpt 0))
+      (printf "static struct utf8_conversion_char digits_table[] = {\n")
       (for-each (lambda (x)
                   (printf " {0x~a, 0x~a}," (car x) (cdr x))
                   (when (= (modulo cpt 5) 4) (newline))
                   (when (= (modulo cpt 10) 9) (newline))
                   (set! cpt (fx+ 1 cpt)))
-                (reverse digits)))
-    (printf "};\n")
-    (printf "static int digits_table_length = ~a;\n\n" (length digits))))
+                (reverse digits))
+      (printf "};\n")
+      (printf "static int digits_table_length = ~a;\n\n" (length digits)))
+
+    ;; ========== Print the lower table
+    (let ((cpt 0))
+      (printf "static struct utf8_conversion_char lowers_table[] = {\n")
+      (for-each (lambda (x)
+                  (unless (string=? (cadr x) "0")
+                    ;; We have a lower case in table
+                    (printf " {0x~a, 0x~a}," (car x) (cadr x))
+                    (when (= (modulo cpt 4) 3) (newline))
+                    (set! cpt (fx+ 1 cpt))))
+                  big)
+      (printf "};\n")
+      (printf "static int lowers_table_length = ~a;\n\n" cpt))
+
+    ;; ========== Print the lower table
+    (let ((cpt 0))
+      (printf "static struct utf8_conversion_char uppers_table[] = {\n")
+      (for-each (lambda (x)
+                  (unless (string=? (caddr x) "0")
+                    ;; We have a upper case in table
+                    (printf " {0x~a, 0x~a}," (car x) (caddr x))
+                    (when (= (modulo cpt 4) 3) (newline))
+                    (set! cpt (fx+ 1 cpt))))
+                  big)
+      (printf "};\n")
+      (printf "static int uppers_table_length = ~a;\n\n" cpt))
+  ))
+
+  
 
 
 ;;; ======================================================================
@@ -193,9 +194,16 @@
              (Loop (read-line)))))))))
 
 (define (write-CaseFolding)
-  (printf "#ifndef BASE_CHAR_SET\n")
-  (print-assoc folds "fold_table")
-  (printf "#endif\n"))
+  (printf "static struct utf8_conversion_char fold_table[] = {\n")
+  (let ((cpt 0))
+    (for-each (lambda (x)
+                (printf " { 0x~a, 0x~a}," (car x) (cdr x))
+                (when (= (modulo cpt 4) 3) (newline))
+                (set! cpt (fx+ 1 cpt)))
+              (reverse folds)))
+  (printf "};\n")
+  (printf "static int fold_table_length = ~A;\n\n" (length folds)))
+
 
 ;;; ======================================================================
 ;;;  SpecialCasing.txt
@@ -225,30 +233,29 @@
 (define (write-SpecialCasing)
   (let ((specials (sort specials
                         (lambda (x y) (string<? (car x) (car y))))))
-    (printf "#ifndef BASE_CHAR_SET\n")
     (printf "static struct utf8_special_casing specials[] = {\n")
     (for-each (lambda (x)
                 ;; print the key
-                (printf "  {0x~A, /* '~A' */\n"
-                        (car x)
-                        (integer->char (string->number (car x) 16)))
-                ;; print the lower array/ For #\x130, Unicode table provides a
-                ;; two letters lower. However, it seems that there is a
-                ;; consensus to use the "tr" mapping where only the first of
-                ;; these two characters is used.
+                (printf " /* ~a */ {0x~A, "
+                        (integer->char (string->number (car x) 16))
+                        (car x))
+
+                ;; print the lower char. For #\x130, Unicode table provides a
+                ;; two letters lower. However, this special case will be treated
+                ;; specially in the conversion functions of char.c
                 (let ((fields (string-split (cadr x))))
-                  (printf "      .lower=0x~A,\n" (car fields)))
+                  (printf "0x~A, " (car fields)))
 
                 ;; print the title array
                 (let ((fields (string-split (caddr x))))
-                  (printf "      .title={0x~A, 0x~A, 0x~A},\n"
+                  (printf "{0x~A, 0x~A, 0x~A},"
                           (car fields)
                           (if (>= (length fields) 2) (cadr fields) "0000")
                           (if (=  (length fields) 3) (caddr fields) "0000")))
 
-                ;; print the title array
+                ;; print the upper array
                 (let ((fields (string-split (cadddr x))))
-                  (printf "      .upper={0x~A, 0x~A, 0x~A}"
+                  (printf " {0x~A, 0x~A, 0x~A}"
                           (car fields)
                           (if (>= (length fields) 2) (cadr fields) "0000")
                           (if (=  (length fields) 3) (caddr fields) "0000")))
@@ -257,8 +264,8 @@
               specials)
 
     (printf "};\n")
-    (printf "static int specials_length = ~A;\n" (length specials))
-    (printf "#endif /* BASE_CHAR_SET */\n")))
+    (printf "static int specials_length = ~A;\n" (length specials))))
+
 
 
 ;;; ======================================================================

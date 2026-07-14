@@ -151,8 +151,6 @@ enum utf8_category {
 /* The big table of characters */
 struct utf8_descr {
   utf8_char key;            /* the character */
-  utf8_char low;            /* its  correponding lower case */
-  utf8_char up;             /* and upper case */
   enum utf8_category cat;   /* its Unicode category */
 };
 
@@ -520,9 +518,6 @@ DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
 DEFINE_PRIMITIVE("char-numeric?", char_isdigit, subr1, (SCM c)) {
   if (!CHARACTERP(c)) error_bad_char(c);
   if (STk_use_utf8)
-    /* We don't use here the big table since we have an association list
-     * for the digit-value primitive. Furthermore, this table is shorter
-     */
     return MAKE_BOOLEAN(-1 != search_conversion_table(CHARACTER_VAL(c),
                                                       digits_table,
                                                       digits_table_length));
@@ -689,16 +684,16 @@ doc>
  */
 utf8_char STk_to_upper(utf8_char c) {
   if (STk_use_utf8) {
-    int idx = search_character(c);
-    return (idx <= 0) ? c: (utf8_char) big_table[idx].up;
+    int idx = search_conversion_table(c, uppers_table, uppers_table_length);
+    return (idx <= 0) ? c: (utf8_char) idx;
   } else
     return toupper(c);
 }
 
 utf8_char STk_to_lower(utf8_char c) {
   if (STk_use_utf8) {
-    int idx = search_character(c);
-    return (idx <= 0) ? c: (utf8_char) big_table[idx].low;
+    int idx = search_conversion_table(c, lowers_table, lowers_table_length);
+    return (idx <= 0) ? c: (utf8_char) idx;
   } else
     return tolower(c);
 }
