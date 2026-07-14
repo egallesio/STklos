@@ -116,14 +116,25 @@
                             (string->number (car y) 16))))))
     ;; ========== print the big table
     (let ((cpt 0))
-      (printf "static struct utf8_descr big_table[] = {\n")
+      (printf "static utf8_char big_table[] = {\n")
       (for-each (lambda (x)
-                  (printf " {0x~a, ~a}," (car x) (cadddr x))
-                  (when (= (modulo cpt 5) 4) (newline))
+                  (printf " 0x~a," (car x))
+                  (when (= (modulo cpt 8) 7) (newline))
                   (set! cpt (fx+ 1 cpt)))
                 big)
       (printf "};\n")
       (printf "static int big_table_length = ~a;\n\n" (length big)))
+
+    ;; print the category table
+    (let ((cpt 0))
+      (printf "// Use a int8_t instead of a utf8_category whose size is int\n")
+      (printf "static int8_t categories[] = {\n")
+      (for-each (lambda (x)
+                  (printf " ~a," (cadddr x))
+                  (when (= (modulo cpt 10) 9) (newline))
+                  (set! cpt (fx+ 1 cpt)))
+                big)
+      (printf "};\n"))
 
     ;; ========== print the digit association list
     (let ((cpt 0))
@@ -162,9 +173,10 @@
                   big)
       (printf "};\n")
       (printf "static int uppers_table_length = ~a;\n\n" cpt))
+
   ))
 
-  
+
 
 
 ;;; ======================================================================
@@ -284,4 +296,3 @@
       (write-UnicodeData)
       (write-CaseFolding)
       (write-SpecialCasing))))
-

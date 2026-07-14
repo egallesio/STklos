@@ -105,7 +105,7 @@ struct utf8_special_casing {
 };
 
 
-enum utf8_category {
+typedef enum {
   /* See https://www.unicode.org/L2/L1999/UnicodeData.html for a description of
    *  character categories
    */
@@ -146,13 +146,13 @@ enum utf8_category {
   /* STklos fictive categories */
   _Lo_Ll_, /* Lo and Ll such as #\xaa: FEMININE ORDINAL INDICATOR (#\ª) */
   _Cc_Ws_  /* A control character which is also a white space */
-};
+} utf8_category;
 
 /* The big table of characters */
-struct utf8_descr {
-  utf8_char key;            /* the character */
-  enum utf8_category cat;   /* its Unicode category */
-};
+///struct utf8_descr {
+///  utf8_char key;       /* the character */
+///  utf8_category cat;   /* its Unicode category */
+///};
 
 #define CH_UPPER(ct)   ((ct) == _Lu_)
 #define CH_LOWER(ct)   ((ct) == _Ll_ || (ct) == _Lo_Ll_)
@@ -181,10 +181,10 @@ static int search_character(unsigned int ch)   /* search a character in big_tabl
   left = 0; right = big_table_length-1;
   do {
     i = (left + right) / 2;
-    if (ch == big_table[i].key)
+    if (ch == big_table[i])
       return i;
     else
-      if (ch < big_table[i].key)
+      if (ch < big_table[i])
         right = i-1;
       else
         left = i+1;
@@ -194,7 +194,6 @@ static int search_character(unsigned int ch)   /* search a character in big_tabl
   /* not found of not in the interval of special character => return -1 */
   return -1;
 }
-
 
 
 static int search_conversion_table(unsigned int ch,
@@ -231,7 +230,7 @@ static int search_special_list(utf8_char ch) {
   unsigned int max = specials[specials_length-1].key;
 
   if (min <= ch && ch <= max) {
-    /* seach the value in the table by dichotomy */
+    /* search the value in the table by dichotomy */
     int left, right, i;
 
     left = 0; right = specials_length-1;
@@ -504,7 +503,7 @@ DEFINE_PRIMITIVE("char-alphabetic?", char_isalpha, subr1, (SCM c)) {
     int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
-      char c = big_table[idx].cat;
+      utf8_category c = categories[idx];
       return MAKE_BOOLEAN(CH_LETTER(c));
     }
     else
@@ -532,7 +531,7 @@ int STk_char_whitespacep(utf8_char ch)
     int idx = search_character(ch);
 
     if (idx >= 0) {
-      char c = big_table[idx].cat;
+      utf8_category c = categories[idx];
       return CH_WHITESP(c);
     }
     else
@@ -556,7 +555,7 @@ DEFINE_PRIMITIVE("char-upper-case?", char_isupper, subr1, (SCM c))
     int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
-      char c = big_table[idx].cat;
+      utf8_category c = categories[idx];
       return MAKE_BOOLEAN(CH_UPPER(c));
     }
     else
@@ -574,7 +573,7 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c))
     int idx = search_character(CHARACTER_VAL(c));
 
     if (idx >= 0) {
-      char c = big_table[idx].cat;
+      utf8_category c = categories[idx];
       return MAKE_BOOLEAN(CH_LOWER(c));
     }
     else
@@ -759,7 +758,7 @@ DEFINE_PRIMITIVE("char-utf8-category", char_utf8_category, subr1, (SCM ch))
     int idx = search_character(CHARACTER_VAL(ch));
 
     if (idx >= 0) {
-      switch (big_table[idx].cat) {
+      switch (categories[idx]) {
         case _Lu_: return STk_intern("Lu");
         case _Ll_: return STk_intern("Ll");
         case _Lt_: return STk_intern("Lt");
@@ -805,27 +804,6 @@ DEFINE_PRIMITIVE("char-utf8-category", char_utf8_category, subr1, (SCM ch))
  * UTF8 support for char-sets
  * ---------------------------------------------------------------------- */
 
-static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
-{
-  SCM lst = STk_nil;
-
-  for (int i = len-1; i >=0; i--) {
-    lst = STk_cons(MAKE_CHARACTER(tab[i].key), lst);
-  }
-  return lst;
-}
-
-static inline SCM make_char_list2(utf8_char *tab, int len)
-{
-  SCM lst = STk_nil;
-
-  for (int i = len-1; i >=0; i--) {
-    lst = STk_cons(MAKE_CHARACTER(tab[i]), lst);
-  }
-  return lst;
-}
-
-
 DEFINE_PRIMITIVE("%valid-char-code?", valid_char_code, subr1, (SCM val))
 {
   int c;
@@ -844,8 +822,8 @@ DEFINE_PRIMITIVE("%uppers-list", uppers_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_UPPER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_UPPER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
  }
@@ -856,8 +834,8 @@ DEFINE_PRIMITIVE("%lowers-list", lowers_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_LOWER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_LOWER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
@@ -868,8 +846,8 @@ DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_LETTER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_LETTER(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
@@ -879,8 +857,8 @@ DEFINE_PRIMITIVE("%blanks-list", blanks_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_BLANK(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_BLANK(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
@@ -891,8 +869,8 @@ DEFINE_PRIMITIVE("%punctuations-list", puncts_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_PUNCT(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_PUNCT(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
@@ -903,8 +881,8 @@ DEFINE_PRIMITIVE("%symbols-list", symbols_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_SYMBOL(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_SYMBOL(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
@@ -915,8 +893,8 @@ DEFINE_PRIMITIVE("%title-case-list", title_case_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    char c = big_table[i].cat;
-    if (CH_TITLE(c)) res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    utf8_category c = categories[i];
+    if (CH_TITLE(c)) res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
@@ -927,18 +905,21 @@ DEFINE_PRIMITIVE("%all-list", all_list, subr0, (void))
   SCM res = STk_nil;
 
   for (int i = 0; i < big_table_length; i++) {
-    res = STk_cons(MAKE_CHARACTER(big_table[i].key), res);
+    res = STk_cons(MAKE_CHARACTER(big_table[i]), res);
   }
   return res;
 }
 
 
-// FIXME: intern
 DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
 {
-  return make_char_list1(digits_table, digits_table_length);
-}
+  SCM lst = STk_nil;
 
+  for (int i = 0;  i < digits_table_length; i++) {
+    lst = STk_cons(MAKE_CHARACTER(digits_table[i].key), lst);
+  }
+  return lst;
+}
 
 
 int STk_init_char(void)
