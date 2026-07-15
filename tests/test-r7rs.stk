@@ -114,6 +114,10 @@
 (test "let.4" 20 (let ((x (let ((y 20))
                             y)))
                    x))
+(test "let.5" 'ok (let ((=> #f))
+                    (cond
+                     (#t => 'ok))))
+
 
 (test/compile-error "ill-formed let.1"
                     (let 1 2))
@@ -1350,6 +1354,29 @@ a")
 ;;------------------------------------------------------------------
 (test-subsection "6.10 Control features")
 
+
+(test "apply.1" 7 (apply + (list 3 4)))
+
+(let ((compose (lambda (f g)
+                 (lambda args
+                   (f (apply g args))))))
+  (test "apply.2" 30 ((compose sqrt *) 12 75)))
+
+(test/error "apply with 0 parameter" (apply))
+(test/error "apply with 1 parameter" (apply +))
+(test/error "apply with incorrect number of parameters.1" (apply cons '(1)))
+(test/error "apply with incorrect number of parameters.2" (apply cons '(1 2 3)))
+(test/error "apply with final arg not a list" (apply cons 1 2))
+(test/error "apply with an improper list" (apply list  '(1 2 3 4 . 5)))
+
+(test "apply ok.1" '(1 . 2) (apply cons '(1 2)))
+(test "apply ok.2" '(1 2 3 4 5) (apply list 1 '(2 3 4 5)))
+(test "apply ok.3" '(1 2 3 4 5) (apply list 1 2 '(3 4 5)))
+(test "apply ok.4" '(1 2 3 4 5) (apply list 1 2 3 4 5 '()))
+
+
+
+
 ;;; SRFI-13 redefines R7RS string-map in an incompatible way. Redefine
 ;;; string-map here to the R7RS version
 (define string-map (in-module SCHEME string-map))
@@ -2207,5 +2234,6 @@ a")
 (test "current-jiffy"  #t (exact? (current-jiffy)))
 (test "jiffies-per-second"  #t (exact? (jiffies-per-second)))
 
+(test "R7RS?" 'ok (and (member 'r7rs (features)) 'ok))
 
 (test-section-end)

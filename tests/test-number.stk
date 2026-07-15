@@ -134,6 +134,13 @@
 (test/error "exactness on +nan.0" (read-from-string "#e+nan.0"))
 (test/error "exactness on -nan.0" (read-from-string "#e-nan.0"))
 
+
+(test "inexact infinity" -inf.0 #i-inf.0)
+(test "inexact nan" +nan.0 #i+nan.0)
+(test/compile-error "exact infinity" (read-from-string "#e-inf.0"))
+(test/compile-error "exact nan"  (read-from-string "#e+nan.0"))
+
+
 ;;------------------------------------------------------------------
 (test-subsection "rational reader")
 

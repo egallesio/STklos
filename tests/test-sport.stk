@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-sport.stk	-- Testing String Ports
 ;;;;
-;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2005-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -149,8 +149,33 @@
   (test "post-close-string.3" "123Hello" str)
   (test "post-close-string.4" #t v))
 
+;;; Some Chibi tests 
+(define-syntax test-write-syntax
+  (syntax-rules ()
+    ((test-write-syntax tag expect-str obj-expr)
+     (let ((out (open-output-string)))
+       (write obj-expr out)
+       (test tag expect-str (get-output-string out))))))
 
-
+(test-write-syntax "chibi.1" "|.|" '|.|)
+(test-write-syntax "chibi.2" "|a b|" '|a b|)
+(test-write-syntax "chibi.3" "|,a|" '|,a|)
+(test-write-syntax "chibi.4" "|\"|" '|\"|)
+(test-write-syntax "chibi.5" "|\\||" '|\||)
+(test-write-syntax "chibi.6" "||" '||)
+(test-write-syntax "chibi.7" "|\\\\123|" '|\\123|)
+(test-write-syntax "chibi.8" "a" '|a|)
+(test-write-syntax "chibi.9" "a.b" '|a.b|)
+(test-write-syntax "chibi.10" "|2|" '|2|)
+(test-write-syntax "chibi.11" "|+3|" '|+3|)
+(test-write-syntax "chibi.12" "|-.4|" '|-.4|)
+(test-write-syntax "chibi.13" "|+i|" '|+i|)
+(test-write-syntax "chibi.14" "|-i|" '|-i|)
+(test-write-syntax "chibi.15" "|+inf.0|" '|+inf.0|)
+(test-write-syntax "chibi.16" "|-inf.0|" '|-inf.0|)
+(test-write-syntax "chibi.17" "|+nan.0|" '|+nan.0|)
+(test-write-syntax "chibi.18" "|+NaN.0|" '|+NaN.0|)
+(test-write-syntax "chibi.19" "+NaN.0abc" '|+NaN.0abc|) ;; Chibi expects "|+NaN.0abc|"
 
 
 

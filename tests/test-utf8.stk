@@ -89,6 +89,40 @@
         (string-fill! s #\字)
         s))
 
+;; special cases
+(test "chibi.17" "SSA" (string-upcase "ßa"))
+(test "chibi.18" "ßa" (string-downcase "ßa"))
+(test "chibi.19" "ssa" (string-downcase "SSA"))
+(test "chibi.20" "maß" (string-downcase "Maß"))
+(test "chibi.21" "mass" (string-foldcase "Maß"))
+(test "chibi.22" "İ" (string-upcase "İ"))
+(test "chibi.23" "i\x0307;" (string-downcase "İ"))
+(test "chibi.24" "i\x0307;" (string-foldcase "İ"))
+(test "chibi.25" "J̌" (string-upcase "ǰ"))
+(test "chibi.26" "ſ" (string-downcase "ſ"))
+(test "chibi.27" "s" (string-foldcase "ſ"))
+
+;; context-sensitive (final sigma)
+(test "chibi.28" "ΓΛΏΣΣΑ" (string-upcase "γλώσσα"))
+(test "chibi.29" "γλώσσα" (string-downcase "ΓΛΏΣΣΑ"))
+(test "chibi.30" "γλώσσα" (string-foldcase "ΓΛΏΣΣΑ"))
+(test "chibi.31" "ΜΈΛΟΣ" (string-upcase "μέλος"))
+(test "chibi.32" #t (and (member (string-downcase "ΜΈΛΟΣ") '("μέλος" "μέλοσ")) #t))
+(test "chibi.33" "μέλοσ" (string-foldcase "ΜΈΛΟΣ"))
+(test "chibi.34" #t (and (member (string-downcase "ΜΈΛΟΣ ΕΝΌΣ")
+                                 '("μέλος ενός" "μέλοσ ενόσ"))
+                         #t))
+
+
+
+
+(test "chibi.17" "SSA" (string-upcase "ßa"))
+(test "chibi.18" "mass" (string-foldcase "Maß"))
+(test "chibi.19" "i̇" (string-downcase "İ"))
+(test "chibi.20" "i̇" (string-foldcase "İ"))
+(test "chibi.21" "J̌" (string-upcase "ǰ"))
+
+
 ;; Following tests come from
 ;;http://www.smyles.com/projects/r6gambit/darcs/test/r6rs/unicode.sls
 
