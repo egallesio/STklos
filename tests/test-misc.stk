@@ -927,6 +927,27 @@ b|)
       '(#t #t #t)
       (list (keyword? ':a) (keyword? 'a:) (keyword? '#:a)))
 
+;;------------------------------------------------------------------
+
+(test "%normalize-library-name.1"
+      'a/b/c
+      (%normalize-library-name '(a b c)))
+
+(test "%normalize-library-name.2"
+      'a
+      (%normalize-library-name 'a))
+
+(test "%normalize-library-name.3"
+      'srfi/1
+      (%normalize-library-name '(srfi 1)))
+
+(test "%normalize-library-name.4"
+      'srfi/1
+      (%normalize-library-name '(srfi srfi-1)))
+
+(test "%normalize-library-name.5"
+      'srfi/1
+      (%normalize-library-name 'srfi/1))
 
 ;;------------------------------------------------------------------
 (test-section-end)
