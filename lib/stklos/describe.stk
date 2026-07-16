@@ -1,7 +1,7 @@
 ;;;;
 ;;;; d e s c r i b e . s t k    -- The DESCRIBE method (partly stolen fom Elk lib)
 ;;;;
-;;;; Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -157,7 +157,7 @@ doc>
                     (%uvector-length x)))))
 
      ((parameter? x)
-      (format port "a parameter")
+      (format port "a parameter object")
       (when (%parameter-name x)
         (format port " whose name is ~a" (%parameter-name x))))
 
