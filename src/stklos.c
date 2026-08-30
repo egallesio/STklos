@@ -27,6 +27,15 @@
 #include <langinfo.h>
 #include <strings.h>
 #include <getopt.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+/* The REPL will fork and communicate with a child. The child will use
+   this pipe to write back the variable _stklos_restart, determining
+   wether the program should do a fresh restart or just exit.  */
+int _stklos_restart;
+int restart_pipefd[2];
+
 
 #define ADD_OPTION(o, k)                                     do{\
   if (*o) options = STk_key_set(options,                        \
@@ -231,75 +240,109 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
                       STk_STklos_module);
 }
 
+
 int main(int argc, char *argv[])
 {
-  int ret;
-  char *argv0 = *argv;
+  int status;
+  pid_t pid;
 
-  /* Initialize the Garbage Collector */
+  if (pipe(restart_pipefd) == -1) {
+    fprintf(stderr,"STklos could not create a pipe when starting up!\n");
+    exit(1);
+  }
+
+  do {
+    _stklos_restart = 0;
+    pid = fork();
+
+    if (pid < 0) {
+      /* this fork failed! */
+      fprintf(stderr,"STklos could not fork itself when starting up!\n");
+      exit(1);
+
+    } else if (pid == 0) {
+      close(restart_pipefd[0]); // close FD 0
+
+      int ret;
+      char *argv0 = *argv;
+
+      /* Initialize the Garbage Collector */
 #if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
 # error GC problem
 #endif
-  STk_gc_init();
+      STk_gc_init();
 
-  /* Process command arguments */
-  ret = process_program_arguments(argc, argv);
-  argc -= ret;
-  argv += ret;
+      /* Process command arguments */
+      ret = process_program_arguments(argc, argv);
+      argc -= ret;
+      argv += ret;
 
-  if (!*program_file && argc) {
-    // We have at least one argument and we don't have set the -f option
-    program_file = *argv;
-    argv+=1;
-    argc-=1;
-  }
+      if (!*program_file && argc) {
+        // We have at least one argument and we don't have set the -f option
+        program_file = *argv;
+        argv+=1;
+        argc-=1;
+      }
 
-  if (*program_file) {
-    if (strcmp(program_file, "-") == 0)
-      /* Use stdin as input => reset program_file to "" */
-      program_file = "";
-    else
-      /* Set script_file to for SRFI-196 */
-      script_file = STk_expand_file_name(program_file);
-  }
+      if (*program_file) {
+        if (strcmp(program_file, "-") == 0)
+          /* Use stdin as input => reset program_file to "" */
+          program_file = "";
+        else
+          /* Set script_file to for SRFI-196 */
+          script_file = STk_expand_file_name(program_file);
+      }
 
-  /* See if we use UTF8 encoding */
-  if (!setlocale(LC_ALL, "")) {
-    fprintf(stderr, "Can't set the specified locale! "
-            "Check LANG, LC_CTYPE, LC_ALL.\n");
-    return 1;
-  }
+      /* See if we use UTF8 encoding */
+      if (!setlocale(LC_ALL, "")) {
+        fprintf(stderr, "Can't set the specified locale! "
+                "Check LANG, LC_CTYPE, LC_ALL.\n");
+        return 1;
+      }
 
-  if (STk_use_utf8 == -1) {
-    /* user didn't force the encoding. Determine it from environment */
-    STk_use_utf8 = (strcasecmp(nl_langinfo(CODESET), "UTF-8") == 0);
-  }
+      if (STk_use_utf8 == -1) {
+        /* user didn't force the encoding. Determine it from environment */
+        STk_use_utf8 = (strcasecmp(nl_langinfo(CODESET), "UTF-8") == 0);
+      }
 
-  /* Hack: to give the illusion that there is no VM under the scene */
-  if (*program_file) argv0 = program_file;
+      /* Hack: to give the illusion that there is no VM under the scene */
+      if (*program_file) argv0 = program_file;
 
-  /* Initialize the library */
-  if (!STk_init_library(&argc, &argv, stack_size)) {
-    fprintf(stderr, "cannot initialize the STklos library\nABORT\n");
-    exit(1);
-  }
+      /* Initialize the library */
+      if (!STk_init_library(&argc, &argv, stack_size)) {
+        fprintf(stderr, "cannot initialize the STklos library\nABORT\n");
+        exit(1);
+      }
 
-  /* Place CLI arguments in the Scheme variable *%system-state-plist* */
-  build_scheme_args(argc, argv, argv0);
+      /* Place CLI arguments in the Scheme variable *%system-state-plist* */
+      build_scheme_args(argc, argv, argv0);
 
-  /* Boot the VM */
-  if (*boot_file)
-    /* We have a boot specified on the command line */
-    ret = STk_load_boot(boot_file);
-  else
-    /* Use The boot in C file */
-    ret = STk_boot_from_C();
+      /* Boot the VM */
+      if (*boot_file)
+        /* We have a boot specified on the command line */
+        ret = STk_load_boot(boot_file);
+      else
+        /* Use The boot in C file */
+        ret = STk_boot_from_C();
 
-  if (ret < 0) {
-    fprintf(stderr, "cannot boot with \"%s\" file (code=%d)\n", boot_file, ret);
-    exit(1);
-  }
+      if (ret < 0) {
+        fprintf(stderr, "cannot boot with \"%s\" file (code=%d)\n", boot_file, ret);
+        exit(1);
+      }
 
-  STk_pre_exit(MAKE_INT(ret));
-  return ret;
+      STk_pre_exit(MAKE_INT(ret));
+      return 0;//ret;
+    } else { // pid > 0
+      /* parent / supervisor */
+      close(restart_pipefd[1]); // close FD 1, we won't write
+
+      /* Block until the child exits, then read the restart
+         variable from the pipe: */
+      wait(&status);
+      read(restart_pipefd[0], &_stklos_restart, sizeof(_stklos_restart));
+
+      if (! _stklos_restart)
+        exit(WEXITSTATUS(status));
+    }
+  } while (_stklos_restart);
 }
