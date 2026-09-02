@@ -4415,10 +4415,10 @@ static SCM my_expt(SCM x, SCM y)
           mpz_t *x_val;
           if (BIGNUMP(x))
             x_val = &BIGNUM_VAL(x);
-          else
-            /* We need 'labs' so the GMP will get the expected ulong */
-            mpz_init_set_si(*x_val, labs(INT_VAL(x)));
-
+          else {
+            x_val = STk_must_malloc(sizeof(mpz_t));
+            mpz_init_set_si(*x_val, INT_VAL(x));
+          }
           mpz_t res;
           mpz_init(res);
           /* mpz_root, GMP manual: "Return non-zero if the computation
