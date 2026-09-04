@@ -77,16 +77,16 @@ static void print_lambda(SCM closure, SCM port, int mode)
     STk_print(formals, port, mode);
   } else {
     switch (CLOSURE_ARITY(closure)) {
-      case 0:  STk_fprintf(port, " ()"); break;
-      case 1:  STk_fprintf(port, " (_)"); break;
-      case 2:  STk_fprintf(port, " (_ _)"); break;
-      case 3:  STk_fprintf(port, " (_ _ _)"); break;
-      case 4:  STk_fprintf(port, " (_ _ _ _)"); break;
-      case 5:  STk_fprintf(port, " (_ _ _ _ _)"); break;
-      case -1: STk_fprintf(port, " _"); break;
-      case -2: STk_fprintf(port, " (_ . _)"); break;
-      case -3: STk_fprintf(port, " (_ _ . _)"); break;
-      case -4: STk_fprintf(port, " (_ _ _ . _)"); break;
+      case 0:  STk_puts(" ()", port); break;
+      case 1:  STk_puts(" (_)", port); break;
+      case 2:  STk_puts(" (_ _)", port); break;
+      case 3:  STk_puts(" (_ _ _)", port); break;
+      case 4:  STk_puts(" (_ _ _ _)", port); break;
+      case 5:  STk_puts(" (_ _ _ _ _)", port); break;
+      case -1: STk_puts(" _", port); break;
+      case -2: STk_puts(" (_ . _)", port); break;
+      case -3: STk_puts(" (_ _ . _)", port); break;
+      case -4: STk_puts(" (_ _ _ . _)", port); break;
       default: break;
     }
   }
