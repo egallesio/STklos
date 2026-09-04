@@ -279,6 +279,22 @@ void STk_print(SCM exp, SCM port, int mode)
     case tc_apply:
       STk_puts("#[primitive ", port);
       STk_puts(PRIMITIVE_NAME(exp), port);
+      switch (BOXED_TYPE(exp)) {
+#define CASED_PRINT(_type, _string) case _type: STk_puts(_string, port); break;
+        CASED_PRINT(tc_subr0, " ()");
+        CASED_PRINT(tc_subr1, " (_)");
+        CASED_PRINT(tc_subr2, " (_ _)");
+        CASED_PRINT(tc_subr3, " (_ _ _)");
+        CASED_PRINT(tc_subr4, " (_ _ _ _)");
+        CASED_PRINT(tc_subr5, " (_ _ _ _ _)");
+        CASED_PRINT(tc_subr01, " _");
+        CASED_PRINT(tc_subr12, " (_ . _)");
+        CASED_PRINT(tc_subr23, " (_ _ . _)");
+        CASED_PRINT(tc_subr34, " (_ _ _ . _)");
+        CASED_PRINT(tc_vsubr, " _");
+        CASED_PRINT(tc_apply, " (_ . _)");
+#undef CASED_PRINT
+      }
       STk_putc(']', port);
       return;
 #ifdef HAVE_FFI
