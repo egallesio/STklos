@@ -66,27 +66,30 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 
 static void print_lambda(SCM closure, SCM port, int mode)
 {
-  if (CLOSURE_NAME(closure) != STk_false)
-    STk_fprintf(port, "#[closure %s", SYMBOL_PNAME(CLOSURE_NAME(closure)));
-  else
-    STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
+  /* log10(LONG_MAX) == 18.964890 */
+  char long_buffer[20] = {0};
+  char *name = (char *) (CLOSURE_NAME(closure) != STk_false
+    ? SYMBOL_PNAME(CLOSURE_NAME(closure))
+    : (snprintf(long_buffer, 20, "%lx", (unsigned long) closure), long_buffer));
 
+  STk_puts("#[closure", port);
   SCM formals = STk_key_get(CLOSURE_PLIST(closure), STk_key_formals, STk_false);
   if (formals != STk_false) {
     STk_nputs(port, " ", 1);
-    STk_print(formals, port, mode);
+    STk_print(STk_cons(STk_intern(name), formals), port, mode);
   } else {
+    STk_puts(" (", port);
+    STk_puts((const char *)name, port);
     switch (CLOSURE_ARITY(closure)) {
-      case 0:  STk_puts(" ()", port); break;
-      case 1:  STk_puts(" (_)", port); break;
-      case 2:  STk_puts(" (_ _)", port); break;
-      case 3:  STk_puts(" (_ _ _)", port); break;
-      case 4:  STk_puts(" (_ _ _ _)", port); break;
-      case 5:  STk_puts(" (_ _ _ _ _)", port); break;
-      case -1: STk_puts(" _", port); break;
-      case -2: STk_puts(" (_ . _)", port); break;
-      case -3: STk_puts(" (_ _ . _)", port); break;
-      case -4: STk_puts(" (_ _ _ . _)", port); break;
+      case 1:  STk_puts(" _)", port); break;
+      case 2:  STk_puts(" _ _)", port); break;
+      case 3:  STk_puts(" _ _ _)", port); break;
+      case 4:  STk_puts(" _ _ _ _)", port); break;
+      case 5:  STk_puts(" _ _ _ _ _)", port); break;
+      case -1: STk_puts(". _)", port); break;
+      case -2: STk_puts(" _ . _)", port); break;
+      case -3: STk_puts(" _ _ . _)", port); break;
+      case -4: STk_puts(" _ _ _ . _)", port); break;
       default: break;
     }
   }
