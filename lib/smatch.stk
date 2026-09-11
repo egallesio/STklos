@@ -3,6 +3,7 @@
 ;; to unhygienic define-macro-s
 
 (define-module (smatch)
+  (import (srfi 1))
   (export match
           ;; match-lambda
           ;; match-lambda*
@@ -24,7 +25,7 @@
        [()
         `(null? ,var)]
        [((kwote not) ?patt)
-        (clause->condition var patt body)]
+        (clause->condition var patt)]
        [((kwote and) . ?patts)
         `(and ,@(map (lambda (p) (clause->condition var p)) patts))]
        [((kwote or) . ?patts)
@@ -36,13 +37,17 @@
               (and ,@(map (lambda (p) (clause->condition var p)) patts)))]
        [(or (?patt (kwote |___|))
             (?patt (kwote |...|)))
-        `(list? ,var)]
+        (let ([param-var (gensym "list-param")])
+          `(and (list? ,var)
+                (every (lambda (,param-var)
+                         ,(clause->condition param-var patt))
+                       ,var)))]
        [(?patt . ?patts)
-        (let ((car-var (gensym "car"))
-              (cdr-var (gensym "cdr")))
+        (let ([car-var (gensym "car")]
+              [cdr-var (gensym "cdr")])
           `(and (pair? ,var)
-                (let ((,car-var (car ,var))
-                      (,cdr-var (cdr ,var)))
+                (let ([,car-var (car ,var)]
+                      [,cdr-var (cdr ,var)])
                   (and ,(clause->condition car-var patt)
                        ,(clause->condition cdr-var patts)))))]
        [(? symbol?)
@@ -50,12 +55,27 @@
        [?something
         (cond
          ((vector? something)
-          `(and (vector? ,var)
-                ,(if (member (vector-ref something (- (vector-length something) 1))
-                             '(|...| |___|))
-                     `(>= (vector-length ,var)
-                          ,(- (vector-length something) 2))
-                     `(= (vector-length ,var) ,(vector-length something)))))
+          (let ([variadic?
+                 (member (vector-ref something (- (vector-length something) 1))
+                         '(|...| |___|))])
+            `(and (vector? ,var)
+                  ,(if variadic?
+                       `(>= (vector-length ,var)
+                            ,(- (vector-length something) 2))
+                       `(= (vector-length ,var) ,(vector-length something)))
+                  ,@(let check-vec ([idx 0]
+                                    [lst (if variadic?
+                                             (drop-right (vector->list something) 2)
+                                             (vector->list something))])
+                      (if (null? lst)
+                          '()
+                          (cons (let* ([elem-var (gensym "elem")]
+                                       [cnd (clause->condition elem-var (car lst))])
+                                  (if (eqv? #t cnd)
+                                      '()
+                                      `(let ([elem-var (vector-ref ,idx)])
+                                         ,cnd)))
+                                (check-vec (+ 1 idx) (cdr lst))))))))
          (else
           (error "unrecognized pattern: ~s" something)))]))
     ;; TODO clause->bindings
