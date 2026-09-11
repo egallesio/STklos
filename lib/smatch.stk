@@ -75,7 +75,18 @@
                                       '()
                                       `(let ([elem-var (vector-ref ,idx)])
                                          ,cnd)))
-                                (check-vec (+ 1 idx) (cdr lst))))))))
+                                (check-vec (+ 1 idx) (cdr lst)))))
+                  ,@(if variadic?
+                        (let* ([tail-pat (vector-ref something
+                                                     (- (vector-length something) 2))]
+                               [cnd (clause->condition 'x tail-pat)]
+                               [param-var (gensym "elem")])
+                          (if (eqv? #t cnd)
+                              '()
+                              `((every (lambda (,param-var)
+                                         ,(clause->condition param-var tail-pat))
+                                       (drop (vector->list ,var)
+                                             ,(- (vector-length something) 2))))))))))
          (else
           (error "unrecognized pattern: ~s" something)))]))
     ;; TODO clause->bindings
