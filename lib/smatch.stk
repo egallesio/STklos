@@ -12,7 +12,7 @@
           )
 
   (define-macro (match expr . clauses)
-    (define (clause->condition var pattern body)
+    (define (clause->condition var pattern)
       (match-case
        pattern
        [_
@@ -26,14 +26,14 @@
        [((kwote not) ?patt)
         (clause->condition var patt body)]
        [((kwote and) . ?patts)
-        `(and ,@(map (lambda (p) (clause->condition var p body)) patts))]
+        `(and ,@(map (lambda (p) (clause->condition var p)) patts))]
        [((kwote or) . ?patts)
-        `(or ,@(map (lambda (p) (clause->condition var p body)) patts))]
+        `(or ,@(map (lambda (p) (clause->condition var p)) patts))]
        [((kwote ?) ?pred)
         `(,pred ,var)]
        [((kwote ?) ?pred . ?patts)
         `(and (,pred ,var)
-              (and ,@(map (lambda (p) (clause->condition var p body)) patts)))]
+              (and ,@(map (lambda (p) (clause->condition var p)) patts)))]
        [(or (?patt (kwote |___|))
             (?patt (kwote |...|)))
         `(list? ,var)]
@@ -43,8 +43,8 @@
           `(and (pair? ,var)
                 (let ((,car-var (car ,var))
                       (,cdr-var (cdr ,var)))
-                  (and ,(clause->condition car-var patt body)
-                       ,(clause->condition cdr-var patts body)))))]
+                  (and ,(clause->condition car-var patt)
+                       ,(clause->condition cdr-var patts)))))]
        [(? symbol?)
         #t]
        [?something
