@@ -2382,6 +2382,30 @@
 ;;------------------------------------------------------------------
 (test-subsection "Complexes")
 
+(test "make-polar zero magnitude.1"
+      0
+      (make-polar 0 1.2))
+
+(test "make-polar zero magnitude.2"
+      0
+      (make-polar 0 +inf.0))
+
+(test "make-polar zero magnitude.3"
+      0
+      (make-polar 0 +nan.0))
+
+(test "make-polar zero angle.1"
+      2/3
+      (make-polar 2/3 0))
+
+(test "make-polar zero angle.2"
+      +inf.0
+      (make-polar +inf.0 0))
+
+(test "make-polar zero angle.3"
+      +nan.0
+      (make-polar +nan.0 0))
+
 (test "complex sum"
       7+3i
       (+ 2-3i 5+6i))
