@@ -276,7 +276,7 @@
                [patterns (map car bindings)]
                [exprs (map cadr bindings)])
           `(match (list ,@exprs)
-             [(,@pattrns)
+             [(,@patterns)
               ,@body]))))
 
   (define-macro (match-let* bindings . body)
