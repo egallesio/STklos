@@ -74,19 +74,19 @@
        [((kwote not) ?patt)
         (clause->condition var patt)]
        [((kwote and) . ?patts)
-        `(and ,@(map (lambda (p) (clause->condition var p)) patts))]
+        `(and ,@(map (lambda [p] (clause->condition var p)) patts))]
        [((kwote or) . ?patts)
-        `(or ,@(map (lambda (p) (clause->condition var p)) patts))]
+        `(or ,@(map (lambda [p] (clause->condition var p)) patts))]
        [((kwote ?) ?pred)
         `(,pred ,var)]
        [((kwote ?) ?pred . ?patts)
         `(and (,pred ,var)
-              (and ,@(map (lambda (p) (clause->condition var p)) patts)))]
+              (and ,@(map (lambda [p] (clause->condition var p)) patts)))]
        [(or (?patt (kwote |___|))
             (?patt (kwote |...|)))
         (let ([param-var (gensym "list-param")])
           `(and (list? ,var)
-                (every (lambda (,param-var)
+                (every (lambda [,param-var]
                          ,(clause->condition param-var patt))
                        ,var)))]
        [(?patt . ?patts)
@@ -131,7 +131,7 @@
                                [param-var (gensym "elem")])
                           (if (eqv? #t cnd)
                               '()
-                              `((every (lambda (,param-var)
+                              `((every (lambda [,param-var]
                                          ,(clause->condition param-var tail-patt))
                                        (drop (vector->list ,var)
                                              ,(- (vector-length something) 2))))))))))
@@ -152,7 +152,7 @@
         `()]
        [((kwote and) . ?patts)
         `(,@(apply append
-                   (map (lambda (p) (clause->bindings var p)) patts)))]
+                   (map (lambda [p] (clause->bindings var p)) patts)))]
        [((kwote or) . ?patts)
         (let ([top-var var]
               [vars (map clause->vars patts)])
@@ -246,7 +246,7 @@
 
   (define-macro (match-lambda . clauses)
     (let ([var (gensym "match-lambda-var")])
-      `(lambda (,var)
+      `(lambda [,var]
          (match ,var
            ,@clauses))))
 
