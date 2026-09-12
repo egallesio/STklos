@@ -72,7 +72,7 @@
        [()
         `(null? ,var)]
        [((kwote not) ?patt)
-        (clause->condition var patt)]
+        `(not ,(clause->condition var patt))]
        [((kwote and) . ?patts)
         `(and ,@(map (lambda [p] (clause->condition var p)) patts))]
        [((kwote or) . ?patts)
@@ -120,7 +120,7 @@
                                        [cnd (clause->condition elem-var (car lst))])
                                   (if (eqv? #t cnd)
                                       '()
-                                      `(let ([elem-var (vector-ref ,idx)])
+                                      `(let ([,elem-var (vector-ref ,var ,idx)])
                                          ,cnd)))
                                 (check-vec (+ 1 idx) (cdr lst)))))
                   ,@(if (not variadic?)
