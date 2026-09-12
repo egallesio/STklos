@@ -1,0 +1,149 @@
+;; Copyright (C) Felix Thibault (2020).  All Rights Reserved.
+
+;; Permission is hereby granted, free of charge, to any person
+;; obtaining a copy of this software and associated documentation
+;; files (the "Software"), to deal in the Software without
+;; restriction, including without limitation the rights to use, copy,
+;; modify, merge, publish, distribute, sublicense, and/or sell copies
+;; of the Software, and to permit persons to whom the Software is
+;; furnished to do so, subject to the following conditions:
+
+;; The above copyright notice and this permission notice (including
+;; the next paragraph) shall be included in all copies or substantial
+;; portions of the Software.
+
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+;; BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+;; ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;; SOFTWARE.
+
+(require "test")
+
+(import (srfi 1))
+
+(test-section "Reduced Wright-Cartwright-Shinn match macro")
+
+(test-subsection "match")
+
+(test "Introduction" #t (let ((ls (list 1 2 3)))
+			  (match ls
+			    ((1 2 3) #t))))
+
+(test "Literal Patterns" '(ok ok)
+      (let ((ls (list 'a "b" #f 2 '() #\c)))
+	(match ls (('a "b" #f 2 () #\c) 'ok))))
+
+(test "Self-evaluating Vector Literal" 'ok
+      (match #(1) (#(1) 'ok)))
+
+(test "Simple Variable" 2 (match (list 1 2 3) ((a b c) b)))
+(test "Throwaway Variable" 2 (match (list 1 2 3) ((_ b _) b)))
+
+(test "empty ellipsis match"
+      #t
+      (match (list 1 2) ((1 2 3 ...) #t)))
+(test "single ellipsis match"
+      #t
+      (match (list 1 2 3) ((1 2 3 ...) #t)))
+(test "triple ellipsis match"
+      #t
+      (match (list 1 2 3 3 3) ((1 2 3 ...) #t)))
+
+(test "subexpression ellipsis match"
+      '((a stitch in) (time saves nine))
+      (match '((a time) (stitch saves) (in nine)) (((x y) ...) (list x y))))
+
+(test-subsection "match-lambda")
+
+(define transpose
+  (match-lambda (((a b ...) ...) (cons a (transpose b))) (_ '())))
+
+(test "double ellipsis match"
+      '((1 4) (2 5) (3 6))
+      (transpose '((1 2 3) (4 5 6))))
+
+(define first-column
+  (match-lambda (((a _ ...) ...) a)))
+
+(test "underscore ellipsis"
+      '(1 4 7)
+      (first-column '((1 2 3) (4 5 6) (7 8 9))))
+
+(define keys
+  (match-lambda (((a _ ...) ...) a) (_ 'fail)))
+
+(test "... proper list match" '(a b c) (keys '((a 1) (b 2) (c 3))))
+(test "... dotted-pair fail" 'fail (keys '((a . 1) (b . 2) (c . 3))))
+
+(define keys
+  (match-lambda (((a . _) ...) a) (_ 'fail)))
+
+(test "tail pattern proper list match"
+      '(a b c)
+      (keys '((a 1) (b 2) (c 3))))
+
+(test "tail pattern dotted-pair match"
+      '(a b c)
+      (keys '((a . 1) (b . 2) (c . 3))))
+
+(test-subsection "boolean operators")
+
+(test "empty and match" #t (match 1 ((and) #t)))
+(test "and identifier match" 1 (match 1 ((and x) x)))
+(test "and identifier matching literal match"
+      1 (match 1 ((and x 1) x)))
+(test "and false match" #t (match #f ((and) #t) (_ #f)))
+(test "empty or fail" #f (match 1 ((or) #t) (else #f)))
+(test "or identifier match" 1 (match 1 ((or x) x)))
+(test "or identifier mis-matched literal match" 1 (match 1 ((or x 2) x)))
+(test-assert "or ellipsis, many undef values"
+  (match (get-environment-variables)
+    (((or ("PATH" . path)
+	  ("HOMEPROFILE" . home)
+	  ("HOME" . home)
+	  ("USER" . user)
+	  ("USERNAME" . user)
+	  (_ . _)) ...)
+     (list path home user))))
+
+(define (clean lst)
+  (let ((undef (when #f #f)))
+    (remove (lambda (item) (equal? item undef)) lst)))
+(test "mostly defined or ellipsis"
+      (list 0 1 3 4 5)
+      (match (iota 7)
+        (((or 2 6 rest) ...) (clean rest))))
+
+(test "not #f match" 1 (match 1 ((and x (not #f)) x) (_ 'fail)))
+(test "not #f fail" 'fail (match #f ((and x (not #f)) x) (_ 'fail)))
+(test "not match" #t (match 1 ((not 2) #t)))
+
+(test-subsection "predicate and field operators")
+
+(test "predicate match" 1 (match 1 ((? odd? x) x)))
+
+(define fibby?
+  (match-lambda ((a b c . rest)
+		 (if (= (+ a b) c)
+		     (fibby? (cons b (cons c rest)))
+		     #f))
+		((a b) #t)
+		((a) #t)
+		(() #t)
+		(_ #f)))
+
+(test "pred catch repetition in body match"
+      #t
+      (fibby? '(4 7 11 18 29 47)))
+
+(test "pred false fail" 'fail
+      (match 1 ((and n (? even?)) n) (_ 'fail)))
+
+;; The rest of tests are pretty advanced and use unimplemented
+;; features. TODO: Implement these features.
+
+(test-section-end)
