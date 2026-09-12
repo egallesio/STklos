@@ -1,16 +1,15 @@
 ;; smatch---reduced Wright-Cartwright-Shinn pattern matcher
-;; This code is adapted from Alex Shinn’s match-simple but rewritten
-;; to unhygienic define-macro-s
+;; This code is adapted from Alex Shinn’s public domain match-simple
+;; but rewritten to unhygienic define-macro-s
 
 (define-module (smatch)
   (import (srfi 1))
   (export match
-          ;; match-lambda
-          ;; match-lambda*
-          ;; match-let
-          ;; match-let*
-          ;; match-letrecb
-          )
+          match-lambda
+          match-lambda*
+          match-let
+          match-let*
+          match-letrec)
 
   (define-macro (match expr . clauses)
     (define (clause->vars pattern)
@@ -154,17 +153,24 @@
        [((kwote and) . ?patts)
         `(,@(apply append
                    (map (lambda (p) (clause->bindings var p)) patts)))]
-       ;; FIXME: This is tricky, as clauses might contain arbitrarily
-       ;; differing cases?
        [((kwote or) . ?patts)
-        `()]
+        (let ([top-var var]
+              [vars (map clause->vars patts)])
+          (apply append
+                 (map (lambda [vars patt]
+                        (map (lambda [var]
+                               (list var `(match ,top-var
+                                            [,patt ,var]
+                                            [_ #f])))
+                             vars))
+                      vars patts)))]
        [((kwote ?) ?pred)
         `()]
        [((kwote ?) ?pred . ?patts)
         (clause->bindings var `(and ,@patts))]
        [(or (?patt (kwote |___|))
             (?patt (kwote |...|)))
-        (let ([proxy-bindings (clause->vars  patt)]
+        (let ([proxy-bindings (clause->vars patt)]
               [param-var (gensym "list-param")])
           (map
            (lambda [binding]
@@ -250,44 +256,49 @@
          (match ,var
            ,@clauses))))
 
-  ;; (define-syntax match-let
-  ;;   (syntax-rules ()
-  ;;     ((_ ((pat expr)) . body)
-  ;;      (match expr (pat . body)))
-  ;;     ((_ ((pat expr) ...) . body)
-  ;;      (match (list expr ...) ((pat ...) . body)))
-  ;;     ((_ loop . rest)
-  ;;      (match-named-let loop () . rest))))
+  (define-macro (match-let . body)
+    (if (symbol? (car body))
+        (let* ([loop-name (car body)]
+               [bindings (cadr body)]
+               [vars (map (lambda _ (gensym "match-let-var")) bindings)]
+               [body (cddr body)])
+          `(let ,loop-name (,@(map (lambda [var binding]
+                                     (list var (cadr binding)))
+                                   vars
+                                   bindings))
+                (match-let (,@(map (lambda [var binding]
+                                     (list (car binding) var))
+                                   vars
+                                   bindings))
+                  ,@body)))
+        (let* ([bindings (car body)]
+               [body (cdr body)]
+               [patterns (map car bindings)]
+               [exprs (map cadr bindings)])
+          `(match (list ,@exprs)
+             [(,@pattrns)
+              ,@body]))))
 
-  ;; (define-syntax match-named-let
-  ;;   (syntax-rules ()
-  ;;     ((_ loop ((pat expr var) ...) () . body)
-  ;;      (let loop ((var expr) ...)
-  ;;        (match-let ((pat var) ...)
-  ;;          . body)))
-  ;;     ((_ loop (v ...) ((pat expr) . rest) . body)
-  ;;      (match-named-let loop (v ... (pat expr tmp)) rest . body))))
+  (define-macro (match-let* bindings . body)
+    (if (null? binding)
+        `(begin ,@body)
+        `(match ,(cadr (first bindings))
+           (,(car (first bindings))
+            (match-let* (,@(cdr bindings))
+              ,@body)))))
 
-  ;; (define-syntax match-letrec
-  ;;   (syntax-rules ()
-  ;;     ((_ vars . body) (match-letrec-helper () vars . body))))
-
-  ;; (define-syntax match-letrec-helper
-  ;;   (syntax-rules ()
-  ;;     ((_ ((pat expr var) ...) () . body)
-  ;;      (letrec ((var expr) ...)
-  ;;        (match-let ((pat var) ...)
-  ;;          . body)))
-  ;;     ((_ (v ...) ((pat expr) . rest) . body)
-  ;;      (match-letrec-helper (v ... (pat expr tmp)) rest . body))))
-
-  ;; (define-syntax match-let*
-  ;;   (syntax-rules ()
-  ;;     ((_ () . body)
-  ;;      (begin . body))
-  ;;     ((_ ((pat expr) . rest) . body)
-  ;;      (match expr (pat (match-let* rest . body))))))
-  )
+  (define-macro (match-letrec bindings . body)
+    (let* ([vars (map (lambda _ (gensym "match-letrec-var")) bindings)]
+           [body (cddr body)])
+      `(letrec (,@(map (lambda [var binding]
+                         (list var (cadr binding)))
+                       vars
+                       bindings))
+         (match-let (,@(map (lambda [var binding]
+                              (list (car binding) var))
+                            vars
+                            bindings))
+           ,@body)))))
 
 (select-module STklos)
 (provide "smatch")
