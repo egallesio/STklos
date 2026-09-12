@@ -17,7 +17,7 @@
        pattern
        [_
         `()]
-       [(or (? integer?) (? boolean?) (? string?) (? char?))
+       [(or (? number?) (? boolean?) (? string?) (? char?))
         `()]
        [((kwote quote) ?c)
         `()]
@@ -65,7 +65,7 @@
        pattern
        [_
         #t]
-       [(or (? integer?) (? boolean?) (? string?) (? char?))
+       [(or (? number?) (? boolean?) (? string?) (? char?))
         `(equal? ,pattern ,var)]
        [((kwote quote) ?c)
         `(equal? ',c ,var)]
@@ -142,7 +142,7 @@
        pattern
        [_
         `()]
-       [(or (? integer?) (? boolean?) (? string?) (? char?))
+       [(or (? number?) (? boolean?) (? string?) (? char?))
         `()]
        [((kwote quote) ?c)
         `()]
