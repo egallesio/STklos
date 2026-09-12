@@ -13,6 +13,54 @@
           )
 
   (define-macro (match expr . clauses)
+    (define (clause->vars pattern)
+      (match-case
+       pattern
+       [_
+        `()]
+       [(or (? integer?) (? boolean?) (? string?) (? char?))
+        `()]
+       [((kwote quote) ?c)
+        `()]
+       [()
+        `()]
+       [((kwote not) ?patt)
+        `()]
+       [((kwote and) . ?patts)
+        `(,@(apply append
+                   (map clause->vars patts)))]
+       ;; FIXME: This is tricky, as clauses might contain arbitrarily
+       ;; differing cases?
+       [((kwote or) . ?patts)
+        `(,@(apply append
+                   (map clause->vars patts)))]
+       [((kwote ?) ?pred)
+        `()]
+       [((kwote ?) ?pred . ?patts)
+        (clause->vars `(and ,@patts))]
+       [(or (?patt (kwote |___|))
+            (?patt (kwote |...|)))
+        (clause->vars patt)]
+       [(?patt . ?patts)
+        (append (clause->vars patt)
+                (clause->vars patts))]
+       [(? symbol?)
+        (list pattern)]
+       [?something
+        (cond
+         ((vector? something)
+          (let* ([variadic?
+                  (member (vector-ref something (- (vector-length something) 1))
+                          '(|...| |___|))]
+                 [base-elems (if variadic?
+                                 (drop-right (vector->list something) 1)
+                                 (vector->list something))])
+            (apply append
+                   (map (lambda [patt]
+                          (clause->vars patt))
+                        base-elems))))
+         (else
+          (error "unrecognized pattern: ~s" something)))]))
     (define (clause->condition var pattern)
       (match-case
        pattern
@@ -76,119 +124,131 @@
                                       `(let ([elem-var (vector-ref ,idx)])
                                          ,cnd)))
                                 (check-vec (+ 1 idx) (cdr lst)))))
-                  ,@(if variadic?
-                        (let* ([tail-pat (vector-ref something
-                                                     (- (vector-length something) 2))]
-                               [cnd (clause->condition 'x tail-pat)]
+                  ,@(if (not variadic?)
+                        '()
+                        (let* ([tail-patt (vector-ref something
+                                                      (- (vector-length something) 2))]
+                               [cnd (clause->condition 'x tail-patt)]
                                [param-var (gensym "elem")])
                           (if (eqv? #t cnd)
                               '()
                               `((every (lambda (,param-var)
-                                         ,(clause->condition param-var tail-pat))
+                                         ,(clause->condition param-var tail-patt))
                                        (drop (vector->list ,var)
                                              ,(- (vector-length something) 2))))))))))
          (else
           (error "unrecognized pattern: ~s" something)))]))
-    ;; TODO clause->bindings
-    ;; TODO match
-    )
+    (define (clause->bindings var pattern)
+      (match-case
+       pattern
+       [_
+        `()]
+       [(or (? integer?) (? boolean?) (? string?) (? char?))
+        `()]
+       [((kwote quote) ?c)
+        `()]
+       [()
+        `()]
+       [((kwote not) ?patt)
+        `()]
+       [((kwote and) . ?patts)
+        `(,@(apply append
+                   (map (lambda (p) (clause->bindings var p)) patts)))]
+       ;; FIXME: This is tricky, as clauses might contain arbitrarily
+       ;; differing cases?
+       [((kwote or) . ?patts)
+        `()]
+       [((kwote ?) ?pred)
+        `()]
+       [((kwote ?) ?pred . ?patts)
+        (clause->bindings var `(and ,@patts))]
+       [(or (?patt (kwote |___|))
+            (?patt (kwote |...|)))
+        (let ([proxy-bindings (clause->vars  patt)]
+              [param-var (gensym "list-param")])
+          (map
+           (lambda [binding]
+             `(,binding
+               (map
+                (lambda [,param-var]
+                  (match ,param-var
+                    [,patt
+                     ,binding]))
+                ,var)))
+           proxy-bindings))]
+       [(?patt . ?patts)
+        (let ([car-var (gensym "car")]
+              [cdr-var (gensym "cdr")])
+          `([,car-var (car ,var)]
+            ,@(clause->bindings car-var patt)
+            [,cdr-var (cdr ,var)]
+            ,@(clause->bindings cdr-var patts)))]
+       [(? symbol?)
+        `((,pattern ,var))]
+       [?something
+        (cond
+         ((vector? something)
+          (let* ([variadic?
+                  (member (vector-ref something (- (vector-length something) 1))
+                          '(|...| |___|))]
+                 [base-elems (if variadic?
+                                 (drop-right (vector->list something) 2)
+                                 (vector->list something))])
+            (append
+             (apply append
+                    (map
+                     (lambda [patt idx]
+                       (let ([elem-sym (gensym "elem")])
+                         `((,elem-sym (vector-ref ,var ,idx))
+                           ,@(clause->bindings elem-sym patt))))
+                     base-elems
+                     (iota (vector-length something))))
+             (if (not variadic?)
+                 '()
+                 (let* ([tail-patt (vector-ref something
+                                               (- (vector-length something) 2))]
+                        [tail-var (gensym "vec-tail")]
+                        [proxy-bindings (clause->vars tail-patt)]
+                        [param-var (gensym "vec-param")])
+                   (append
+                    `((,tail-var (vector-copy ,var ,(length base-elems))))
+                    (map
+                     (lambda [binding]
+                       `(,binding
+                         (vector->list
+                          (vector-map
+                           (lambda [,param-var]
+                             (match ,param-var
+                               [,tail-patt
+                                ,binding]))
+                           ,tail-var))))
+                     proxy-bindings)))))))
+         (else
+          (error "unrecognized pattern: ~s" something)))]))
+    (let ([expr-var (gensym "expr")])
+      `(let ([,expr-var ,expr])
+         (cond
+          ,@(map
+             (lambda [clause]
+               (match-case
+                clause
+                [(?patt . ?body)
+                 `(,(clause->condition expr-var patt)
+                   (let* (,@(clause->bindings expr-var patt))
+                     ,@body))]))
+             clauses)))))
 
-  ;; (define-syntax match
-  ;;   (syntax-rules ()
-  ;;     ((match expr (pat . body) ...)
-  ;;      (match-gen-labels expr start () (pat . body) ...))))
+  (define-macro (match-lambda . clauses)
+    (let ([var (gensym "match-lambda-var")])
+      `(lambda (,var)
+         (match ,var
+           ,@clauses))))
 
-  ;; (define-syntax match-gen-labels
-  ;;   (syntax-rules (=>)
-  ;;     ((_ expr label ((k1 fk1 pat1 . body1) (k fk pat . body) ...))
-  ;;      (let ((tmp expr))
-  ;;        (letrec ((k (lambda () (match-one tmp pat (begin . body) (fk)))) ...
-  ;;                 (label (lambda () (error "no matches" tmp))))
-  ;;          (match-one tmp pat1 (begin . body1) (fk1)))))
-  ;;     ((_ expr label (labels ...) (pat (=> fk) . body) . rest)
-  ;;      (match-gen-labels expr fk (labels ... (label fk pat . body)) . rest))
-  ;;     ((_ expr label (labels ...) (pat . body) . rest)
-  ;;      (match-gen-labels expr fail (labels ... (label fail pat . body)) . rest))))
-
-  ;; (define-syntax match-one
-  ;;   (syntax-rules (_ ___ quote ? and or not)
-  ;;     ((match-one var () sk fk)
-  ;;      (if (null? var) sk fk))
-  ;;     ((match-one var (quote a) sk fk)
-  ;;      (if (equal? var 'a) sk fk))
-  ;;     ((match-one var (and) sk fk) sk)
-  ;;     ((match-one var (and a b ...) sk fk)
-  ;;      (match-one var a (match-one var (and b ...) sk fk) fk))
-  ;;     ((match-one var (or) sk fk) fk)
-  ;;     ((match-one var (or a ...) sk fk)
-  ;;      (let ((sk2 (lambda () sk)))
-  ;;        (match-one var (not (and (not a) ...)) (sk2) fk)))
-  ;;     ((match-one var (not a) sk fk)
-  ;;      (match-one var a fk sk))
-  ;;     ((match-one var (? pred a ...) sk fk)
-  ;;      (if (pred var) (match-one var (and a ...) sk fk) fk))
-  ;;     ((match-one var (a ___) sk fk)
-  ;;      (match-extract-variables a (match-gen-ellipses var a sk fk) ()))
-  ;;     ((match-one var (a) sk fk)
-  ;;      (if (and (pair? var) (null? (cdr var)))
-  ;;          (let ((tmp (car var)))
-  ;;            (match-one tmp a sk fk))
-  ;;          fk))
-  ;;     ((match-one var (a . b) sk fk)
-  ;;      (if (pair? var)
-  ;;          (let ((tmp1 (car var)))
-  ;;            (match-one tmp1 a (let ((tmp2 (cdr var))) (match-one tmp2 b sk fk)) fk))
-  ;;          fk))
-  ;;     ((match-one var #(a ...) sk fk)
-  ;;      (if (vector? var)
-  ;;          (let ((ls (vector->list var)))
-  ;;            (match-one ls (a ...) sk fk))
-  ;;          fk))
-  ;;     ((match-one var _ sk fk) sk)
-  ;;     ((match-one var x sk fk)
-  ;;      (let-syntax ((sym?
-  ;;                    (syntax-rules ()
-  ;;                      ((sym? x) (let ((x var)) sk))
-  ;;                      ((sym? y) (if (equal? var x) sk fk)))))
-  ;;        (sym? abracadabra)))))
-
-  ;; (define-syntax match-gen-ellipses
-  ;;   (syntax-rules ()
-  ;;     ((_ var a sk fk ((v v-ls) ...))
-  ;;      (let loop ((ls var) (v-ls '()) ...)
-  ;;        (cond ((null? ls)
-  ;;               (let ((v (reverse v-ls)) ...) sk))
-  ;;              ((pair? ls)
-  ;;               (let ((x (car ls)))
-  ;;                 (match-one x a (loop (cdr ls) (cons v v-ls) ...) fk)))
-  ;;              (else
-  ;;               fk))))))
-
-  ;; (define-syntax match-extract-variables
-  ;;   (syntax-rules (_ ___ quote ? and or not)
-  ;;     ((_ (a . b) k v)
-  ;;      (match-extract-variables a (match-extract-variables-step b k v) ()))
-  ;;     ((_ #(a ...) k v)
-  ;;      (match-extract-variables (a ...) k v))
-  ;;     ((_ a (k ...) (v ...))
-  ;;      (let-syntax ((sym?
-  ;;                    (syntax-rules ()
-  ;;                      ((sym? a) (k ... (v ... (a a-ls))))
-  ;;                      ((sym? b) (k ... (v ...))))))
-  ;;        (sym? abracadabra)))))
-
-  ;; (define-syntax match-extract-variables-step
-  ;;   (syntax-rules ()
-  ;;     ((_ a k (v ...) (v2 ...))
-  ;;      (match-extract-variables a k (v ... v2 ...)))))
-
-  ;; (define-syntax match-lambda
-  ;;   (syntax-rules ()
-  ;;     ((_ clause ...) (lambda (expr) (match expr clause ...)))))
-
-  ;; (define-syntax match-lambda*
-  ;;   (syntax-rules ()
-  ;;     ((_ clause ...) (lambda expr (match expr clause ...)))))
+  (define-macro (match-lambda* . clauses)
+    (let ([var (gensym "match-lambda*-var")])
+      `(lambda ,var
+         (match ,var
+           ,@clauses))))
 
   ;; (define-syntax match-let
   ;;   (syntax-rules ()
