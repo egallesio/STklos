@@ -1,0 +1,53 @@
+(test "cyclic bytevector ports are input ports"
+      #t
+      (call-with-port (open-cyclic-input-bytevector '#u8(1)) input-port?))
+
+(test "cyclic bytevector ports are binary ports"
+      #t
+      (call-with-port (open-cyclic-input-bytevector '#u8(1)) binary-port?))
+
+(test "cyclic string ports are input ports"
+      #t
+      (call-with-port (open-cyclic-input-string "a") input-port?))
+
+(test "cyclic string ports are textual ports"
+      #t
+      (call-with-port (open-cyclic-input-string "a") textual-port?))
+
+(test "read from cyclic bytevector port"
+      #u8(1 2 3 1 2 3 1 2)
+      (call-with-port (open-cyclic-input-bytevector '#u8(1 2 3))
+                      (lambda (p)
+                        (read-bytevector 8 p))))
+
+(test "read from cyclic string port"
+      "abcabcab"
+      (call-with-port (open-cyclic-input-string "abc")
+                      (lambda (p)
+                        (read-chars 8 p))))
+
+;;-- ;;;
+;;-- ;;; port positioning (no port positioning on virtual ports)
+;;-- ;;;
+;;-- 
+;;-- #;(test "read on cyclic bytevector port after positioning"
+;;--       #t
+;;--       (call-with-port (open-cyclic-input-bytevector '#u8(1 2 3))
+;;--                       (lambda (p)
+;;--                         (let* ((get-bvec (lambda () (read-bytevector 5 p)))
+;;--                                (_junk    (read-bytevector 13 p))
+;;--                                (pos      (port-position p))
+;;--                                (v        (get-bvec)))
+;;--                           (set-port-position! p pos)
+;;--                           (equal? v (get-bvec))))))
+;;-- 
+;;-- (test "read on cyclic string port after positioning"
+;;--       #t
+;;--       (call-with-port  (open-cyclic-input-string "abc")
+;;--                        (lambda (p)
+;;--                          (let* ((get-str (lambda () (read-string 5 p)))
+;;--                                 (_junk         (read-string p 13))
+;;--                                 (pos           (port-position p))
+;;--                                 (s             (get-str)))
+;;--                            (set-port-position! p pos)
+;;--                            (equal? s (get-str))))))

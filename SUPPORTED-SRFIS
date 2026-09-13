@@ -153,3 +153,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-267: Raw String Syntax
     - SRFI-273: Extensions to Data (Type-)Checking
     - SRFI-274: Extended List Conversion Procedures
+    - SRFI-277: Cyclic ports
