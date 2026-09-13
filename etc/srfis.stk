@@ -317,7 +317,7 @@
     (274 "Extended List Conversion Procedures")
     ;; 275 URIs and IRIs
     ;; 276 Type-specific Flonum Libraries
-    ; (277 "Cyclic ports" (cyclic-port))
+    (277 "Cyclic ports" (cyclic-port))
     ))
 
 ;; ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
