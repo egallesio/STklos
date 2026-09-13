@@ -2056,7 +2056,8 @@ doc>
  *          (expt 3 5)
  *          (expt 3 4))     => 1, 162
  * (exact-integer-log 16 2) => 4, 0
- * (exact-integer-log 19 1) => 4, 3
+ * (exact-integer-log 19 2) => 4, 3
+ * (exact-integer-log 19 3) => 2, 10
  * (exact-integer-log
  *          (expt 6 10000)
  *          (expt 6 1000)) => 10, 0
@@ -3029,7 +3030,7 @@ doc>
 (%add-sharp-reader #\"
                    (lambda (port)
                      ;; We are sure that current character is the opening #\"
-                     (read-char port)  ;; skip it 
+                     (read-char port)  ;; skip it
                      (read-raw-string-after-prefix port)))
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg
