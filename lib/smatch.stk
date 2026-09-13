@@ -1,0 +1,304 @@
+;; smatch---reduced Wright-Cartwright-Shinn pattern matcher
+;; This code is adapted from Alex Shinn’s public domain match-simple
+;; but rewritten to unhygienic define-macro-s
+
+(define-module (smatch)
+  (import (srfi 1))
+  (export match
+          match-lambda
+          match-lambda*
+          match-let
+          match-let*
+          match-letrec)
+
+  (define-macro (match expr . clauses)
+    (define (clause->vars pattern)
+      (match-case
+       pattern
+       [_
+        `()]
+       [(or (? number?) (? boolean?) (? string?) (? char?))
+        `()]
+       [((kwote quote) ?c)
+        `()]
+       [()
+        `()]
+       [((kwote not) ?patt)
+        `()]
+       [((kwote and) . ?patts)
+        `(,@(apply append
+                   (map clause->vars patts)))]
+       ;; FIXME: This is tricky, as clauses might contain arbitrarily
+       ;; differing cases?
+       [((kwote or) . ?patts)
+        `(,@(apply append
+                   (map clause->vars patts)))]
+       [((kwote ?) ?pred)
+        `()]
+       [((kwote ?) ?pred . ?patts)
+        (clause->vars `(and ,@patts))]
+       [(or (?patt (kwote |___|))
+            (?patt (kwote |...|)))
+        (clause->vars patt)]
+       [(?patt . ?patts)
+        (append (clause->vars patt)
+                (clause->vars patts))]
+       [(? symbol?)
+        (list pattern)]
+       [?something
+        (cond
+         ((vector? something)
+          (let* ([variadic?
+                  (member (vector-ref something (- (vector-length something) 1))
+                          '(|...| |___|))]
+                 [base-elems (if variadic?
+                                 (drop-right (vector->list something) 1)
+                                 (vector->list something))])
+            (apply append
+                   (map (lambda [patt]
+                          (clause->vars patt))
+                        base-elems))))
+         (else
+          (error "unrecognized pattern: ~s" something)))]))
+    (define (clause->condition var pattern)
+      (match-case
+       pattern
+       [_
+        #t]
+       [(or (? number?) (? boolean?) (? string?) (? char?))
+        `(equal? ,pattern ,var)]
+       [((kwote quote) ?c)
+        `(equal? ',c ,var)]
+       [()
+        `(null? ,var)]
+       [((kwote not) ?patt)
+        `(not ,(clause->condition var patt))]
+       [((kwote and) . ?patts)
+        `(and ,@(map (lambda [p] (clause->condition var p)) patts))]
+       [((kwote or) . ?patts)
+        `(or ,@(map (lambda [p] (clause->condition var p)) patts))]
+       [((kwote ?) ?pred)
+        `(,pred ,var)]
+       [((kwote ?) ?pred . ?patts)
+        `(and (,pred ,var)
+              (and ,@(map (lambda [p] (clause->condition var p)) patts)))]
+       [(or (?patt (kwote |___|))
+            (?patt (kwote |...|)))
+        (let ([param-var (gensym "list-param")])
+          `(and (list? ,var)
+                (every (lambda [,param-var]
+                         ,(clause->condition param-var patt))
+                       ,var)))]
+       [(?patt . ?patts)
+        (let ([car-var (gensym "car")]
+              [cdr-var (gensym "cdr")])
+          `(and (pair? ,var)
+                (let ([,car-var (car ,var)]
+                      [,cdr-var (cdr ,var)])
+                  (and ,(clause->condition car-var patt)
+                       ,(clause->condition cdr-var patts)))))]
+       [(? symbol?)
+        #t]
+       [?something
+        (cond
+         ((vector? something)
+          (let ([variadic?
+                 (member (vector-ref something (- (vector-length something) 1))
+                         '(|...| |___|))])
+            `(and (vector? ,var)
+                  ,(if variadic?
+                       `(>= (vector-length ,var)
+                            ,(- (vector-length something) 2))
+                       `(= (vector-length ,var) ,(vector-length something)))
+                  ,@(let check-vec ([idx 0]
+                                    [lst (if variadic?
+                                             (drop-right (vector->list something) 2)
+                                             (vector->list something))])
+                      (if (null? lst)
+                          '()
+                          (cons (let* ([elem-var (gensym "elem")]
+                                       [cnd (clause->condition elem-var (car lst))])
+                                  (if (eqv? #t cnd)
+                                      '()
+                                      `(let ([,elem-var (vector-ref ,var ,idx)])
+                                         ,cnd)))
+                                (check-vec (+ 1 idx) (cdr lst)))))
+                  ,@(if (not variadic?)
+                        '()
+                        (let* ([tail-patt (vector-ref something
+                                                      (- (vector-length something) 2))]
+                               [cnd (clause->condition 'x tail-patt)]
+                               [param-var (gensym "elem")])
+                          (if (eqv? #t cnd)
+                              '()
+                              `((every (lambda [,param-var]
+                                         ,(clause->condition param-var tail-patt))
+                                       (drop (vector->list ,var)
+                                             ,(- (vector-length something) 2))))))))))
+         (else
+          (error "unrecognized pattern: ~s" something)))]))
+    (define (clause->bindings var pattern)
+      (match-case
+       pattern
+       [_
+        `()]
+       [(or (? number?) (? boolean?) (? string?) (? char?))
+        `()]
+       [((kwote quote) ?c)
+        `()]
+       [()
+        `()]
+       [((kwote not) ?patt)
+        `()]
+       [((kwote and) . ?patts)
+        `(,@(apply append
+                   (map (lambda [p] (clause->bindings var p)) patts)))]
+       [((kwote or) . ?patts)
+        (let ([top-var var]
+              [vars (map clause->vars patts)])
+          (apply append
+                 (map (lambda [vars patt]
+                        (map (lambda [var]
+                               (list var `(match ,top-var
+                                            [,patt ,var]
+                                            [_ #f])))
+                             vars))
+                      vars patts)))]
+       [((kwote ?) ?pred)
+        `()]
+       [((kwote ?) ?pred . ?patts)
+        (clause->bindings var `(and ,@patts))]
+       [(or (?patt (kwote |___|))
+            (?patt (kwote |...|)))
+        (let ([proxy-bindings (clause->vars patt)]
+              [param-var (gensym "list-param")])
+          (map
+           (lambda [binding]
+             `(,binding
+               (map
+                (lambda [,param-var]
+                  (match ,param-var
+                    [,patt
+                     ,binding]))
+                ,var)))
+           proxy-bindings))]
+       [(?patt . ?patts)
+        (let ([car-var (gensym "car")]
+              [cdr-var (gensym "cdr")])
+          `([,car-var (car ,var)]
+            ,@(clause->bindings car-var patt)
+            [,cdr-var (cdr ,var)]
+            ,@(clause->bindings cdr-var patts)))]
+       [(? symbol?)
+        `((,pattern ,var))]
+       [?something
+        (cond
+         ((vector? something)
+          (let* ([variadic?
+                  (member (vector-ref something (- (vector-length something) 1))
+                          '(|...| |___|))]
+                 [base-elems (if variadic?
+                                 (drop-right (vector->list something) 2)
+                                 (vector->list something))])
+            (append
+             (apply append
+                    (map
+                     (lambda [patt idx]
+                       (let ([elem-sym (gensym "elem")])
+                         `((,elem-sym (vector-ref ,var ,idx))
+                           ,@(clause->bindings elem-sym patt))))
+                     base-elems
+                     (iota (vector-length something))))
+             (if (not variadic?)
+                 '()
+                 (let* ([tail-patt (vector-ref something
+                                               (- (vector-length something) 2))]
+                        [tail-var (gensym "vec-tail")]
+                        [proxy-bindings (clause->vars tail-patt)]
+                        [param-var (gensym "vec-param")])
+                   (append
+                    `((,tail-var (vector-copy ,var ,(length base-elems))))
+                    (map
+                     (lambda [binding]
+                       `(,binding
+                         (vector->list
+                          (vector-map
+                           (lambda [,param-var]
+                             (match ,param-var
+                               [,tail-patt
+                                ,binding]))
+                           ,tail-var))))
+                     proxy-bindings)))))))
+         (else
+          (error "unrecognized pattern: ~s" something)))]))
+    (let ([expr-var (gensym "expr")])
+      `(let ([,expr-var ,expr])
+         (cond
+          ,@(map
+             (lambda [clause]
+               (match-case
+                clause
+                [(?patt . ?body)
+                 `(,(clause->condition expr-var patt)
+                   (let* (,@(clause->bindings expr-var patt))
+                     ,@body))]))
+             clauses)))))
+
+  (define-macro (match-lambda . clauses)
+    (let ([var (gensym "match-lambda-var")])
+      `(lambda [,var]
+         (match ,var
+           ,@clauses))))
+
+  (define-macro (match-lambda* . clauses)
+    (let ([var (gensym "match-lambda*-var")])
+      `(lambda ,var
+         (match ,var
+           ,@clauses))))
+
+  (define-macro (match-let . body)
+    (if (symbol? (car body))
+        (let* ([loop-name (car body)]
+               [bindings (cadr body)]
+               [vars (map (lambda _ (gensym "match-let-var")) bindings)]
+               [body (cddr body)])
+          `(let ,loop-name (,@(map (lambda [var binding]
+                                     (list var (cadr binding)))
+                                   vars
+                                   bindings))
+                (match-let (,@(map (lambda [var binding]
+                                     (list (car binding) var))
+                                   vars
+                                   bindings))
+                  ,@body)))
+        (let* ([bindings (car body)]
+               [body (cdr body)]
+               [patterns (map car bindings)]
+               [exprs (map cadr bindings)])
+          `(match (list ,@exprs)
+             [(,@patterns)
+              ,@body]))))
+
+  (define-macro (match-let* bindings . body)
+    (if (null? binding)
+        `(begin ,@body)
+        `(match ,(cadr (first bindings))
+           (,(car (first bindings))
+            (match-let* (,@(cdr bindings))
+              ,@body)))))
+
+  (define-macro (match-letrec bindings . body)
+    (let* ([vars (map (lambda _ (gensym "match-letrec-var")) bindings)]
+           [body (cddr body)])
+      `(letrec (,@(map (lambda [var binding]
+                         (list var (cadr binding)))
+                       vars
+                       bindings))
+         (match-let (,@(map (lambda [var binding]
+                              (list (car binding) var))
+                            vars
+                            bindings))
+           ,@body)))))
+
+(select-module STklos)
+(provide "smatch")
