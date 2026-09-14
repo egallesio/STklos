@@ -1,0 +1,319 @@
+
+(import (except (scheme base) exact-integer? real? integer? rational?
+                              rationalize)
+        (prefix (only (scheme base) real?) r7rs-)
+        (scheme write)
+        (scheme process-context)
+        (scheme complex)
+        (rename (scheme inexact) (nan? r7rs:nan?))
+        (srfi 278))
+
+;(test-begin "SRFI 278")
+
+(define-macro test-approximate
+  (syntax-rules ()
+    ((_  a b epsilon)
+     (test "" #t (<= (abs (- a b)) epsilon)))))
+
+(test-subsection "real?")
+  (test "srfi-278." #t  (real? 1.0))
+  (test "srfi-278." #t  (real? 1.0+0i))
+  (test "srfi-278." #t  (not (real? 1.0+0.0i)))
+  (test "srfi-278." #t  (not (real? 1.0-0.0i)))
+
+(test-subsection "rational?")
+  (test "srfi-278." #t  (rational? 1/2))
+  (test "srfi-278." #t  (rational? 1/2+0i))
+  (test "srfi-278." #t  (rational? 0.5))
+  (test "srfi-278." #t  (not (rational? 0.5+0.0i)))
+  (test "srfi-278." #t  (not (rational? 0.5-0.0i)))
+
+(test-subsection "integer?")
+  (test "srfi-278." #t  (integer? 1.0))
+  (test "srfi-278." #t  (integer? 1))
+  (test "srfi-278." #t  (integer? 1+0i))
+  (test "srfi-278." #t  (integer? 1-0i))
+  (test "srfi-278." #t  (not (integer? 1+0.0i)))
+  (test "srfi-278." #t  (not (integer? 1-0.0i)))
+
+(test-subsection "exact-integer?")
+  (test "srfi-278." #t  (exact-integer? 1))
+  (test "srfi-278." #t  (exact-integer? 0))
+  (test "srfi-278." #t  (not (exact-integer? 0.0)))
+  (test "srfi-278." #t  (not (exact-integer? "0.0")))
+
+(test-subsection "rationalize")
+  (test "srfi-278."  0 (rationalize 1 1))
+  ;; From the Gauche test suite
+  (test "srfi-278."  1/3  (rationalize 3/10 1/10 1/10 #f #f))
+  (test "srfi-278."  2/3  (rationalize 24/35 4/35 4/35 #f #f))
+  (test "srfi-278."   1   (rationalize 1 1/2))
+  (test "srfi-278."   2   (rationalize 5 3))
+  (test "srfi-278."   0   (rationalize 1 3))
+  (test "srfi-278."  -1   (rationalize -1 1/2))
+  (test "srfi-278."  -2   (rationalize -5 3))
+  (test "srfi-278."   0   (rationalize -1 3))
+  (test "srfi-278." #t    (exact? (rationalize 1/2 1/3)))
+  (test "srfi-278." #t    (inexact? (rationalize 0.5 1/3)))
+  (test "srfi-278." #t    (inexact? (rationalize 1/2 0.1)))
+  (test "srfi-278." #t    (inexact? (rationalize 0.5 0.1)))
+  (test "srfi-278." 53/10 (rationalize 5967269506265907/1125899906842624
+                               (expt 2 -51)
+                               (expt 2 -51)
+                               #f
+                               #f))
+
+(test-subsection "nan?")
+  (test "srfi-278." #t  (nan? +nan.0))
+  (test "srfi-278." #t  (not (nan? +inf.0)))
+  (test "srfi-278." #t  (not (nan? "NaN")))
+
+(test-subsection "nonnegative?")
+  (test "srfi-278." #t  (nonnegative? 1))
+  (test "srfi-278." #t  (nonnegative? 0))
+  (test "srfi-278." #t  (nonnegative? -0.0))
+  (test "srfi-278." #t  (not (nonnegative? -1)))
+  (test "srfi-278." #t  (not (nonnegative? +nan.0)))
+
+(test-subsection "nonpositive?")
+  (test "srfi-278." #t  (nonpositive? -1))
+  (test "srfi-278." #t  (nonpositive? 0))
+  (test "srfi-278." #t  (nonpositive? -0.0))
+  (test "srfi-278." #t  (not (nonpositive? +1)))
+  (test "srfi-278." #t  (not (nonpositive? +nan.0)))
+
+(test-subsection "nonzero?")
+  (test "srfi-278." #t  (nonzero? -1))
+  (test "srfi-278." #t  (nonzero? 1))
+  (test "srfi-278." #t  (not (nonzero? 0)))
+  (test "srfi-278." #t  (not (nonzero? 0.0)))
+  (test "srfi-278." #t  (not (nonzero? -0.0)))
+  (test "srfi-278." #t  (not (nonzero? +nan.0)))
+
+(test-subsection "sign-negative?")
+  (test "srfi-278." #t  (sign-negative? -0.0))
+  (test "srfi-278." #t  (not (sign-negative? 0)))
+  (test "srfi-278." #t  (not (sign-negative? +0.0)))
+  (test "srfi-278." #t  (sign-negative? -inf.0))
+  (test "srfi-278." #t  (not (sign-negative? +inf.0)))
+  (test "srfi-278." #t  (sign-negative? -1))
+  (test "srfi-278." #t  (not (sign-negative? 1)))
+
+(test-subsection "ordered? and unordered?")
+  (test "srfi-278." #t  (ordered? 0 1))
+  (test "srfi-278." #t  (not (unordered? 0 1)))
+  (test "srfi-278." #t  (unordered? +nan.0 0))
+  (test "srfi-278." #t  (not (ordered? +nan.0 0)))
+  (test "srfi-278." #t  (unordered? 0 +nan.0))
+  (test "srfi-278." #t  (not (ordered? 0 +nan.0)))
+
+(test-subsection "!=")
+  (test "srfi-278." #t  (!= 1 2))
+  (test "srfi-278." #t  (not (!= -0.0 +0.0)))
+  (test "srfi-278." #t  (not (!= 0 0)))
+  (test "srfi-278." #t  (!= 1 1 2))
+  (test "srfi-278." #t  (not (!= 0.0 -0.0 0.0 0 -0.0)))
+  (test "srfi-278." #t  (!= 0.0 -0.0 0.0 0 -0.0 1))
+  (let ((nan +nan.0))
+    (test "srfi-278." #t  (not (!= nan nan))))
+
+(test-subsection "round-away")
+  (test "srfi-278."  +inf.0 (round-away +inf.0))
+  (test "srfi-278."  -inf.0 (round-away -inf.0))
+  (test "srfi-278." #t  (nan? (round-away +nan.0)))
+  (test-approximate 4.0
+                    (round-away 3.5)
+                    1e-6)
+  (test-approximate 3.0
+                    (round-away 2.5)
+                    1e-6)
+  (test-approximate 3.0
+                    (round-away 2.6)
+                    1e-6)
+  (test-approximate 2.0
+                    (round-away 2.4)
+                    1e-6)
+  (test "srfi-278."  3 (round-away 5/2))
+  (test-approximate -4.0
+                    (round-away -3.5)
+                    1e-6)
+  (test-approximate -3.0
+                    (round-away -2.5)
+                    1e-6)
+
+(test-subsection "conjugate")
+  (test "srfi-278."   1 (conjugate 1))
+  (test "srfi-278."   -1 (conjugate -1))
+  (test "srfi-278."   1-2i (conjugate 1+2i))
+  (test "srfi-278."   -0.0 (imag-part (conjugate 1.0+0.0i)))
+  (test "srfi-278."   +i (conjugate -i))
+
+(test-subsection "sinh")
+  ;; TODO: Better way to test?
+  (test "srfi-278."   0 (sinh 0))
+  (test "srfi-278."   0.0 (sinh 0.0))
+  (test "srfi-278."   -0.0 (sinh -0.0))
+  (test "srfi-278."   +inf.0 (sinh +inf.0))
+  (test "srfi-278."   -inf.0 (sinh -inf.0))
+  (test-approximate (/ (- (exp 1) (exp -1)) 2)
+                    (sinh 1)
+                    1e-6)
+
+(test-subsection "cosh")
+  (test "srfi-278."   1 (cosh 0))
+  (test "srfi-278."   +inf.0 (cosh +inf.0))
+  (test "srfi-278."   +inf.0 (cosh -inf.0))
+  (test-approximate (/ (+ (exp 1) (exp -1)) 2)
+                    (cosh 1)
+                    1e-6)
+
+(test-subsection "tanh")
+  (test "srfi-278."   0 (tanh 0))
+  (test "srfi-278.(tanh 0.0)" 0.0 (tanh 0.0))
+  (test "srfi-278.(tanh -0.0)" -0.0 (tanh -0.0))
+  (test "srfi-278.(tanh +inf.0)" 1.0 (tanh +inf.0))
+  (test "srfi-278.(tanh -inf.0)" -1.0 (tanh -inf.0))
+  (test-approximate (/ (sinh 10) (cosh 10))
+                    (tanh 10)
+                    1e-6)
+
+(define (naive-atanh z)
+  (/ (- (log (+ 1 z)) (log (- 1 z)))
+     2))
+
+(define (test-approximate/special expect actual error)
+  (cond
+   ((zero? expect)
+    (test "srfi-278." #t  (zero? actual)))
+   ((eqv? expect +0.0)
+    (test "srfi-278." #t  (or (eqv? actual 0.0)
+                              (eqv? actual 0))))
+   ((eqv? expect -0.0)
+    (test "srfi-278." #t  (eqv? actual -0.0)))
+   ((infinite? expect)
+    (test "srfi-278." #t  (eqv? expect actual)))
+   (else (test-approximate expect actual error))))
+
+(define (test-real-and-imag z-expect z-actual)
+  (test-approximate/special (real-part z-expect)
+                            (real-part z-actual)
+                            1e-6)
+  (test-approximate/special (imag-part z-expect)
+                            (imag-part z-actual)
+                            1e-6))
+
+(test-subsection "atanh")
+  ;; In Kahan’s version for unsigned zero, the returned value is the
+  ;; value that is approached counter-clockwise.
+(test "srfi-278."   0 (atanh 0))
+(test-subsection "(atanh 1.0+0.0i)")
+(test-real-and-imag +inf.0+.7853981633974483i
+                    (atanh 1.0+0.0i))
+(test-subsection "(atanh 1.0-0.0i)")
+(test-real-and-imag +inf.0-.7853981633974483i
+                    (atanh 1.0-0.0i))
+(test-subsection "(atanh -1.0+0.0i)")
+(test-real-and-imag -inf.0+.7853981633974483i
+                    (atanh -1.0+0.0i))
+(test-subsection "(atanh -1.0-0.0i)")
+(test-real-and-imag  -inf.0-.7853981633974483i
+                     (atanh -1.0-0.0i))
+
+  (test-subsection "(atanh 2.0+0.0i)")
+    (test-real-and-imag  .5493061443340549+1.5707963267948966i
+                         (atanh 2.0+0.0i))
+  (test-subsection "(atanh 2.0-0.0i)")
+    (test-real-and-imag .5493061443340549-1.5707963267948966i
+                        (atanh 2.0-0.0i))
+  (test-subsection "(atanh 0.0+1.0i)")
+    (test-real-and-imag 0.0+0.7853981633974483i
+                        (atanh 0.0+1.0i))
+  (test-subsection "(atanh 0.0-1.0i)")
+    (test-real-and-imag 0.0-.7853981633974483i
+                        (atanh 0.0-1.0i))
+  (test-approximate
+                    (naive-atanh 0.5)
+                    (atanh 0.5)
+                    1e-6)
+  (test-approximate
+                    (naive-atanh 0.99)
+                    (atanh 0.99)
+                    1e-6)
+  (let ((w (atanh 0-1.0i)))
+    (test "srfi-278."  0 (real-part w))
+    (test-approximate -.7853981633974483
+                      (imag-part w)
+                      1e-6))
+  (test-subsection "(atanh 2.0)")
+    (test-real-and-imag (naive-atanh 2.0)
+                        (atanh 2.0))
+  (test-subsection "(atanh 5+10i)")
+    (test-real-and-imag .03976617365742184+1.490839765215787i
+                        (atanh 5+10i))
+
+(test-subsection "acosh")
+  (test "srfi-278."   0 (acosh 1))
+  (test-subsection "(acosh 1.0+0.0i)")
+    (test-real-and-imag 0.0+0.0i
+                        (acosh 1.0+0.0i))
+  (test-subsection "(acosh 1.0-0.0i)")
+    (test-real-and-imag 0.0-0.0i
+                        (acosh 1.0-0.0i))
+  (test-subsection "(acosh 0.0+0.0i)")
+    (test-real-and-imag 0.+1.5707963267948966i
+                        (acosh 0.0+0.0i))
+  (test-subsection "(acosh 0.0-0.0i)")
+    (test-real-and-imag 0.-1.5707963267948966i
+                        (acosh 0.0-0.0i))
+  (test-subsection "(acosh -1+0.0i)")
+    (test-real-and-imag 0.0+3.141592653589793i
+                        (acosh -1+0.0i))
+  (test-subsection "(acosh -1-0.0i)")
+    (test-real-and-imag 0.0-3.141592653589793i
+                        (acosh -1-0.0i))
+  (test-subsection "(acosh 3+4i)")
+    (test-real-and-imag 2.305509031243477+.9368124611557198i
+                        (acosh 3+4i))
+
+(define (naive-asinh z)
+  (log (+ z (sqrt (+ 1 (square z))))))
+
+(test-subsection "asinh")
+  (test "srfi-278."   0 (asinh 0))
+  (test-subsection "(asinh 0.0+2.0i)")
+    (test-real-and-imag 1.3169578969248166+1.5707963267948966i
+                        (asinh 0.0+2.0i))
+  (test-subsection "(asinh -0.0+2.0i)")
+    (let ((input (make-rectangular -0.0 2.0)))
+      (test-real-and-imag -1.3169578969248166+1.5707963267948966i
+                          (asinh input)))
+  (test-subsection "(asinh 0.0-2.0i)")
+    (test-real-and-imag 1.3169578969248166-1.5707963267948966i
+                        (asinh 0.0-2.0i))
+  (test-subsection "(asinh -0.0-2.0i)")
+    (let ((input (make-rectangular -0.0 -2.0)))
+      (test-real-and-imag -1.3169578969248166-1.5707963267948966i
+                          (asinh input)))
+  (test-subsection "(asinh +i)")
+    (test-real-and-imag +1.5707963267948966i
+                        (asinh +i))
+  (test-subsection "(asinh 5)")
+    (test-approximate (naive-asinh 5)
+                      (asinh 5)
+                      1e-6)
+  (test-subsection "(asinh 1+2i)")
+    (test-real-and-imag (naive-asinh 1+2i)
+                        (asinh 1+2i))
+
+(test-subsection "exact integer nth root")
+  (let-values (((e i) (exact-integer-nth-root 40 3)))
+    (test "" 3 e)
+    (test "" (- 40 27) i))
+
+(test-subsection "exact integer log")
+  (let-values (((e i) (exact-integer-log 8 2)))
+    (test "" 3 e)
+    (test "" 0 i))
+  (let-values (((e i) (exact-integer-log 11 2)))
+    (test "" 3 e)
+    (test "" 3 i))
