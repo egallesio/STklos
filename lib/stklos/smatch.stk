@@ -90,13 +90,12 @@
            ;; OR
            ((eq? patt 'or)
             `(or ,@(map (lambda [p] (clause->condition var p)) patts)))
-           ;; (? predicate)
-           ((and (eq? patt '?) (pair? patts) (null? (cdr patts))) ;; (? pred?)
-            `(,(car patts) ,var))
-           ;; (? predicate x ...)
-           ((eq? patt '?)                                        ;; (? pred? x ...)
-            `(and (,(car patts) ,var)
-                  ,@(map (lambda [p] (clause->condition var p)) patts)))
+           ;; (? predicate ...)
+           ((eq? patt '?)
+            (if (and (pair? patts) (null? (cdr patts)))
+                `(,(car patts) ,var)             ;; only (? predicate)
+                `(and (,(car patts) ,var)        ;; general case (? predicate x ...) 
+                      ,@(map (lambda [p] (clause->condition var p)) patts))))
            ;; (xxx ...) or (xxxx ___)
            ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
             (let ([param-var (gensym "list-param")])
@@ -261,8 +260,8 @@
                    (let* (,@(clause->bindings expr-var patt))
                      ,@body))))
              clauses)
-          ;; No matching clause. FIXME: else doesn't work here. Why?
-          (#t (error 'match "no matching clause for ~s" ,expr-var))))))
+          ;; No matching clause.
+          (else (error 'match "no matching clause for ~s" ,expr-var))))))
 
   ;;
   ;; Derived forms
