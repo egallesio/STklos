@@ -46,6 +46,9 @@ static unsigned int log10_maxint;
 
 #define FINITE_REALP(n) isfinite(REAL_VAL(n))
 
+/* Rational 1/2 is used a number of times. */
+static SCM half;
+
 /* Complex i: will be used as a constant when computing some functions. */
 static SCM complex_i;
 
@@ -85,6 +88,10 @@ struct bignum_obj {
 #define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 &&        \
                                   mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
 #define LONG_FITS_INTEGER(_l)    (INT_MIN_VAL <= (_l) && (_l) <= INT_MAX_VAL)
+
+#define REAL_REPRESENTS_INT(x) (0 == (x -floor(x)))
+
+
 #define TYPEOF(n)                (INTP(n)? tc_integer: STYPE(n))
 
 #define IS_INFP(x)              (REALP(x) && isinf(REAL_VAL(x)))
@@ -194,6 +201,21 @@ union binary64 {
 static const uint64_t sign_mask    = (uint64_t) 1 << 63;
 static const uint64_t quiet_mask   = (uint64_t) 1 << 51;
 static const uint64_t payload_mask = ((uint64_t) 1 << 50) - 1;
+
+
+/* Utilities: */
+
+static inline SCM invert(SCM x) {
+    return div2(MAKE_INT(1), x);
+}
+
+static inline SCM flip(SCM x) {
+    return mul2(MAKE_INT(-1), x);
+}
+
+
+
+
 
 static double make_nan(int neg, int quiet, unsigned long pay)
 {
@@ -814,7 +836,7 @@ static inline SCM real2integer(SCM r)
   /* For NaNs, the test floor(v) == v will return false.  But for infinities,
      it returns true. And we can't do double2integer on an inf.
   */
-  if (floor(v) != v || isinf(v)) {
+  if ( (!REAL_REPRESENTS_INT(v)) || isinf(v)) {
     /* This is not an inexact integer (weak test) */
     STk_error("non-integer real number (~s) in an integer division", r);
   }
@@ -1692,7 +1714,7 @@ DEFINE_PRIMITIVE("integer?", integerp, subr1, (SCM x))
                        double val = REAL_VAL(x);
                        return ((val == minus_inf) || (val == plus_inf)) ?
                                  STk_false:
-                                 MAKE_BOOLEAN(floor(val) == val);
+                                 MAKE_BOOLEAN(REAL_REPRESENTS_INT(val));
                      }
     case tc_bignum:
     case tc_integer: return STk_true;
@@ -4102,66 +4124,6 @@ DEFINE_PRIMITIVE("square", square, subr1, (SCM z))
  * positive real part, or zero real part and non-negative imaginary part.
 doc>
  */
-static SCM my_sqrt_exact(SCM z) {
-  if (zerop(z))     return MAKE_INT(0);
-  if (negativep(z)) return Cmake_complex(MAKE_INT(0),
-                                         my_sqrt_exact(mul2(MAKE_INT(-1UL), z)));
-
-  if (INTP(z)) {
-    long   i = INT_VAL(z);
-    double d = (double) sqrt((double) i);
-
-    return ((int) d * (int) d == i)? MAKE_INT((int) d) : double2real(d);
-
-  } else { /* This is a bignum */
-
-    mpz_t z0;
-    mpz_init(z0);
-
-    if (mpz_perfect_square_p(BIGNUM_VAL(z))) {
-      /* We're lucky! It's a perfect square, and the GMP
-         will compute the exact result. */
-      mpz_sqrt(z0,BIGNUM_VAL(z));
-      return bignum2number(z0);
-    }
-
-    /* Does it fit a double? If so, use plain C sqrt. It's not exact
-       anyway, since we checked above with the result from
-       mpz_sqrtrem... */
-    double r = bignum2double(BIGNUM_VAL(z));
-    if (isfinite(r)) return double2real(sqrt(r));
-
-    mpz_sqrt(z0,BIGNUM_VAL(z));
-    SCM x0 = bignum2number(z0);
-    /* If x0 does not fit a double, we don't need to waste time with
-       an approximation. Return infinity. */
-    r = bignum2double(BIGNUM_VAL(x0));
-    if (!isfinite(r)) return double2real(plus_inf);
-
-    /* Ok, we tried everything. There's only the slow path now! */
-    SCM x = x0;
-    SCM x_new = x0;
-    SCM err = x0;
-
-    /* Approximate the square root... Essentially, Newton's method,
-       but coded using STklos' internal sub2, div2, mul2, abs
-       functions.  */
-    while(STk_numgt2(err, rational_epsilon) > 0 &&
-          isfinite(REAL_VAL(exact2inexact(x_new)))) {
-        x_new = sub2(x, div2(sub2(mul2(x, x), z),
-                             mul2(x, MAKE_INT(2))));
-        err = STk_abs(sub2(x_new, x));
-        x = x_new;
-    }
-    /* Return inexact, because if we got here, the square of this
-       result will not equal to z (it's an approximation, so it would
-       be strange to give an "exact" result that is not "exactly" the
-       result of the operation). But for floating-point, it is
-       acceptable to offer an approximation.  */
-    return exact2inexact(x_new);
-  }
-}
-
 static inline SCM my_sqrt_complex(SCM z)
 {
   SCM aa, bb;
@@ -4221,42 +4183,25 @@ static inline SCM my_sqrt_complex(SCM z)
   } else {
     /* a >= 0 */
     aa = STk_sqrt(div2(add2(a, absolute(z)), MAKE_INT(2)));
-    bb = zerop(aa) ? double2real(0.0): div2(b,mul2(aa,MAKE_INT(2)));
+    if (zerop(aa))
+        bb = (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
+            ? double2real(-0.0)
+            : double2real(+0.0);
+    else
+        bb = div2(b,mul2(aa,MAKE_INT(2)));
   }
   return make_complex(aa, bb);
 }
+
+static SCM my_expt(SCM x, SCM y);
 
 DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 {
   switch (TYPEOF(z)) {
     case tc_integer:
-    case tc_bignum:   return my_sqrt_exact(z);
-    case tc_rational: SCM sqrt_n = my_sqrt_exact(RATIONAL_NUM(z));
-                      SCM sqrt_d = my_sqrt_exact(RATIONAL_DEN(z));
-                      /* If either is infinite, then we may try converting to inexact
-                         to see if it helps. For example,
-                         (define x (- (expt 9 -10000) 1))
-                         (define q (* x x))
-                         (sqrt (+ 1 q))
-                         This will ne NaN if we just call sqrt on numerator and
-                         denominator, but will return 1.4142135623730951
-                         (the correct value) if we first convert to inexact.
-                         Of course, if the two square roots are finite, we keep them,
-                         for they're exact numbers.                                */
-                      if (IS_INFP(sqrt_n) || IS_INFP(sqrt_d))
-                        return STk_sqrt(exact2inexact(z));
-                      /* No infinities, just return the division of square roots: */
-                      return div2(sqrt_n, sqrt_d);
-    case tc_real:     if (REAL_VAL(z) < 0 && FINITE_REALP(z))
-                        return Cmake_complex(MAKE_INT(0),
-                                             double2real(sqrt(-REAL_VAL(z))));
-                      /* The C function sqrt will return a NaN for "-inf",
-                         because it doesn't handle complexes. We treat this as
-                         a special case, returning -inf.0i */
-                      if (IS_INFP(z) && REAL_VAL(z) < 0.0)
-                        return Cmake_complex(MAKE_INT(0),
-                                             double2real(plus_inf));
-                      return double2real(sqrt(REAL_VAL(z)));
+    case tc_bignum:
+    case tc_rational: return my_expt(z, half);
+    case tc_real:     return my_expt(z, half); // FIXME: should be 0.5 ?
     case tc_complex:  return my_sqrt_complex(z);
     default:          error_bad_number(z);
   }
@@ -4305,8 +4250,30 @@ DEFINE_PRIMITIVE("exact-integer-sqrt", exact_int_sqrt, subr1, (SCM z))
 doc>
  */
 
-static inline SCM fixnum_exponent_expt(SCM x, long y)
+static inline SCM my_expt_basic(SCM x, long y) {
+    /* x ^ y, y POSITIVE FIXNUM */
+
+    /* Does repeated squaring. This will take at most
+       64 iterations inside the loop (because it runs in
+       O(log(n)) time).    */
+    SCM nx, val = MAKE_INT(1);
+    long ny = 1;
+
+    while (y > 1) {
+        nx = mul2(x, x);
+        ny = y / 2;
+        if (y & 1) val = mul2(x, val);
+        x = nx;
+        y = ny;
+    }
+    return mul2(val, x);
+}
+
+
+static inline SCM expt_exact_positivefixnum(SCM x, long y)
 {
+  /* x^y, with x EXACT and y POSITIVE FIXNUM */
+
   mpz_t res;
   SCM scm_res;
 
@@ -4337,195 +4304,454 @@ static inline SCM fixnum_exponent_expt(SCM x, long y)
       mpz_clear(res);
       return scm_res;
     case tc_rational:
-      return make_rational(fixnum_exponent_expt(RATIONAL_NUM(x), y),
-                           fixnum_exponent_expt(RATIONAL_DEN(x), y));
-    default: { // tc_complex and tc_real in fact
-      SCM nx, val = MAKE_INT(1);
-      long ny = 1;
+      return make_rational(expt_exact_positivefixnum(RATIONAL_NUM(x), y),
+                           expt_exact_positivefixnum(RATIONAL_DEN(x), y));
+    default: // tc_complex and tc_real in fact
+        return my_expt_basic(x, y);
+  }
+}
 
-      while (y > 1) {
-        nx = mul2(x, x);
-        ny = y / 2;
-        if (y & 1) val = mul2(x, val);
-        x = nx;
-        y = ny;
-      }
-      return mul2(val, x);
+static SCM my_expt_real_positivefixnum(SCM x, SCM y) {
+  /* x^y, with x REAL and y POSITIVE FIXNUM */
+
+  /* Treat special cases where x = +0.0, -0,0, +1.0 or -1.0 */
+  double val = REAL_VAL(x);
+
+  if (val == 0.0) {
+    if (signbit(val))
+      // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
+      return (number_parity(y)==-1) ? x : double2real(0.0);
+    else
+      // x = +0.0 retult is always +0.0
+      return x;
+  }
+  if (val == +1.0) return x;
+  if (val == -1.0) return double2real(number_parity(y));
+  return my_expt_basic(x, INT_VAL(y));
+}
+
+static inline int represents_exact(SCM x) {
+    /* Will return 1 iff x represents some number with integer or rational components exactly.
+       2/3    => 1
+       2      => 1
+       1.2    => 0
+       1.0    => 1
+       1+2i   => 1
+       2.0-3i => 1
+       2/3-4i => 1
+       2.2-4i => 0
+     */
+    return (isexactp(x) ||
+            REALP(x) && REAL_REPRESENTS_INT(REAL_VAL(x)) ||
+            (RATIONALP(x) && represents_exact(RATIONAL_DEN(x)) && represents_exact(RATIONAL_NUM(x))) ||
+            (COMPLEXP(x) && represents_exact(COMPLEX_REAL(x)) && represents_exact(COMPLEX_IMAG(x))))
+        ? 1 : 0;
+}
+
+static inline SCM expt_via_log(SCM x, SCM y) {
+    /* x^y, GENERAL exp-log method */
+   SCM z = my_exp(mul2(my_log(x),y));
+   /* The exp-log method above is not perfect, and it introduces
+      error. We'll try to fix.
+      If:
+
+         1. x is neither inifnite nor NaN and
+         2. The exponent is either a fixnum or rational which
+            does NOT contain bignums,
+
+      then we do 3 iterations of Newton's method, which should be
+      enough to get the best possible approximation to the actual
+      value.          */
+   if (( (finitep(x) && !STk_isnan(x)) || !REALP(x) ) &&
+       (INTP(y) || (RATIONALP(y) &&
+                    INTP(RATIONAL_DEN(y)) &&
+                    INTP(RATIONAL_NUM(y))))) {
+       /* y is either p/1 or p/q. */
+       SCM p = INTP(y) ? y           : RATIONAL_NUM(y);
+       SCM q = INTP(y) ? MAKE_INT(1) : RATIONAL_DEN(y);
+       /*
+         Newton's method:
+         z = exp( p/q log(a+bi) )
+         K = log(x)^p
+         repeat:
+             z_(n+1) = [ (q-1) z_n ^ q + K ] / [ q z_n ^ (q-1) ],
+       */
+       SCM K = negativep(p)
+           ? invert(my_expt_basic(x, - INT_VAL(p)))
+           : my_expt_basic(x, INT_VAL(p));
+       SCM z_new;
+       SCM z_prev = MAKE_INT(0);
+       /* Three iterations: */
+       for(int i=0; i<3; i++) {
+           z_new = add2(mul2(sub2(q,MAKE_INT(1)),
+                             my_expt_basic(z, INT_VAL(q))),
+                        K);
+           z_new = div2(z_new,
+                        mul2(q,
+                             my_expt_basic(z,
+                                           INT_VAL(q)-1)));
+           /* If z = z_new we got a perfect solution!
+              If z_new = z_prev we are bouncing back and forth, and perhaps the
+              solution is not representable as a double float...  In both cases,
+              we break and deliver the best we have (z) */
+           if (STk_numeq2(z, z_new) || STk_numeq2(z_new, z_prev)) break;
+           z_prev = z;
+           z = z_new;
+       }
+   }
+   /* If the arguments were exact AND the answer is float BUT
+      represents some exact number perfectly, convert: */
+   if (isexactp(x) &&
+       isexactp(y) &&
+       represents_exact(z)) return STk_inex2ex(z);
+
+   return z;
+}
+
+/* Forward declaration, because my_expt_exact_x_rational_y uses it: */
+static SCM my_expt(SCM x, SCM y);
+
+static SCM my_expt_exact_x_rational_y (SCM x, SCM y) {
+    /* x^y, with x EXACT POSITIVE and y RATIONAL */
+
+    /* y = m/n */
+    SCM m = RATIONAL_NUM(y);
+    SCM n = RATIONAL_DEN(y);
+
+    /* If y is not 1/n, that is, it is m/n with m > 1, then do (
+       x^1/n )^m. We take n-th root first, then m-th power */
+    if (m != MAKE_INT(1)) return my_expt(my_expt(x, div2(MAKE_INT(1), n)), m);
+
+    /* Rational x: do powers of numerator and denominator separately.*/
+    if (RATIONALP(x)) {
+        SCM a = RATIONAL_NUM(x);
+        SCM b = RATIONAL_DEN(x);
+        SCM root_a = my_expt_exact_x_rational_y(a, y);
+        SCM root_b = my_expt_exact_x_rational_y(b, y);
+        return div2(root_a, root_b);
     }
-  }
-}
 
-static SCM my_expt(SCM x, SCM y)
-{
-  /* y is >= 0 */
-  switch (TYPEOF(y)) {
-    case tc_bignum:
-      if (REALP(x)) {
-        double val = REAL_VAL(x);
-        int odd_exp = (number_parity(y) == -1);
+    /**
+       From here on, x is either fixnum or bignum!
+    **/
 
-        if (val == 1.0)                            /* 1 */
-          return x;
-        if (val == -1.0)                           /* -1 */
-          return odd_exp? x : double2real(1.0);
+    /* The GMP does not extract n-th root when n is a bignum
+       (just as it also doesn't compute a^b when b is a
+       bignum), so we can return inexact zero). */
+    if (BIGNUMP(n)) return double2real(0.0);
 
-        /* if in ]-1, 1[ result is +/-0.0 and +/-inf.0 otherwise */
-        if (val > -1.0 && val < 1.0)               /*  ]-1, 1[ */
-          return double2real((signbit(val) && odd_exp)? -0.0: 0.0);
-        else                                       /* out of [-1, 1] */
-          return double2real((val < -1.0 && odd_exp)? minus_inf: plus_inf);
-      }
-      /* FALLTHROUGH */
-    case tc_integer:
+    /**
+       SPECIAL CASE: n = 2 (square root)
+    **/
 
-      if (y == MAKE_INT(0))  /* Treat special case where y = 0 => 1 */
-        return MAKE_INT(1);
+    if (BIGNUMP(x) && n == MAKE_INT(2)) {
 
-      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
-
-        if (INT_VAL(x) == 0 || INT_VAL(x) == 1)         // 0 and 1
-          return x;
-        if (x == MAKE_INT(-1UL))                        // -1
-          return MAKE_INT(number_parity(y));
-      }
-
-      if (REALP(x)) { /* Treat special cases where x = +0.0, -0,0, +1.0 or -1.0 */
-        double val = REAL_VAL(x);
-
-        if (val == 0.0) {
-          if (signbit(val))
-            // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
-            return (number_parity(y)==-1) ? x : double2real(0.0);
-          else
-            // x = +0.0 retult is always +0.0
-            return x;
+        mpz_t z0;
+        mpz_init(z0);
+        if (mpz_perfect_square_p(BIGNUM_VAL(x))) {
+            /* We're lucky! It's a perfect square, and the GMP
+               will compute the exact result. */
+            mpz_sqrt(z0, BIGNUM_VAL(x));
+            return bignum2number(z0);
         }
-        if (val == +1.0) return x;
-        if (val == -1.0) return double2real(number_parity(y));
-      }
+        /* Does it fit a double? If so, use plain C sqrt. It's not exact
+           anyway, since we checked above with the result from
+           mpz_sqrtrem... */
+        double r = bignum2double(BIGNUM_VAL(x));
+        if (isfinite(r)) return double2real(sqrt(r));
 
-      if (TYPEOF(y) == tc_bignum)
-        /* x is not 0 or 1 (exact or inexact) => error */
-        STk_error("exponent too big: ~S", y);
+        /* z0, x0 are an approximation of the square root. */
+        mpz_sqrt(z0, BIGNUM_VAL(x));
+        SCM x0 = bignum2number(z0);
 
-      // Ok all special cases treated => compute and exact x^y
-      return fixnum_exponent_expt(x, INT_VAL(y));
+        /* If the result from mpz_sqrt does not fit a double, we don't
+           need to waste time with an approximation. Return
+           infinity. */
+        r = mpz_get_d(z0);
+        if (!isfinite(r)) return double2real(plus_inf);
 
-    case tc_rational:
-      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
-        if (INT_VAL(x) == 0) return MAKE_INT(0);        //  0
-        if (INT_VAL(x) == 1) return MAKE_INT(1);        // +1
-      }
-      if (INTP(x) || BIGNUMP(x)) {
-        /* y = m/n */
-        SCM m = RATIONAL_NUM(y);
-        SCM n = RATIONAL_DEN(y);
+        /* Ok, we tried everything. There's only the slow path now! */
+        SCM z = x0;
+        SCM z_new = x0;
+        SCM err = x0;
 
-        if (m != MAKE_INT(1)) {
-          return my_expt(my_expt(x, div2(MAKE_INT(1), n)), m);
-        } else {
-          /* Take n-th root first, then m-th power */
-          if (BIGNUMP(n))
-            /* The GMP does not extract n-th root when n is a bignum
-               (just as it also doesnt compute a^b when b is a bignum), so we can
-               returninexact zero). */
-            return double2real(0.0);
-
-          mpz_t *x_val;
-          if (BIGNUMP(x))
-            x_val = &BIGNUM_VAL(x);
-          else
-            /* We need 'labs' so the GMP will get the expected ulong */
-            mpz_init_set_si(*x_val, labs(INT_VAL(x)));
-
-          mpz_t res;
-          mpz_init(res);
-          /* mpz_root, GMP manual: "Return non-zero if the computation
-             was exact, i.e., if op is rop to the nth power" */
-
-          int neg = (mpz_sgn(*x_val) < 0)? +1 : 0;
-
-          if (neg) mpz_neg ( *x_val,  *x_val);
-          if (mpz_root(res, *x_val, labs(INT_VAL(n)))) {
-            /* If we're here then res is the exact root.
-               Of course, if it was negative we multiply by complex_i: */
-            if (neg)
-              return mul2(bignum2number(res), complex_i);
-            else
-              return bignum2number(res);
-          }
-          if (neg) mpz_neg ( *x_val,  *x_val);
-
-          /* Not exact! */
-          return my_expt(x, (exact2inexact(y)));
+        /* Approximate the square root... Essentially, Newton's method,
+           but coded using STklos' internal sub2, div2, mul2, abs
+           functions.  */
+        while(STk_numgt2(err, rational_epsilon) > 0 &&
+              isfinite(REAL_VAL(exact2inexact(z_new)))) {
+            z_new = sub2(z, div2(sub2(mul2(z, z), x),
+                                 mul2(z, MAKE_INT(2))));
+            err = STk_abs(sub2(z_new, z));
+            z = z_new;
         }
-      }
-      /* fallthrough */
-    case tc_real:
-      if (zerop(y)) /* Treat  special case where y = 0.0 (or -0.0) */
-        return double2real(1.0);
+        /* Return inexact, because if we got here, the square of this
+           result will not equal to z (it's an approximation, so it would
+           be strange to give an "exact" result that is not "exactly" the
+           result of the operation). But for floating-point, it is
+           acceptable to offer an approximation.  */
+        return exact2inexact(z_new);
+    }
 
-      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
-        if (INT_VAL(x) == 0) return double2real(0.0);        //  0
-        if (INT_VAL(x) == 1) return double2real(1.0);        // +1
-        if (x==MAKE_INT(-1UL) && STk_integerp(y)==STk_true)  // -1
-          return double2real(number_parity(y));
-      }
+    /* Fixnum sqrt: */
+    if (INTP(x) && n == MAKE_INT(2)) {
+        double res = sqrt((double)(INT_VAL(x)));
+        /* If the C-sqrt returned an integer, we're lucky! Make an int
+           from it (because the argument to Scheme-sqrt was exact) and
+           return it! Otherwise, return the real. */
+        return (res == floor(res))
+            ? MAKE_INT((long)floor(res))
+            : double2real(res);
+    }
 
-      if (REALP(x)) { /* Treat special cases where x = +0.0, -0,0 */
-        double val = REAL_VAL(x);
+    /**
+       GENERAL CASE: n-th root
+    **/
 
-        if (val == 0.0) {
-          if (signbit(val))
-            // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
-            return (number_parity(y)==-1) ? x : double2real(0.0);
-          else
-            // x = +0.0 retult is always +0.0
-            return x;
-        }
-      }
+    /* We use the GMP to compute the n-th root, because it is easy.
+       Below we first convert x to bignum if it was a fixnum. */
 
-      if (REALP(y)) {
-        if (REALP(x) && !negativep(x)) {
-          /* real ^ real, see if we can use pow: */
-          double r = pow(REAL_VAL(x),REAL_VAL(y));
-          if (!isinf(r) || /* no overflow, return r */
-              (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not overflow, one arg. was inf! */
-            return double2real(r);
-        }
-        if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
-          /* It represents an integer precisely! Turn the exponent into an
-             exact integer number and call us recursively. We don't go right
-             to fixnum_exponent_expt because y could be a bignum, and we check
-             for that in the recursive call. */
-          return exact2inexact(my_expt(x, (inexact2exact(y))));
+    mpz_t *x_val;
+    if (BIGNUMP(x))
+        x_val = &BIGNUM_VAL(x);
+    else {
+        x_val = STk_must_malloc(sizeof(mpz_t));
+        mpz_init_set_si(*x_val, INT_VAL(x));
+    }
 
-        /* If we are here, either 'r' overflowed, or 'y' didn't represent an
-           integer perfectly. Fall through to use STklos' arithmetic version
-           of exp(log(x) * y)
-        */
-      }
-      /* FALLTHROUGH */
+    mpz_t res;
+    mpz_init(res);
+    /* mpz_root, GMP manual: "Return non-zero if the computation
+       was exact, i.e., if op is rop to the nth power" */
 
-    case tc_complex:
-      if (zerop(x)) {
-        /* R7RS: The value of 0^z is 1 if (zero? z), 0 if (real-part z) is positive,
-           and an error otherwise. Similarly for 0.0^z, with inexact results.*/
-        if (positivep(COMPLEX_REAL(y))) {
-          return isexactp(x) ? MAKE_INT(0) : double2real(0.0);
-        }
+    int neg = (mpz_sgn(*x_val) < 0)? +1 : 0;
+
+    if (neg) mpz_neg (*x_val,  *x_val);
+    if (mpz_root(res, *x_val, labs(INT_VAL(n)))) {
+        /* If we're here then res is the exact root.
+           Of course, if it was negative we multiply by complex_i: */
+        if (neg)
+            return mul2(bignum2number(res), complex_i);
         else
-          STk_error("power of zero to a complex exponent with negative real part ~S", y);
-      }
-      else
-        return my_exp(mul2(my_log(x),y));
-      /* FALLTHROUGH */
-    default:
-      error_cannot_operate("expt", x, y);
-  }
-  return STk_void; /* never reached */
+            return bignum2number(res);
+    }
+    /* Not exact! Last resort: */
+    if (neg) mpz_neg (*x_val,  *x_val);
+    return expt_via_log(x,y);
 }
 
+static SCM my_expt_real_real(SCM x, SCM y) {
+  /* x^y, with x REAL and y REAL */
+
+    /* y == 0.5 (sqrt): */
+    if (REAL_VAL(y) == 0.5) {
+        /* The C function sqrt will return a NaN for "-inf", because it
+           doesn't handle complexes. We treat this as a special case,
+           returning -inf.0i */
+        if (IS_INFP(x) && REAL_VAL(x) < 0.0)
+            return make_complex(MAKE_INT(0),
+                                double2real(plus_inf));
+        /* sqrt(negative) -> complex with exact zero real part. */
+        return (REAL_VAL(x) < 0)
+            ? make_complex(MAKE_INT(0), double2real(sqrt(-REAL_VAL(x))))
+            : double2real(sqrt(REAL_VAL(x)));
+    }
+
+    /* all other exponents.
+
+       1. exp-via-log if x<0 and the exact algorithm
+       2. if the float exponent represents an exact integer.
+
+       FIXME: do we really get more precision doing (2)? Or should we
+       be using pow(.,.)?     */
+    if (REAL_VAL(x) < 0)
+        return expt_via_log(x,y);
+    if (REAL_VAL(y) = floor(REAL_VAL(y)))
+        return my_expt_real_positivefixnum(x, MAKE_INT((long)floor(REAL_VAL(y))));
+    return double2real(pow(REAL_VAL(x),REAL_VAL(y)));
+}
+
+
+static inline int exact_int_or_ratio_p(SCM x) {
+    return BIGNUMP(x) || RATIONALP(x) || INTP(x);
+}
+
+static SCM my_expt(SCM x, SCM y) {
+/*
+      x         y     result
+=====================================================
+-----------------------------------------------------  y = NaN:
+     !=0    +-NaN     +NaN
+-----------------------------------------------------  y = 0:
+                0     1
+              0.0     1.0
+-----------------------------------------------------  x = 0, 1, -1:
+       1             1
+      -1       int   1 or -1
+       0     -a+bi   error
+       0      < 0    error
+       0      >=0    0
+----------------------------------------------------- y = 1, 1.0, 0.0:
+                1    x
+     0.0      0.0    1.0
+              1.0    inex(x)
+     0.0    -a+bi    error
+-----------------------------------------------------  x REAL:
+   +-NaN             +NaN
+    -1.0       big   x
+    +1.0       big   +-x (parity of y)
+    -0.0       big   +-0.0 (parity of y)
+    +0.0      +big   +0.0
+] 0.0,+1.0[   +big   +0.0
+]-1.0, 0.0[   +big   0.0 * parity(y)
+   +real      +big   +inf.0
+   -real      +big   +inf.0 * parity(y)
+    real   +fixnum   expt_real_positivefixnum
+    -0.0             +-0.0 (parity of y)
+     0,0             0.0
+    real      real   my_expt_real_real(x, y)
+   +real +rational   expt_via_log(x, y)
+   -real +rational   make-rect(0,  imag-part(expt_via_log(x, y)))
+    real   complex   expt_via_log(x, y)
+    real       < 0   1 / exp(x,-y)
+----------------------------------------------------- x EXACT except 0, 1:
+   exact      +big   error
+   exact   +fixnum   expt_exact_positivefixnum(x,y)
+   exact   -fixnum   1 / expt_exact_positivefixnum(x,y)
+  +exact +rational   my_expt_exact_x_rational_y(x, y)
+  +exact -rational   1 / my_expt_exact_x_rational_y(x, -y)
+  -exact       1/2   make-complex(0, my_expt_exact_x_rational_y(-x,y)
+  -exact      -1/2   make-complex(0, 1 / (my_expt_exact_x_rational_y(-x,-y))
+  -exact  rational   1 / my_expt_exact_x_rational_y(x,y)
+   exact     -real   make-rect(0,  imag-part( pow(x,y) )
+   exact     +real   pow(x,y)
+   exact   complex   expt_via_log(x, y)
+----------------------------------------------------- x COMPLEX:
+ complex      +real  expt_exact_positivefixnum(x,y)      IF y represents int
+ complex      -real  1 / expt_exact_positivefixnum(x,y)  IF y represents int
+ complex      +int   expt_exact_positivefixnum(x,y)
+ complex      -int   1 / expt_exact_positivefixnum(x,y)
+ complex             expt_via_log(x, y)
+*/
+    /* y = +-NaN */
+    if (STk_isnan(y) && x != MAKE_INT(0)) return double2real(STk_NaN);
+    /* y = 0: */
+    if (y == MAKE_INT(0))     return MAKE_INT(1);
+    if (REALP(y) && zerop(y)) return double2real(1.0);
+
+    /* x = 0, 1: */
+    if (x == MAKE_INT(1))     return MAKE_INT(1);
+    if (x == MAKE_INT(-1)
+        && (INTP(y) || BIGNUMP(y)))
+        return MAKE_INT(1 * number_parity(y));
+    if (x == MAKE_INT(0)) {
+        if (COMPLEXP(y) && negativep(COMPLEX_REAL(y)))
+            STk_error("power of zero to a complex exponent with negative real part ~S", y);
+        if (negativep(y))
+            STk_error("division by 0");
+        return MAKE_INT(0);
+    }
+
+    /* y = 1, 1.0, 0.0: */
+    if (y == MAKE_INT(1))               return x;
+    if (REALP(y) && REAL_VAL(y) == 1.0) return exact2inexact(x);
+    if (REALP(x)
+        && zerop(x)
+        && COMPLEXP(y)
+        && negativep(COMPLEX_REAL(y)))
+
+        STk_error("power of zero to a complex exponent with negative real part ~S", y);
+
+    /* x REAL: */
+    if (REALP(x) && isnan(REAL_VAL(x)))   return double2real(STk_NaN);
+    if (REALP(x) && BIGNUMP(y)) {
+        if (REAL_VAL(x) == 1.0)           return x;
+        if (REAL_VAL(x) == -1.0)          return double2real(number_parity(y));
+        if (REAL_VAL(x) == -0.0)          return double2real(- number_parity(y) * -0.0);
+        if (REAL_VAL(x) == 0.0)           return x;
+        if (REAL_VAL(x) >  0.0 && REAL_VAL(x) < 1.0)  return double2real(0.0);
+
+        if (REAL_VAL(x) > -1.0 && REAL_VAL(x) < 0.0) {
+            if (mpz_odd_p(BIGNUM_VAL(y))) return double2real(-0.0);
+            else                          return double2real(+0.0);
+        }
+        return (REAL_VAL(x) < 0)
+            ? double2real((- number_parity(y)) * minus_inf)
+            : double2real(plus_inf);
+    }
+    if (REALP(x) && INTP(y) && INT_VAL(y)>0) return my_expt_real_positivefixnum(x,y);
+    if (REALP(x) && zerop(x))                return (negativep(x) && number_parity(y)==-1)
+                                                 ? double2real(-0.0)
+                                                 : double2real(0.0);
+    if (REALP(x) && REALP(y))                return my_expt_real_real(x, y);
+    /* (expt -inf.0 1/2) => +inf.0i
+       (expt -inf.0 1/n) => +inf.0+inf.0i with signs changing accordig to the
+                            exp-log method. */
+    if (IS_INFP(x) &&
+        RATIONALP(y) &&
+        (RATIONAL_NUM(y)!=MAKE_INT(1) ||
+         RATIONAL_DEN(y)!=MAKE_INT(2)))        return expt_via_log(x,y);
+
+    if (REALP(x) && RATIONALP(y))            return negativep(x)
+                                                 ? make_complex(MAKE_INT(0),
+                                                                COMPLEX_IMAG(expt_via_log(x,y)))
+                                                 : expt_via_log(x,y);
+    if (REALP(x) && COMPLEXP(y))             return expt_via_log(x,y);
+    if (REALP(x) && negativep(y))            return invert(my_expt(x, flip(y)));
+
+    /* x EXACT except 0, 1: */
+    if (exact_int_or_ratio_p(x) && BIGNUMP(y))   STk_error("exponent too large: ~S", y);
+    if (exact_int_or_ratio_p(x) && INTP(y))      return positivep(y)
+                                         ? expt_exact_positivefixnum(x, INT_VAL(y))
+                                         : invert(expt_exact_positivefixnum(x, INT_VAL(y)));
+    /* Three cases for exact x and rationa y: */
+    if (exact_int_or_ratio_p(x) &&
+        !negativep(x) &&
+        RATIONALP(y))                            return negativep(y)
+                                                     ? invert(my_expt_exact_x_rational_y(x, flip(y)))
+                                                     : my_expt_exact_x_rational_y(x, y);
+    if (exact_int_or_ratio_p(x) &&
+        RATIONALP(y) &&
+        RATIONAL_NUM(y)==MAKE_INT(1) &&
+        RATIONAL_DEN(y)==MAKE_INT(2))            return make_complex(MAKE_INT(0),
+                                                                     my_expt_exact_x_rational_y(flip(x), y));
+    if (exact_int_or_ratio_p(x) &&
+        RATIONALP(y) &&
+        RATIONAL_NUM(y)==MAKE_INT(-1) &&
+        RATIONAL_DEN(y)==MAKE_INT(2))            return make_complex(MAKE_INT(0),
+                                                                     invert(my_expt_exact_x_rational_y(flip(x), flip(y))));
+    if (exact_int_or_ratio_p(x) && RATIONALP(y)) return expt_via_log(x, y);
+    if (exact_int_or_ratio_p(x) && REALP(y))     return negativep(x)
+                                         ? make_complex(MAKE_INT(0),
+                                                        double2real(pow(- REAL_VAL(exact2inexact(x)),
+                                                                        REAL_VAL(y))))
+                                         : double2real(pow(REAL_VAL(exact2inexact(x)),REAL_VAL(y)));
+    if (exact_int_or_ratio_p(x) && COMPLEXP(y))  return expt_via_log(x,y);
+
+    /* x COMPLEX: */
+
+    if (COMPLEXP(x)) {
+        if (REALP(y)
+            && (REAL_REPRESENTS_INT(REAL_VAL(y))))
+            return positivep(y)
+                ? exact2inexact(expt_exact_positivefixnum(x, floor(REAL_VAL(y))))
+                : invert(expt_exact_positivefixnum(x, floor(REAL_VAL(y))));
+        if (INTP(y))
+            return positivep(y)
+                ? expt_exact_positivefixnum(x, INT_VAL(y))
+                : invert(expt_exact_positivefixnum(x, INT_VAL(y)));
+        if ((RATIONALP(y) &&
+             RATIONAL_NUM(y)==MAKE_INT(1) &&
+             RATIONAL_DEN(y)==MAKE_INT(2))
+            ||
+            REALP(y) && REAL_VAL(y) == 0.5)
+            return REALP(y)
+                ? STk_ex2inex(my_sqrt_complex(x))
+                : my_sqrt_complex(x);
+        return expt_via_log(x,y);
+    }
+    return STk_false; /* Should not be reached */
+}
 
 DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 {
@@ -5142,6 +5368,7 @@ int STk_init_number(void)
   STk_NaN   = strtod("NAN", NULL); // FIXME: use make_nan(0, 1, 0)?
 
   /* Other useful "constants" */
+  half             = Cmake_rational(MAKE_INT(1), MAKE_INT(2));
   complex_i        = make_complex(MAKE_INT(0),MAKE_INT(1));
   rational_epsilon = div2(inexact2exact(double2real(STk_dbl_true_min())),
                           MAKE_INT(2));

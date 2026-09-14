@@ -1591,6 +1591,14 @@
              (< 0.999999 (imag-part s) 1.00001)
              (inexact? s))))
 
+(test "sqrt 0.0+0.0i"
+      0.0+0.0i
+      (sqrt 0.0+0.0i))
+
+(test "sqrt 0.0-0.0"
+      0.0-0.0i
+      (sqrt 0.0-0.0i))
+
 (test "sqrt -inf"
       +inf.0i
       (sqrt -inf.0))
