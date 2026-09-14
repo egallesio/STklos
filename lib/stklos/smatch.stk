@@ -238,12 +238,12 @@
          (cond
           ,@(map
              (lambda [clause]
-               (match-case
-                clause
-                [(?patt . ?body)
+               (unless (list? clause) (error 'match "bad clause ~S" clause))
+               (let ((patt (car clause))
+                     (body (cdr clause)))
                  `(,(clause->condition expr-var patt)
                    (let* (,@(clause->bindings expr-var patt))
-                     ,@body))]))
+                     ,@body))))
              clauses)
           (else (error 'match "no matching clause for ~s" ,expr-var))))))
 
