@@ -263,11 +263,11 @@
                [vars (map (lambda _ (gensym "match-let-var")) bindings)]
                [body (cddr body)])
           `(let ,loop-name (,@(map (lambda [var binding]
-                                     (list var (cadr binding)))
+                                     (list var (cadr bindings)))
                                    vars
                                    bindings))
                 (match-let (,@(map (lambda [var binding]
-                                     (list (car binding) var))
+                                     (list (car bindings) var))
                                    vars
                                    bindings))
                   ,@body)))
@@ -280,7 +280,7 @@
               ,@body]))))
 
   (define-macro (match-let* bindings . body)
-    (if (null? binding)
+    (if (null? bindings)
         `(begin ,@body)
         `(match ,(cadr (first bindings))
            (,(car (first bindings))
@@ -291,14 +291,14 @@
     (let* ([vars (map (lambda _ (gensym "match-letrec-var")) bindings)]
            [body (cddr body)])
       `(letrec (,@(map (lambda [var binding]
-                         (list var (cadr binding)))
+                         (list var (cadr bindings)))
                        vars
                        bindings))
          (match-let (,@(map (lambda [var binding]
-                              (list (car binding) var))
+                              (list (car bindings) var))
                             vars
                             bindings))
            ,@body)))))
 
-(select-module STklos)
+
 (provide "stklos/smatch")

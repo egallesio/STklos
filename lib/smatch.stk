@@ -280,7 +280,7 @@
               ,@body]))))
 
   (define-macro (match-let* bindings . body)
-    (if (null? binding)
+    (if (null? bindings)
         `(begin ,@body)
         `(match ,(cadr (first bindings))
            (,(car (first bindings))
