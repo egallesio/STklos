@@ -231,6 +231,8 @@
                      proxy-bindings)))))))
          (else
           (error "unrecognized pattern: ~s" something)))]))
+
+    ;; ==== Macro starts here
     (let ([expr-var (gensym "expr")])
       `(let ([,expr-var ,expr])
          (cond
@@ -242,8 +244,12 @@
                  `(,(clause->condition expr-var patt)
                    (let* (,@(clause->bindings expr-var patt))
                      ,@body))]))
-             clauses)))))
+             clauses)
+          (else (error 'match "no matching clause for ~s" ,expr-var))))))
 
+  ;;
+  ;; Derived forms
+  ;;
   (define-macro (match-lambda . clauses)
     (let ([var (gensym "match-lambda-var")])
       `(lambda [,var]
