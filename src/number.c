@@ -4181,7 +4181,12 @@ static inline SCM my_sqrt_complex(SCM z)
   } else {
     /* a >= 0 */
     aa = STk_sqrt(div2(add2(a, absolute(z)), MAKE_INT(2)));
-    bb = zerop(aa) ? double2real(0.0): div2(b,mul2(aa,MAKE_INT(2)));
+    if (zerop(aa))
+        bb = (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
+            ? double2real(-0.0)
+            : double2real(+0.0);
+    else
+        bb = div2(b,mul2(aa,MAKE_INT(2)));
   }
   return make_complex(aa, bb);
 }
