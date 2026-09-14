@@ -12,6 +12,7 @@
           match-letrec)
 
   (define-macro (match expr . clauses)
+
     (define (clause->vars pattern)
       (match-case
        pattern
@@ -60,83 +61,98 @@
                         base-elems))))
          (else
           (error "unrecognized pattern: ~s" something)))]))
+
+    ;; ----------------------------------------------------------------------
     (define (clause->condition var pattern)
-      (match-case
-       pattern
-       [_
-        #t]
-       [(or (? number?) (? boolean?) (? string?) (? char?))
-        `(equal? ,pattern ,var)]
-       [((kwote quote) ?c)
-        `(equal? ',c ,var)]
-       [()
-        `(null? ,var)]
-       [((kwote not) ?patt)
-        `(not ,(clause->condition var patt))]
-       [((kwote and) . ?patts)
-        `(and ,@(map (lambda [p] (clause->condition var p)) patts))]
-       [((kwote or) . ?patts)
-        `(or ,@(map (lambda [p] (clause->condition var p)) patts))]
-       [((kwote ?) ?pred)
-        `(,pred ,var)]
-       [((kwote ?) ?pred . ?patts)
-        `(and (,pred ,var)
-              (and ,@(map (lambda [p] (clause->condition var p)) patts)))]
-       [(or (?patt (kwote |___|))
-            (?patt (kwote |...|)))
-        (let ([param-var (gensym "list-param")])
-          `(and (list? ,var)
-                (every (lambda [,param-var]
-                         ,(clause->condition param-var patt))
-                       ,var)))]
-       [(?patt . ?patts)
-        (let ([car-var (gensym "car")]
-              [cdr-var (gensym "cdr")])
-          `(and (pair? ,var)
-                (let ([,car-var (car ,var)]
-                      [,cdr-var (cdr ,var)])
-                  (and ,(clause->condition car-var patt)
-                       ,(clause->condition cdr-var patts)))))]
-       [(? symbol?)
-        #t]
-       [?something
-        (cond
-         ((vector? something)
-          (let ([variadic?
-                 (member (vector-ref something (- (vector-length something) 1))
-                         '(|...| |___|))])
-            `(and (vector? ,var)
-                  ,(if variadic?
-                       `(>= (vector-length ,var)
-                            ,(- (vector-length something) 2))
-                       `(= (vector-length ,var) ,(vector-length something)))
-                  ,@(let check-vec ([idx 0]
-                                    [lst (if variadic?
-                                             (drop-right (vector->list something) 2)
-                                             (vector->list something))])
-                      (if (null? lst)
-                          '()
-                          (cons (let* ([elem-var (gensym "elem")]
-                                       [cnd (clause->condition elem-var (car lst))])
-                                  (if (eqv? #t cnd)
-                                      '()
-                                      `(let ([,elem-var (vector-ref ,var ,idx)])
-                                         ,cnd)))
-                                (check-vec (+ 1 idx) (cdr lst)))))
-                  ,@(if (not variadic?)
+      (cond
+       ((symbol? pattern)
+        #t)
+
+       ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
+        `(equal? ,var ,pattern))
+
+       ((null? pattern)
+        `(null? ,var))
+
+       ((pair? pattern)
+        (let ((patt   (car pattern))
+              (patts (cdr pattern)))
+          (cond
+           ;; QUOTE
+           ((and (eq? patt 'quote) (pair? patts) (null? (cdr patts))) ;; (quote X)
+            `(equal? ,var ',(car patts)))
+           ;; NOT
+           ((and (eq? patt 'not) (pair? patts) (null? (cdr patts))) ;; (not X)
+            `(not ,(clause->condition var (car patts))))
+           ;; AND
+           ((eq? patt 'and)
+            `(and ,@(map (lambda [p] (clause->condition var p)) patts)))
+           ;; OR
+           ((eq? patt 'or)
+            `(or ,@(map (lambda [p] (clause->condition var p)) patts)))
+           ;; (? predicate)
+           ((and (eq? patt '?) (pair? patts) (null? (cdr patts))) ;; (? pred?)
+            `(,(car patts) ,var))
+           ;; (? predicate x ...)
+           ((eq? patt '?)                                        ;; (? pred? x ...)
+            `(and (,(car patts) ,var)
+                  ,@(map (lambda [p] (clause->condition var p)) patts)))
+           ;; (xxx ...) or (xxxx ___)
+           ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
+            (let ([param-var (gensym "list-param")])
+              `(and (list? ,var)
+                    (every (lambda [,param-var]
+                             ,(clause->condition param-var patt))
+                           ,var))))
+           ;; A general list
+           (else
+            (let ([car-var (gensym "car")]
+                  [cdr-var (gensym "cdr")])
+              `(and (pair? ,var)
+                    (let ([,car-var (car ,var)]
+                          [,cdr-var (cdr ,var)])
+                      (and ,(clause->condition car-var (car pattern))
+                           ,(clause->condition cdr-var (cdr pattern))))))))))
+
+       ((vector? pattern)
+        (let ([variadic?
+               (member (vector-ref pattern (- (vector-length pattern) 1))
+                       '(|...| |___|))])
+          `(and (vector? ,var)
+                ,(if variadic?
+                     `(>= (vector-length ,var)
+                          ,(- (vector-length pattern) 2))
+                     `(= (vector-length ,var) ,(vector-length pattern)))
+                ,@(let check-vec ([idx 0]
+                                  [lst (if variadic?
+                                           (drop-right (vector->list pattern) 2)
+                                           (vector->list pattern))])
+                    (if (null? lst)
                         '()
-                        (let* ([tail-patt (vector-ref something
-                                                      (- (vector-length something) 2))]
-                               [cnd (clause->condition 'x tail-patt)]
-                               [param-var (gensym "elem")])
-                          (if (eqv? #t cnd)
-                              '()
-                              `((every (lambda [,param-var]
-                                         ,(clause->condition param-var tail-patt))
-                                       (drop (vector->list ,var)
-                                             ,(- (vector-length something) 2))))))))))
-         (else
-          (error "unrecognized pattern: ~s" something)))]))
+                        (cons (let* ([elem-var (gensym "elem")]
+                                     [cnd (clause->condition elem-var (car lst))])
+                                (if (eqv? #t cnd)
+                                    '()
+                                    `(let ([,elem-var (vector-ref ,var ,idx)])
+                                       ,cnd)))
+                              (check-vec (+ 1 idx) (cdr lst)))))
+                ,@(if (not variadic?)
+                      '()
+                      (let* ([tail-patt (vector-ref pattern
+                                                    (- (vector-length pattern) 2))]
+                             [cnd (clause->condition 'x tail-patt)]
+                             [param-var (gensym "elem")])
+                        (if (eqv? #t cnd)
+                            '()
+                            `((every (lambda [,param-var]
+                                       ,(clause->condition param-var tail-patt))
+                                     (drop (vector->list ,var)
+                                           ,(- (vector-length pattern) 2))))))))))
+
+       (else
+        (error "unrecognized pattern: ~s" pattern))))
+
+
     (define (clause->bindings var pattern)
       (match-case
        pattern
@@ -245,7 +261,8 @@
                    (let* (,@(clause->bindings expr-var patt))
                      ,@body))))
              clauses)
-          (else (error 'match "no matching clause for ~s" ,expr-var))))))
+          ;; No matching clause. FIXME: else doesn't work here. Why?
+          (#t (error 'match "no matching clause for ~s" ,expr-var))))))
 
   ;;
   ;; Derived forms
