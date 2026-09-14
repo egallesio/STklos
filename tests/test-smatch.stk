@@ -21,22 +21,21 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(import (srfi 1)
-        (smatch))
 
 (require "test")
+(import (stklos smatch))
 
 (test-section "Reduced Wright-Cartwright-Shinn match macro")
 
 (test-subsection "match")
 
 (test "Introduction" #t (let ((ls (list 1 2 3)))
-			  (match ls
-			    ((1 2 3) #t))))
+              (match ls
+                ((1 2 3) #t))))
 
 (test "Literal Patterns" 'ok
       (let ((ls (list 'a "b" #f 2 '() #\c)))
-	(match ls (('a "b" #f 2 () #\c) 'ok))))
+    (match ls (('a "b" #f 2 () #\c) 'ok))))
 
 (test "Self-evaluating Vector Literal" 'ok
       (match #(1) (#(1) 'ok)))
@@ -105,11 +104,11 @@
       #t
       (match (get-environment-variables)
         (((or ("PATH" . path)
-	      ("HOMEPROFILE" . home)
-	      ("HOME" . home)
-	      ("USER" . user)
-	      ("USERNAME" . user)
-	      (_ . _)) ...)
+          ("HOMEPROFILE" . home)
+          ("HOME" . home)
+          ("USER" . user)
+          ("USERNAME" . user)
+          (_ . _)) ...)
          (list path home user)))
       (lambda (a b)
         (and a b)))
@@ -134,13 +133,13 @@
 
 (define fibby?
   (match-lambda ((a b c . rest)
-		 (if (= (+ a b) c)
-		     (fibby? (cons b (cons c rest)))
-		     #f))
-		((a b) #t)
-		((a) #t)
-		(() #t)
-		(_ #f)))
+         (if (= (+ a b) c)
+             (fibby? (cons b (cons c rest)))
+             #f))
+        ((a b) #t)
+        ((a) #t)
+        (() #t)
+        (_ #f)))
 
 (test "pred catch repetition in body match"
       #t
