@@ -3782,8 +3782,14 @@ static SCM my_sinh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(sub2(ez,inv_ez),
-                                    double2real(2.0));
+                        SCM res = div2(sub2(ez,inv_ez),
+                                       double2real(2.0));
+                        /* If z is a complex like 0 + bi, then sinh(z)
+                           has exact zero real part. */
+                        return (COMPLEXP(z) &&
+                                COMPLEX_REAL(z) == MAKE_INT(0))
+                            ? make_complex(MAKE_INT(0), COMPLEX_IMAG(res))
+                            : res;
                       }
     default:          error_bad_number(z);
   }
@@ -3934,6 +3940,15 @@ static SCM my_atanh(SCM z) {
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
   case tc_complex:
+      if (REALP(COMPLEX_REAL(z))
+          && labs(REAL_VAL(COMPLEX_REAL(z))) == 1.0
+          && REALP(COMPLEX_IMAG(z))
+          && zerop(COMPLEX_IMAG(z)))
+          return make_complex(double2real(signbit(REAL_VAL(COMPLEX_REAL(z)))
+                                          ? minus_inf : plus_inf),
+                              double2real(signbit(REAL_VAL(COMPLEX_IMAG(z)))
+                                          ? - (MY_PI / 4) : (MY_PI / 4)));
+      /* fallthrough */
   case tc_bignum:
   case tc_rational: {
       SCM numer = add2(MAKE_INT(1),z);
@@ -3949,7 +3964,11 @@ static SCM my_atanh(SCM z) {
          zero. */
       SCM l = sub2(my_log(numer), my_log(denom));
       if (REALP(l)) return double2real(REAL_VAL(l)/2.0);
-      return div2(l, double2real(2.0));
+      /* Preserve exactness for real part. */
+      return (COMPLEXP(z) &&
+              COMPLEX_REAL(z) == MAKE_INT(0))
+          ? make_complex(MAKE_INT(0), div2(l, double2real(2.0)))
+          : div2(l, double2real(2.0));
   }
   default:          error_bad_number(z);
   }
