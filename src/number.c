@@ -4416,7 +4416,9 @@ static SCM my_expt(SCM x, SCM y)
         if (INT_VAL(x) == 0) return MAKE_INT(0);        //  0
         if (INT_VAL(x) == 1) return MAKE_INT(1);        // +1
       }
-      if (INTP(x) || BIGNUMP(x)) {
+      /* If x < 0 then we go into the complex world, and this code
+         won't help, so we skip to the tc_real case */
+      if (!negativep(x) && (INTP(x) || BIGNUMP(x))) {
         /* y = m/n */
         SCM m = RATIONAL_NUM(y);
         SCM n = RATIONAL_DEN(y);
