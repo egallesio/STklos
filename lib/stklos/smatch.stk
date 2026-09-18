@@ -20,6 +20,7 @@
 
        ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
         `())
+
        ((null? pattern)
         `())
 
@@ -55,16 +56,8 @@
                          (clause->vars patts))))))
 
        ((vector? pattern)
-        (let* ([variadic?
-                (member (vector-ref pattern (- (vector-length pattern) 1))
-                        '(|...| |___|))]
-               [base-elems (if variadic?
-                               (drop-right (vector->list pattern) 1)
-                               (vector->list pattern))])
-          (apply append
-                 (map (lambda [patt]
-                        (clause->vars patt))
-                      base-elems))))
+        (clause->vars (vector->list pattern)))
+
        (else
         (error "unrecognized pattern: ~s" pattern))))
 
@@ -120,39 +113,20 @@
                            ,(clause->condition cdr-var (cdr pattern))))))))))
 
        ((vector? pattern)
-        (let ([variadic?
-               (member (vector-ref pattern (- (vector-length pattern) 1))
-                       '(|...| |___|))])
-          `(and (vector? ,var)
-                ,(if variadic?
-                     `(>= (vector-length ,var)
-                          ,(- (vector-length pattern) 2))
-                     `(= (vector-length ,var) ,(vector-length pattern)))
-                ,@(let check-vec ([idx 0]
-                                  [lst (if variadic?
-                                           (drop-right (vector->list pattern) 2)
-                                           (vector->list pattern))])
-                    (if (null? lst)
-                        '()
-                        (cons (let* ([elem-var (gensym "elem")]
-                                     [cnd (clause->condition elem-var (car lst))])
-                                (if (eqv? #t cnd)
-                                    '()
-                                    `(let ([,elem-var (vector-ref ,var ,idx)])
-                                       ,cnd)))
-                              (check-vec (+ 1 idx) (cdr lst)))))
-                ,@(if (not variadic?)
-                      '()
-                      (let* ([tail-patt (vector-ref pattern
-                                                    (- (vector-length pattern) 2))]
-                             [cnd (clause->condition 'x tail-patt)]
-                             [param-var (gensym "elem")])
-                        (if (eqv? #t cnd)
-                            '()
-                            `((every (lambda [,param-var]
-                                       ,(clause->condition param-var tail-patt))
-                                     (drop (vector->list ,var)
-                                           ,(- (vector-length pattern) 2))))))))))
+        (if (zero? (vector-length pattern))
+            `(and (vector? ,var)                      ;; vector is  #()
+                  (equal? ,var #()))
+            (let ([car-var (gensym "car-v")]          ;; length is > 0
+                  [cdr-var (gensym "cdr-v")]
+                  [patt    (gensym "pattern")]
+                  (lst     (vector->list pattern)))
+              `(and (vector? ,var)
+                    (positive? (vector-length ,var))
+                    (let* ([,patt (vector->list ,var)]
+                           [,car-var (car ,patt)]
+                           [,cdr-var (cdr ,patt)])
+                      (and ,(clause->condition car-var (car lst))
+                           ,(clause->condition cdr-var (cdr lst))))))))
 
        (else
         (error "unrecognized pattern: ~s" pattern))))
@@ -226,41 +200,9 @@
                 ,@(clause->bindings cdr-var patts)))))))
 
        ((vector? pattern)
-        (let* ([variadic?
-                (member (vector-ref pattern (- (vector-length pattern) 1))
-                        '(|...| |___|))]
-               [base-elems (if variadic?
-                               (drop-right (vector->list pattern) 2)
-                               (vector->list pattern))])
-          (append
-           (apply append
-                  (map
-                   (lambda [patt idx]
-                     (let ([elem-sym (gensym "elem")])
-                       `((,elem-sym (vector-ref ,var ,idx))
-                         ,@(clause->bindings elem-sym patt))))
-                   base-elems
-                   (iota (vector-length pattern))))
-           (if (not variadic?)
-               '()
-               (let* ([tail-patt (vector-ref pattern
-                                             (- (vector-length pattern) 2))]
-                      [tail-var (gensym "vec-tail")]
-                      [proxy-bindings (clause->vars tail-patt)]
-                      [param-var (gensym "vec-param")])
-                 (append
-                  `((,tail-var (vector-copy ,var ,(length base-elems))))
-                  (map
-                   (lambda [binding]
-                     `(,binding
-                       (vector->list
-                        (vector-map
-                         (lambda [,param-var]
-                           (match ,param-var
-                             [,tail-patt
-                              ,binding]))
-                         ,tail-var))))
-                   proxy-bindings)))))))
+        (let ([patt (gensym "lst")])
+          (append `((,patt (vector->list ,var)))
+                  (clause->bindings patt (vector->list pattern)))))
        (else
         (error "unrecognized pattern: ~s" pattern))))
 
@@ -280,9 +222,9 @@
           ;; No matching clause.
           (else (error 'match "no matching clause for ~s" ,expr-var))))))
 
-  ;;
-  ;; Derived forms
-  ;;
+  ;; ======================================================================
+  ;; Extended match forms
+  ;; ======================================================================
   (define-macro (match-lambda . clauses)
     (let ([var (gensym "match-lambda-var")])
       `(lambda [,var]
