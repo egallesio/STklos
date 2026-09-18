@@ -34,14 +34,14 @@
            ((and (eq? patt 'not) (pair? patts) (null? (cdr patts))) ;; (not X)
             `())
            ;; AND
-           ((eq? patt 'and)                             ;; FIXME;
-            `(,@(apply append
-                       (map clause->vars patts))))
+           ((eq? patt 'and)
+            (apply append
+                       (map clause->vars patts)))
            ;; OR     FIXME: This is tricky, as clauses might contain arbitrarily
            ;;        differing cases?
            ((eq? patt 'or)
-            `(,@(apply append
-                       (map clause->vars patts))))
+            (apply append
+                       (map clause->vars patts)))
            ;; (? PREDICATE) or (? PREDICATE ...)
            ((eq? patt '?)
             (if (and (pair? patts) (null? (cdr patts)))
