@@ -14,53 +14,59 @@
   (define-macro (match expr . clauses)
 
     (define (clause->vars pattern)
-      (match-case
-       pattern
-       [_
-        `()]
-       [(or (? number?) (? boolean?) (? string?) (? char?))
-        `()]
-       [((kwote quote) ?c)
-        `()]
-       [()
-        `()]
-       [((kwote not) ?patt)
-        `()]
-       [((kwote and) . ?patts)
-        `(,@(apply append
-                   (map clause->vars patts)))]
-       ;; FIXME: This is tricky, as clauses might contain arbitrarily
-       ;; differing cases?
-       [((kwote or) . ?patts)
-        `(,@(apply append
-                   (map clause->vars patts)))]
-       [((kwote ?) ?pred)
-        `()]
-       [((kwote ?) ?pred . ?patts)
-        (clause->vars `(and ,@patts))]
-       [(or (?patt (kwote |___|))
-            (?patt (kwote |...|)))
-        (clause->vars patt)]
-       [(?patt . ?patts)
-        (append (clause->vars patt)
-                (clause->vars patts))]
-       [(? symbol?)
-        (list pattern)]
-       [?something
-        (cond
-         ((vector? something)
-          (let* ([variadic?
-                  (member (vector-ref something (- (vector-length something) 1))
-                          '(|...| |___|))]
-                 [base-elems (if variadic?
-                                 (drop-right (vector->list something) 1)
-                                 (vector->list something))])
-            (apply append
-                   (map (lambda [patt]
-                          (clause->vars patt))
-                        base-elems))))
-         (else
-          (error "unrecognized pattern: ~s" something)))]))
+      (cond
+       ((symbol? pattern)
+        (if (eq? pattern '_) `() (list pattern)))
+
+       ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
+        `())
+       ((null? pattern)
+        `())
+
+       ((pair? pattern)
+        (let ((patt  (car pattern))
+              (patts (cdr pattern)))
+          (cond
+           ;; QUOTE
+           ((and (eq? patt 'quote) (pair? patts) (null? (cdr patts))) ;; (quote X)
+            `())
+           ;; NOT
+           ((and (eq? patt 'not) (pair? patts) (null? (cdr patts))) ;; (not X)
+            `())
+           ;; AND
+           ((eq? patt 'and)                             ;; FIXME;
+            `(,@(apply append
+                       (map clause->vars patts))))
+           ;; OR     FIXME: This is tricky, as clauses might contain arbitrarily
+           ;;        differing cases?
+           ((eq? patt 'or)
+            `(,@(apply append
+                       (map clause->vars patts))))
+           ;; (? PREDICATE) or (? PREDICATE ...)
+           ((eq? patt '?)
+            (if (and (pair? patts) (null? (cdr patts)))
+                `()
+                (clause->vars `(and ,@patts))))
+           ;; (xxx ...) or (xxxx ___)
+           ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
+            (clause->vars patt))
+           ;; General list
+           (else (append (clause->vars patt)
+                         (clause->vars patts))))))
+
+       ((vector? pattern)
+        (let* ([variadic?
+                (member (vector-ref pattern (- (vector-length pattern) 1))
+                        '(|...| |___|))]
+               [base-elems (if variadic?
+                               (drop-right (vector->list pattern) 1)
+                               (vector->list pattern))])
+          (apply append
+                 (map (lambda [patt]
+                        (clause->vars patt))
+                      base-elems))))
+       (else
+        (error "unrecognized pattern: ~s" pattern))))
 
     ;; ----------------------------------------------------------------------
     (define (clause->condition var pattern)
