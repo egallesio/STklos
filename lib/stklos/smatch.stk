@@ -90,11 +90,11 @@
            ;; OR
            ((eq? patt 'or)
             `(or ,@(map (lambda [p] (clause->condition var p)) patts)))
-           ;; (? predicate ...)
+           ;; (? PREDICATE ...)
            ((eq? patt '?)
             (if (and (pair? patts) (null? (cdr patts)))
                 `(,(car patts) ,var)             ;; only (? predicate)
-                `(and (,(car patts) ,var)        ;; general case (? predicate x ...) 
+                `(and (,(car patts) ,var)        ;; general case (? predicate x ...)
                       ,@(map (lambda [p] (clause->condition var p)) patts))))
            ;; (xxx ...) or (xxxx ___)
            ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
@@ -153,99 +153,110 @@
 
 
     (define (clause->bindings var pattern)
-      (match-case
-       pattern
-       [_
-        `()]
-       [(or (? number?) (? boolean?) (? string?) (? char?))
-        `()]
-       [((kwote quote) ?c)
-        `()]
-       [()
-        `()]
-       [((kwote not) ?patt)
-        `()]
-       [((kwote and) . ?patts)
-        `(,@(apply append
-                   (map (lambda [p] (clause->bindings var p)) patts)))]
-       [((kwote or) . ?patts)
-        (let ([top-var var]
-              [vars (map clause->vars patts)])
-          (apply append
-                 (map (lambda [vars patt]
-                        (map (lambda [var]
-                               (list var `(match ,top-var
-                                            [,patt ,var]
-                                            [_ #f])))
-                             vars))
-                      vars patts)))]
-       [((kwote ?) ?pred)
-        `()]
-       [((kwote ?) ?pred . ?patts)
-        (clause->bindings var `(and ,@patts))]
-       [(or (?patt (kwote |___|))
-            (?patt (kwote |...|)))
-        (let ([proxy-bindings (clause->vars patt)]
-              [param-var (gensym "list-param")])
-          (map
-           (lambda [binding]
-             `(,binding
-               (map
-                (lambda [,param-var]
-                  (match ,param-var
-                    [,patt
-                     ,binding]))
-                ,var)))
-           proxy-bindings))]
-       [(?patt . ?patts)
-        (let ([car-var (gensym "car")]
-              [cdr-var (gensym "cdr")])
-          `([,car-var (car ,var)]
-            ,@(clause->bindings car-var patt)
-            [,cdr-var (cdr ,var)]
-            ,@(clause->bindings cdr-var patts)))]
-       [(? symbol?)
-        `((,pattern ,var))]
-       [?something
-        (cond
-         ((vector? something)
-          (let* ([variadic?
-                  (member (vector-ref something (- (vector-length something) 1))
-                          '(|...| |___|))]
-                 [base-elems (if variadic?
-                                 (drop-right (vector->list something) 2)
-                                 (vector->list something))])
-            (append
-             (apply append
-                    (map
-                     (lambda [patt idx]
-                       (let ([elem-sym (gensym "elem")])
-                         `((,elem-sym (vector-ref ,var ,idx))
-                           ,@(clause->bindings elem-sym patt))))
-                     base-elems
-                     (iota (vector-length something))))
-             (if (not variadic?)
-                 '()
-                 (let* ([tail-patt (vector-ref something
-                                               (- (vector-length something) 2))]
-                        [tail-var (gensym "vec-tail")]
-                        [proxy-bindings (clause->vars tail-patt)]
-                        [param-var (gensym "vec-param")])
-                   (append
-                    `((,tail-var (vector-copy ,var ,(length base-elems))))
-                    (map
-                     (lambda [binding]
-                       `(,binding
-                         (vector->list
-                          (vector-map
-                           (lambda [,param-var]
-                             (match ,param-var
-                               [,tail-patt
-                                ,binding]))
-                           ,tail-var))))
-                     proxy-bindings)))))))
-         (else
-          (error "unrecognized pattern: ~s" something)))]))
+      (cond
+       ((symbol? pattern)
+        (if (eq? pattern '_) `() `((,pattern ,var))))
+
+       ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
+        `())
+
+       ((null? pattern)
+        `())
+
+       ((pair? pattern)
+        (let ((patt  (car pattern))
+              (patts (cdr pattern)))
+          (cond
+           ;; QUOTE
+           ((and (eq? patt 'quote) (pair? patts) (null? (cdr patts))) ;; (quote X)
+            `())
+           ;; NOT
+           ((and (eq? patt 'not) (pair? patts) (null? (cdr patts))) ;; (not X)
+            `())
+           ;; AND
+           ((eq? patt 'and)
+            `(,@(apply append
+                       (map (lambda [p] (clause->bindings var p)) patts))))
+           ;; OR
+           ((eq? patt 'or)
+            (let ([top-var var]
+                  [vars (map clause->vars patts)])
+              (apply append
+                     (map (lambda [vars patt]
+                            (map (lambda [var]
+                                   (list var `(match ,top-var
+                                                [,patt ,var]
+                                                [_ #f])))
+                                 vars))
+                          vars patts))))
+           ;; (? PREDICATE) and (? PREDICATE ...)
+           ((eq? patt '?)
+            (if (and (pair? patts) (null? (cdr patts)))
+                `()                                     ;; only (? predicate)
+                (clause->bindings var `(and ,@patts)))) ;; general case
+           ;; (xxx ...) or (xxx ___)
+           ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
+            (let ([proxy-bindings (clause->vars patt)]
+                  [param-var (gensym "list-param")])
+              (map (lambda [binding]
+                     `(,binding
+                       (map
+                        (lambda [,param-var]
+                          (match ,param-var
+                            [,patt
+                             ,binding]))
+                        ,var)))
+                   proxy-bindings)))
+
+
+           ;;------
+           ;; A general list
+           (else
+            (let ([car-var (gensym "car")]
+                  [cdr-var (gensym "cdr")])
+              `([,car-var (car ,var)]
+                ,@(clause->bindings car-var patt)
+                [,cdr-var (cdr ,var)]
+                ,@(clause->bindings cdr-var patts)))))))
+
+       ((vector? pattern)
+        (let* ([variadic?
+                (member (vector-ref pattern (- (vector-length pattern) 1))
+                        '(|...| |___|))]
+               [base-elems (if variadic?
+                               (drop-right (vector->list pattern) 2)
+                               (vector->list pattern))])
+          (append
+           (apply append
+                  (map
+                   (lambda [patt idx]
+                     (let ([elem-sym (gensym "elem")])
+                       `((,elem-sym (vector-ref ,var ,idx))
+                         ,@(clause->bindings elem-sym patt))))
+                   base-elems
+                   (iota (vector-length pattern))))
+           (if (not variadic?)
+               '()
+               (let* ([tail-patt (vector-ref pattern
+                                             (- (vector-length pattern) 2))]
+                      [tail-var (gensym "vec-tail")]
+                      [proxy-bindings (clause->vars tail-patt)]
+                      [param-var (gensym "vec-param")])
+                 (append
+                  `((,tail-var (vector-copy ,var ,(length base-elems))))
+                  (map
+                   (lambda [binding]
+                     `(,binding
+                       (vector->list
+                        (vector-map
+                         (lambda [,param-var]
+                           (match ,param-var
+                             [,tail-patt
+                              ,binding]))
+                         ,tail-var))))
+                   proxy-bindings)))))))
+       (else
+        (error "unrecognized pattern: ~s" pattern))))
 
     ;; ==== Macro starts here
     (let ([expr-var (gensym "expr")])
