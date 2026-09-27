@@ -115,19 +115,18 @@
                       ,@(map (lambda [p] (clause->condition var p env)) patts))))
            ;; (xxx ...) or (xxxx ___)
            ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
-            (let ([param-var (gensym "list-param")])
+            (let ([param-var (gensym "list-param")]
+                  [vars (clause->vars patt)])
               `(and (list? ,var)
                     (every (lambda [,param-var]
                              ,(clause->condition param-var patt env))
                            ,var)
-                    ,@(let ([vars (clause->vars patt)]
-                            [param-var (gensym "list-param")])
-                        (map (lambda [binding]
-                               `(set! ,binding
-                                      (map (lambda [,param-var]
-                                             (match ,param-var [,patt ,binding]))
-                                           ,var)))
-                             vars))
+                    ,@(map (lambda [binding]
+                             `(set! ,binding
+                                    (map (lambda [,param-var]
+                                           (match ,param-var [,patt ,binding]))
+                                         ,var)))
+                           vars)
                     #t)))
            ;; A general list
            (else
