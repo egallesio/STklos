@@ -370,14 +370,14 @@
 ;;//(test "list *.. tail fail" #f
 ;;//	    (match (list 1 2 3 4 5 6 7) ((a b *.. 2 4 c) c) (else #f)))
 ;;//
-;;//(test "match-named-let" 6
-;;//	    (match-let loop (((x . rest) '(1 2 3))
-;;//			     (sum 0))
-;;//		       (let ((sum (+ x sum)))
-;;//			 (if (null? rest)
-;;//			     sum
-;;//			     (loop rest sum)))))
-;;//
+(test "match-named-let" 6
+      (match-let loop (((x . rest) '(1 2 3))
+                       (sum 0))
+        (let ((sum (+ x sum)))
+          (if (null? rest)
+              sum
+              (loop rest sum)))))
+
 ;;//(test "match-letrec" '(2 1 1 2)
 ;;//	     (match-letrec (((x y) (list 1 (lambda () (list a x))))
 ;;//			    ((a b) (list 2 (lambda () (list x a)))))

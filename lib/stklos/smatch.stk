@@ -200,28 +200,29 @@
          (match ,var
            ,@clauses))))
 
-  (define-macro (match-let . body)
-    (if (symbol? (car body))
-        (let* ([loop-name (car body)]
-               [bindings (cadr body)]
-               [vars (map (lambda _ (gensym "match-let-var")) bindings)]
-               [body (cddr body)])
-          `(let ,loop-name (,@(map (lambda [var binding]
-                                     (list var (cadr bindings)))
-                                   vars
-                                   bindings))
-                (match-let (,@(map (lambda [var binding]
-                                     (list (car bindings) var))
-                                   vars
-                                   bindings))
-                  ,@body)))
-        (let* ([bindings (car body)]
-               [body (cdr body)]
-               [patterns (map car bindings)]
-               [exprs (map cadr bindings)])
+  (define-macro (match-let bindings . body)
+    (if (symbol?  bindings)
+        ;; Named match-let
+        (if (null? body)
+            (error 'match-let "bad syntax (match-let ~S)" bindings)
+            (let* ([loop-name bindings]
+                   [bindings (car body)]
+                   [vars (map (lambda _ (gensym "match-let-var")) bindings)]
+                   [body (cdr body)])
+              `(let ,loop-name (,@(map (lambda [var binding]
+                                         (list var (cadr binding)))
+                                       vars
+                                       bindings))
+                    (match-let (,@(map (lambda [var binding]
+                                         (list (car binding) var))
+                                       vars
+                                       bindings))
+                      ,@body))))
+        ;; Normal match-let
+        (let ([patterns (map car bindings)]
+              [exprs    (map cadr bindings)])
           `(match (list ,@exprs)
-             [(,@patterns)
-              ,@body]))))
+             [(,@patterns) ,@body]))))
 
   (define-macro (match-let* bindings . body)
     (if (null? bindings)
