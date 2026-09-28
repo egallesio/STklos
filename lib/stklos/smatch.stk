@@ -65,6 +65,7 @@
       (extract pattern '()))
 
     (define (produce-set-or-test var value env)
+      ;; Set var to value (or check var = value  if var was already set before)
       (let ((possible (key-get env :possible '()))
             (seen     (key-get env :seen '())))
         (if (memq var seen)
@@ -86,21 +87,8 @@
         #t)
 
        ((symbol? pattern)
-;;//        (let ((possible (key-get env :possible '()))
-;;//              (seen     (key-get env :seen '())))
-;;//          (if (memq pattern seen)
-;;//              ;; We have already seen this variable before. Test equality
-;;//              `(equal? ,var ,pattern)
-;;//              ;; First time we see this variable.
-;;//              ;; Register it if is a possible variable (do not set a variable
-;;//              ;; which is not in our generated let).
-;;//              (if (memq pattern possible)
-;;//                  (let ((seen (cons pattern seen)))
-;;//                    (key-set! env :seen seen)
-;;//                    `(begin (set! ,pattern ,var) #t))
-;;//                  #t))))
         (produce-set-or-test pattern var env))
-       
+
        ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
         `(equal? ,var ,pattern))
 
