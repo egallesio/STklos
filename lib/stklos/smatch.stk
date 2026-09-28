@@ -64,6 +64,21 @@
           vars)))
       (extract pattern '()))
 
+    (define (produce-set-or-test var value env)
+      (let ((possible (key-get env :possible '()))
+            (seen     (key-get env :seen '())))
+        (if (memq var seen)
+            ;; We have already seen this variable before. Test equality
+            `(equal? ,var ,value)
+            ;; First time we see this variable.
+            ;; Register it if is a possible variable (do not set a variable
+            ;; which is not in our generated let).
+            (if (memq var possible)
+                (let ((seen (cons var seen)))
+                  (key-set! env :seen seen)
+                  `(begin (set! ,var ,value) #t))
+                #t))))
+
 
     (define (clause->condition var pattern env)
       (cond
@@ -71,20 +86,21 @@
         #t)
 
        ((symbol? pattern)
-        (let ((possible (key-get env :possible '()))
-              (seen     (key-get env :seen '())))
-          (if (memq pattern seen)
-              ;; We have already seen this variable before. Test equality
-              `(equal? ,var ,pattern)
-              ;; First time we see this variable.
-              ;; Register it if is a possible variable (do not set a variable
-              ;; which is not in our generated let).
-              (if (memq pattern possible)
-                  (let ((seen (cons pattern seen)))
-                    (key-set! env :seen seen)
-                    `(begin (set! ,pattern ,var) #t))
-                  #t))))
-
+;;//        (let ((possible (key-get env :possible '()))
+;;//              (seen     (key-get env :seen '())))
+;;//          (if (memq pattern seen)
+;;//              ;; We have already seen this variable before. Test equality
+;;//              `(equal? ,var ,pattern)
+;;//              ;; First time we see this variable.
+;;//              ;; Register it if is a possible variable (do not set a variable
+;;//              ;; which is not in our generated let).
+;;//              (if (memq pattern possible)
+;;//                  (let ((seen (cons pattern seen)))
+;;//                    (key-set! env :seen seen)
+;;//                    `(begin (set! ,pattern ,var) #t))
+;;//                  #t))))
+        (produce-set-or-test pattern var env))
+       
        ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
         `(equal? ,var ,pattern))
 
@@ -116,18 +132,23 @@
            ;; (xxx ...) or (xxxx ___)
            ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
             (let ([param-var (gensym "list-param")]
-                  [vars (clause->vars patt)])
+                  [vars      (clause->vars patt)]
+                  [possible  (key-get env :possible '())]
+                  [seen      (key-get env :seen '())])
               `(and (list? ,var)
-                    (every (lambda [,param-var]
-                             ,(clause->condition param-var patt env))
+                    (every (lambda [,param-var]  
+                             (match ,param-var [,patt #t] [_  #f]))
                            ,var)
+                    
                     ,@(map (lambda [binding]
-                             `(set! ,binding
-                                    (map (lambda [,param-var]
-                                           (match ,param-var [,patt ,binding]))
-                                         ,var)))
-                           vars)
-                    #t)))
+                             (produce-set-or-test
+                                  binding
+                                  `(map (lambda [,param-var]
+                                          (match ,param-var [,patt ,binding]))
+                                        ,var)
+                                  env))
+                           vars))))
+
            ;; A general list
            (else
             (let* ([car-var (gensym "car")]
