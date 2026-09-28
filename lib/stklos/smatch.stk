@@ -131,15 +131,13 @@
                       ,@(map (lambda [p] (clause->condition var p env)) patts))))
            ;; (xxx ...) or (xxxx ___)
            ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
-            (let ([param-var (gensym "list-param")]
-                  [vars      (clause->vars patt)]
-                  [possible  (key-get env :possible '())]
-                  [seen      (key-get env :seen '())])
+            (let ([param-var (gensym "var")]
+                  [vars      (clause->vars patt)])
               `(and (list? ,var)
-                    (every (lambda [,param-var]  
+                    (every (lambda [,param-var]
                              (match ,param-var [,patt #t] [_  #f]))
                            ,var)
-                    
+
                     ,@(map (lambda [binding]
                              (produce-set-or-test
                                   binding
