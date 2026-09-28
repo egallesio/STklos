@@ -89,7 +89,8 @@
        ((symbol? pattern)
         (produce-set-or-test pattern var env))
 
-       ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern))
+       ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern)
+            (keyword? pattern))
         `(equal? ,var ,pattern))
 
        ((null? pattern)
