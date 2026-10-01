@@ -162,7 +162,7 @@
 
      (else
       (error "unrecognized pattern: ~s" pattern))))
-  
+
   ;; ======================================================================
   ;; Match macro
   ;; ======================================================================
@@ -233,17 +233,30 @@
               ,@body)))))
 
   (define-macro (match-letrec bindings . body)
-    (let* ([vars (map (lambda _ (gensym "match-letrec-var")) bindings)]
-           [body (cddr body)])
-      `(letrec (,@(map (lambda [var binding]
-                         (list var (cadr bindings)))
-                       vars
-                       bindings))
-         (match-let (,@(map (lambda [var binding]
-                              (list (car bindings) var))
-                            vars
-                            bindings))
-           ,@body))))
+    (let* ([tmp-vars     (map (lambda _ (gensym "tmp")) bindings)]
+           [expr-var     (gensym "expr")]
+           [letrec-vars  (map (lambda [var binding] (list var (cadr binding)))
+                              tmp-vars bindings)]
+           [bindings     (map (lambda [var binding] (list (car binding) var))
+                              tmp-vars bindings)]
+           [patterns     (map car bindings)]
+           [exprs        (map cadr bindings)]
+           [match-code   (match-one expr-var (list (cons patterns body)))])
+      ;; math-code contains the Scheme code implementing the match. We know it
+      ;; starts by declaring the vars used during the match. This declaration
+      ;; MUST be placed before the letrec which define the binding function.
+      ;;
+      ;; For (match-letrec (((x y) (list 12 (lambda() (* x x)))))
+      ;;        (print (y)))
+      ;; previous MATCH-ONE will give (let ((x #void) (y #void)) <matching-code>)
+      ;; We will produce: (let ((x #void) (y #void))
+      ;;                    (letrec ((tmp (list 12 (lambda () (* x x)))))
+      ;;                      <matching-code>)
+      ;; Hence the previous lambda close over x and y.
+      `(let ,(cadr match-code)
+         (letrec (,@letrec-vars)
+           (let ([,expr-var (list ,@exprs)])
+             ,@(cddr match-code))))))
   )
 
 (provide "stklos/smatch")
