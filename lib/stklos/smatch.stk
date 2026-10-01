@@ -1,0 +1,262 @@
+;; smatch---reduced Wright-Cartwright-Shinn pattern matcher
+;; This code is adapted from Alex Shinn’s public domain match-simple
+;; but rewritten to unhygienic define-macro-s
+;;
+;; Original code rewriting author is Artyom Bologov (2026-09-12).
+;;
+;; Extended by Erick Gallesio (2026-02-27) to ensure that same variables in a
+;; pattern are equal: (match '(1 2) ((a a) 1) ((a b) 2)) => 2
+;;NOTE: Previous call would return 1 with original match-simple
+
+
+(define-module (stklos smatch)
+  (export match
+          match-lambda
+          match-lambda*
+          match-let
+          match-let*
+          match-letrec)
+
+  (define (clause->vars pattern)
+    (define (extract pattern vars)
+      (cond
+       ((eq? pattern '_)
+        vars)
+
+       ((symbol? pattern)
+        (if (memq pattern vars)
+            vars
+            (cons pattern vars)))
+
+       ((pair? pattern)
+        (let ((patt  (car pattern))
+              (patts (cdr pattern)))
+          (cond
+           ;; QUOTE
+           ((and (eq? patt 'quote) (pair? patts) (null? (cdr patts))) ;; (quote X)
+            vars)
+           ;; NOT
+           ((and (eq? patt 'not) (pair? patts) (null? (cdr patts))) ;; (not X)
+            (extract patts vars))
+           ;; AND
+           ((eq? patt 'and)
+            (extract patts vars))
+           ;; OR
+           ((eq? patt 'or)
+            (extract patts vars))
+           ;; (? PREDICATE ...)
+           ((eq? patt '?)
+            (extract (cdr patts) vars))
+           ;; (xxx ...) or (xxxx ___)
+           ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
+            (extract patt vars))
+           ;; A general list
+           (else
+            (let ((new-vars (extract (car pattern) vars)))
+              (extract (cdr pattern) new-vars))))))
+
+       ((vector? pattern)
+        (extract (vector->list pattern) vars))
+
+       (else
+        vars)))
+    (extract pattern '()))
+
+
+  (define (produce-set-or-test var value env)
+    ;; Set var to value (or check var = value  if var was already set before)
+    (let ((possible (key-get env :possible '()))
+          (seen     (key-get env :seen '())))
+      (if (memq var seen)
+          ;; We have already seen this variable before. Test equality
+          `(equal? ,var ,value)
+          ;; First time we see this variable.
+          ;; Register it if is a possible variable (do not set a variable
+          ;; which is not in our generated let).
+          (if (memq var possible)
+              (let ((seen (cons var seen)))
+                (key-set! env :seen seen)
+                `(begin (set! ,var ,value) #t))
+              #t))))
+
+
+  (define (clause->condition var pattern env)
+    (cond
+     ((eq? pattern '_)
+      #t)
+
+     ((symbol? pattern)
+      (produce-set-or-test pattern var env))
+
+     ((or (number? pattern) (boolean? pattern) (string? pattern) (char? pattern)
+          (keyword? pattern))
+      `(equal? ,var ,pattern))
+
+     ((null? pattern)
+      `(null? ,var))
+
+     ((pair? pattern)
+      (let ((patt   (car pattern))
+            (patts (cdr pattern)))
+        (cond
+         ;; QUOTE
+         ((and (eq? patt 'quote) (pair? patts) (null? (cdr patts))) ;; (quote X)
+          `(equal? ,var ',(car patts)))
+         ;; NOT
+         ((and (eq? patt 'not) (pair? patts) (null? (cdr patts))) ;; (not X)
+          `(not ,(clause->condition var (car patts) env)))
+         ;; AND
+         ((eq? patt 'and)
+          `(and ,@(map (lambda [p] (clause->condition var p env)) patts)))
+         ;; OR
+         ((eq? patt 'or)
+          `(or ,@(map (lambda [p] (clause->condition var p env)) patts)))
+         ;; (? PREDICATE ...)
+         ((eq? patt '?)
+          (if (and (pair? patts) (null? (cdr patts)))
+              `(,(car patts) ,var)             ;; only (? predicate)
+              `(and (,(car patts) ,var)        ;; general case (? predicate x ...)
+                    ,@(map (lambda [p] (clause->condition var p env)) patts))))
+         ;; (xxx ...) or (xxxx ___)
+         ((or (equal? patts '(|...|)) (equal? patts '(|___|)))
+          (let ([param-var (gensym "var")]
+                [vars      (clause->vars patt)])
+            `(and (list? ,var)
+                  (every (lambda [,param-var]
+                           (match ,param-var [,patt #t] [_  #f]))
+                         ,var)
+
+                  ,@(map (lambda [binding]
+                           (produce-set-or-test
+                            binding
+                            `(map (lambda [,param-var]
+                                    (match ,param-var [,patt ,binding]))
+                                  ,var)
+                            env))
+                         vars))))
+
+         ;; A general list
+         (else
+          (let* ([car-var (gensym "car")]
+                 [cdr-var (gensym "cdr")])
+            `(and (pair? ,var)
+                  (let ([,car-var (car ,var)]
+                        [,cdr-var (cdr ,var)])
+                    (and ,(clause->condition car-var (car pattern) env)
+                         ,(clause->condition cdr-var (cdr pattern) env)))))))))
+
+     ((vector? pattern)
+      (if (zero? (vector-length pattern))
+          `(equal? ,var #())                      ;; test if var is #()
+          (let ([car-var (gensym "car")]          ;; var length is > 0
+                [cdr-var (gensym "cdr")]
+                [patt    (gensym "pattern")]
+                (lst     (vector->list pattern)))
+            `(and (vector? ,var)
+                  (positive? (vector-length ,var))
+                  (let* ([,patt (vector->list ,var)]
+                         [,car-var (car ,patt)]
+                         [,cdr-var (cdr ,patt)])
+                    (and ,(clause->condition car-var (car lst) env)
+                         ,(clause->condition cdr-var (cdr lst) env)))))))
+
+     (else
+      (error "unrecognized pattern: ~s" pattern))))
+
+  ;; ======================================================================
+  ;; Match macro
+  ;; ======================================================================
+  (define (match-one expr-var clauses)
+    (if (null? clauses)
+        `(error 'match "no matching clause for ~s" ,expr-var)
+        (let ((clause (car clauses)))
+          (unless (list? clause) (error 'match "bad clause ~S" clause))
+          (let* ((patt (car clause))
+                 (body (cdr clause))
+                 (vars (clause->vars patt))
+                 (env  (list :possible vars :seen '())))
+            `(let ,(map (lambda (x) `(,x #void)) vars)
+               (if ,(clause->condition expr-var patt env)
+                   (begin ,@body)
+                   ,(match-one expr-var (cdr clauses))))))))
+
+  (define-macro (match expr . clauses)
+    (let ([expr-var (gensym "expr")])
+      `(let ([,expr-var ,expr])
+         ,( [in-module (stklos smatch) match-one] expr-var clauses))))
+
+  ;; ======================================================================
+  ;; Extended match forms
+  ;; ======================================================================
+  (define-macro (match-lambda . clauses)
+    (let ([var (gensym "match-lambda-var")])
+      `(lambda [,var]
+         (match ,var
+           ,@clauses))))
+
+  (define-macro (match-lambda* . clauses)
+    (let ([var (gensym "match-lambda*-var")])
+      `(lambda ,var
+         (match ,var
+           ,@clauses))))
+
+  (define-macro (match-let bindings . body)
+    (if (symbol?  bindings)
+        ;; Named match-let
+        (if (null? body)
+            (error 'match-let "bad syntax (match-let ~S)" bindings)
+            (let* ([loop-name bindings]
+                   [bindings (car body)]
+                   [vars (map (lambda _ (gensym "match-let-var")) bindings)]
+                   [body (cdr body)])
+              `(let ,loop-name (,@(map (lambda [var binding]
+                                         (list var (cadr binding)))
+                                       vars
+                                       bindings))
+                    (match-let (,@(map (lambda [var binding]
+                                         (list (car binding) var))
+                                       vars
+                                       bindings))
+                      ,@body))))
+        ;; Normal match-let
+        (let ([patterns (map car bindings)]
+              [exprs    (map cadr bindings)])
+          `(match (list ,@exprs)
+             [(,@patterns) ,@body]))))
+
+  (define-macro (match-let* bindings . body)
+    (if (null? bindings)
+        `(begin ,@body)
+        `(match ,(cadr (car bindings))
+           (,(car (car bindings))
+            (match-let* (,@(cdr bindings))
+              ,@body)))))
+
+  (define-macro (match-letrec bindings . body)
+    (let* ([tmp-vars     (map (lambda _ (gensym "tmp")) bindings)]
+           [expr-var     (gensym "expr")]
+           [letrec-vars  (map (lambda [var binding] (list var (cadr binding)))
+                              tmp-vars bindings)]
+           [bindings     (map (lambda [var binding] (list (car binding) var))
+                              tmp-vars bindings)]
+           [patterns     (map car bindings)]
+           [exprs        (map cadr bindings)]
+           [match-code   (match-one expr-var (list (cons patterns body)))])
+      ;; math-code contains the Scheme code implementing the match. We know it
+      ;; starts by declaring the vars used during the match. This declaration
+      ;; MUST be placed before the letrec which define the binding function.
+      ;;
+      ;; For (match-letrec (((x y) (list 12 (lambda() (* x x)))))
+      ;;        (print (y)))
+      ;; previous MATCH-ONE will give (let ((x #void) (y #void)) <matching-code>)
+      ;; We will produce: (let ((x #void) (y #void))
+      ;;                    (letrec ((tmp (list 12 (lambda () (* x x)))))
+      ;;                      <matching-code>)
+      ;; Hence the previous lambda close over x and y.
+      `(let ,(cadr match-code)
+         (letrec (,@letrec-vars)
+           (let ([,expr-var (list ,@exprs)])
+             ,@(cddr match-code))))))
+  )
+
+(provide "stklos/smatch")
