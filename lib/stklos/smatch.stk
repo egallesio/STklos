@@ -187,32 +187,6 @@
   (define-macro (match expr . clauses)
     ([in-module (stklos smatch) expand-match] expr clauses))
 
-
-
-
-
-
-;;  (define (match-one expr-var clauses)
-;;    (%debug "CALL match-one ~S ~S" expr-var clauses)
-;;    (if (null? clauses)
-;;        `(error 'match "no matching clause for ~s" ,expr-var)
-;;        (let ((clause (car clauses)))
-;;          (unless (list? clause) (error 'match "bad clause ~S" clause))
-;;          (let* ((patt (car clause))
-;;                 (body (cdr clause))
-;;                 (vars (clause->vars patt))
-;;                 (env  (list :possible vars :seen '())))
-;;            `(let ,(map (lambda (x) `(,x #void)) vars)
-;;               (if ,(clause->condition expr-var patt env)
-;;                   (begin ,@body)
-;;                   ,(match-one expr-var (cdr clauses))))))))
-;; 
-;;  (define-macro (match expr . clauses)
-;;    (let ([expr-var (gensym "expr")])
-;;      `(let ([,expr-var ,expr])
-;;         ,( [in-module (stklos smatch) match-one] expr-var clauses))))
-;; 
-
   ;; ======================================================================
   ;; Extended match forms
   ;; ======================================================================
