@@ -306,7 +306,7 @@ SCM STk_argv2list(int argc, SCM *argv)
 }
 
 
-DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM x))
+DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM obj))
 /*
 <doc pair?
  * (pair? obj)
@@ -315,7 +315,7 @@ DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM x))
 doc>
  */
 {
-  return CONSP(x) ? STk_true : STk_false;
+  return MAKE_BOOLEAN(CONSP(obj));
 }
 
 
@@ -489,7 +489,7 @@ doc>
 }
 
 
-DEFINE_PRIMITIVE("list?", listp, subr1, (SCM x))
+DEFINE_PRIMITIVE("list?", listp, subr1, (SCM obj))
 /*
 <doc list?
  * (list? obj)
@@ -508,7 +508,7 @@ doc>
  */
 {
   int len;
-  return MAKE_BOOLEAN(NULLP(STk_list_type_and_length(x, &len)));
+  return MAKE_BOOLEAN(NULLP(STk_list_type_and_length(obj, &len)));
 }
 
 /*

@@ -1643,9 +1643,9 @@ SCM STk_Cstr2number(char *str, long base)
  *
 doc>
  */
-DEFINE_PRIMITIVE("number?", numberp, subr1, (SCM x))
+DEFINE_PRIMITIVE("number?", numberp, subr1, (SCM obj))
 {
-  switch (TYPEOF (x)) {
+  switch (TYPEOF (obj)) {
     case tc_complex:
     case tc_real:
     case tc_rational:
@@ -1656,17 +1656,17 @@ DEFINE_PRIMITIVE("number?", numberp, subr1, (SCM x))
 }
 
 
-DEFINE_PRIMITIVE("complex?", complexp, subr1, (SCM x))
+DEFINE_PRIMITIVE("complex?", complexp, subr1, (SCM obj))
 {
-  return STk_numberp(x);
+  return STk_numberp(obj);
 }
 
 
-DEFINE_PRIMITIVE("real?", realp, subr1, (SCM x))
+DEFINE_PRIMITIVE("real?", realp, subr1, (SCM obj))
 {
-  switch (TYPEOF(x)) {
+  switch (TYPEOF(obj)) {
     case tc_complex:
-      /* If x is complex, IMAG_PART is not #e0, so x is NOT real! */
+      /* If obj is complex, IMAG_PART is not #e0, so obj is NOT real! */
       return STk_false;
     case tc_real:
     case tc_rational:
@@ -1677,10 +1677,10 @@ DEFINE_PRIMITIVE("real?", realp, subr1, (SCM x))
 }
 
 
-DEFINE_PRIMITIVE("rational?", rationalp, subr1, (SCM x))
+DEFINE_PRIMITIVE("rational?", rationalp, subr1, (SCM obj))
 {
-  switch (TYPEOF(x)) {
-    case tc_real:    return MAKE_BOOLEAN(FINITE_REALP(x));
+  switch (TYPEOF(obj)) {
+    case tc_real:    return MAKE_BOOLEAN(FINITE_REALP(obj));
     case tc_rational:
     case tc_bignum:
     case tc_integer: return STk_true;
@@ -1702,17 +1702,17 @@ DEFINE_PRIMITIVE("rational?", rationalp, subr1, (SCM x))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("bignum?", bignump, subr1, (SCM x))
+DEFINE_PRIMITIVE("bignum?", bignump, subr1, (SCM obj))
 {
-  return MAKE_BOOLEAN(BIGNUMP(x));
+  return MAKE_BOOLEAN(BIGNUMP(obj));
 }
 
 
-DEFINE_PRIMITIVE("integer?", integerp, subr1, (SCM x))
+DEFINE_PRIMITIVE("integer?", integerp, subr1, (SCM obj))
 {
-  switch (TYPEOF(x)){
+  switch (TYPEOF(obj)){
     case tc_real:    {
-                       double val = REAL_VAL(x);
+                       double val = REAL_VAL(obj);
                        return ((val == minus_inf) || (val == plus_inf)) ?
                                  STk_false:
                                  MAKE_BOOLEAN(REAL_REPRESENTS_INT(val));
@@ -1781,18 +1781,18 @@ DEFINE_PRIMITIVE("inexact?", inexactp, subr1, (SCM z))
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("integer-length", integer_length, subr1, (SCM z))
+DEFINE_PRIMITIVE("integer-length", integer_length, subr1, (SCM n))
 {
-   switch (TYPEOF(z)) {
+   switch (TYPEOF(n)) {
     case tc_integer:{
-      long n = INT_VAL(z);
-      if (n == -1 || n == 0) return MAKE_INT(0);
-      if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 ); /* n >  0 */
-      return MAKE_INT( (long) log2( (float) labs(n+1) ) + 1 );  /* n < -1 */
+      long nn = INT_VAL(n);
+      if (nn == -1 || nn == 0) return MAKE_INT(0);
+      if (nn>0)  return MAKE_INT( (long) log2( (float) nn) + 1 ); /* n >  0 */
+      return MAKE_INT( (long) log2( (float) labs(nn+1) ) + 1 );  /* n < -1 */
     }
-    case tc_bignum:  return MAKE_INT(mpz_sizeinbase(BIGNUM_VAL(z),2));
+    case tc_bignum:  return MAKE_INT(mpz_sizeinbase(BIGNUM_VAL(n),2));
 
-    default: STk_error ("bad integer ~S", z);
+    default: STk_error ("bad integer ~S", n);
   }
   return STk_void; /* Never reached */
 }
@@ -1984,33 +1984,33 @@ static int infinitep(SCM n)
   return FALSE; /* never reached */
 }
 
-DEFINE_PRIMITIVE("finite?", finitep, subr1, (SCM n))
+DEFINE_PRIMITIVE("finite?", finitep, subr1, (SCM z))
 {
-  return MAKE_BOOLEAN(finitep(n));
+  return MAKE_BOOLEAN(finitep(z));
 }
 
 
-DEFINE_PRIMITIVE("infinite?", infinitep, subr1, (SCM n))
+DEFINE_PRIMITIVE("infinite?", infinitep, subr1, (SCM z))
 {
-  return MAKE_BOOLEAN(infinitep(n));
+  return MAKE_BOOLEAN(infinitep(z));
 }
 
 
-DEFINE_PRIMITIVE("zero?", zerop, subr1, (SCM n))
+DEFINE_PRIMITIVE("zero?", zerop, subr1, (SCM z))
 {
-  return MAKE_BOOLEAN(zerop(n));
+  return MAKE_BOOLEAN(zerop(z));
 }
 
 
-DEFINE_PRIMITIVE("positive?", positivep, subr1, (SCM n))
+DEFINE_PRIMITIVE("positive?", positivep, subr1, (SCM x))
 {
-  return MAKE_BOOLEAN(positivep(n));
+  return MAKE_BOOLEAN(positivep(x));
 }
 
 
-DEFINE_PRIMITIVE("negative?", negativep, subr1, (SCM n))
+DEFINE_PRIMITIVE("negative?", negativep, subr1, (SCM x))
 {
-  return MAKE_BOOLEAN(negativep(n));
+  return MAKE_BOOLEAN(negativep(x));
 }
 
 
@@ -2755,26 +2755,26 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
  * _magnitude_ of its argument.
 doc>
  */
-DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
+DEFINE_PRIMITIVE("abs", abs, subr1, (SCM z))
 {
-  switch (TYPEOF(x)) {
-    case tc_integer:  if (INT_VAL(x) == INT_MIN_VAL)
-                        return long2scheme_bignum(-INT_VAL(x));
-                      return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
-    case tc_bignum:   if (mpz_sgn(BIGNUM_VAL(x)) < 0) {
+  switch (TYPEOF(z)) {
+    case tc_integer:  if (INT_VAL(z) == INT_MIN_VAL)
+                        return long2scheme_bignum(-INT_VAL(z));
+                      return (INT_VAL(z) < 0) ? MAKE_INT(-INT_VAL(z)) : z;
+    case tc_bignum:   if (mpz_sgn(BIGNUM_VAL(z)) < 0) {
                         mpz_t tmp;
                         mpz_init(tmp);
-                        mpz_neg(tmp, BIGNUM_VAL(x));
-                        x = bignum2scheme_bignum(tmp);
+                        mpz_neg(tmp, BIGNUM_VAL(z));
+                        z = bignum2scheme_bignum(tmp);
                         mpz_clear(tmp);
                       }
-                      return x;
-    case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
-    case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
-                                           RATIONAL_DEN(x));
+                      return z;
+    case tc_real:     return (REAL_VAL(z) < 0.0) ? double2real(-REAL_VAL(z)) : z;
+    case tc_rational: return make_rational(absolute(RATIONAL_NUM(z)),
+                                           RATIONAL_DEN(z));
     case tc_complex:  {
-                        SCM r = COMPLEX_REAL(x);
-                        SCM i = COMPLEX_IMAG(x);
+                        SCM r = COMPLEX_REAL(z);
+                        SCM i = COMPLEX_IMAG(z);
                         int inexact = 0;
                         /* Compute the sum of squares that would be
                            inside the square root, but before
@@ -2811,7 +2811,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
                           x = exact2inexact(x);
                         return x;
                       }
-    default:          error_bad_number(x);
+    default:          error_bad_number(z);
   }
   return STk_void;      /* never reached */
 }
@@ -4086,9 +4086,9 @@ static SCM my_log2(SCM x, SCM b) {
   return div2(my_log(x),my_log(b));
 }
 
-DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
+DEFINE_PRIMITIVE("log", log, subr12, (SCM z, SCM b))
 {
-    return (b)? my_log2(x,b) : my_log(x);
+    return (b)? my_log2(z,b) : my_log(z);
 }
 
 
@@ -4223,19 +4223,19 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
 */
 EXTERN_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o));
-DEFINE_PRIMITIVE("exact-integer-sqrt", exact_int_sqrt, subr1, (SCM z))
+DEFINE_PRIMITIVE("exact-integer-sqrt", exact_int_sqrt, subr1, (SCM n))
 {
-  if ( (!(INTP(z) || BIGNUMP(z))) ||
-       negativep(z))
-    STk_error("non negative integer expected. It was: ~s", z);
+  if ( (!(INTP(n) || BIGNUMP(n))) ||
+       negativep(n))
+    STk_error("non negative integer expected. It was: ~s", n);
 
-  if (INTP(z)) return STk_fxsqrt(z);
+  if (INTP(n)) return STk_fxsqrt(n);
 
   mpz_t root;
   mpz_t rem;
   mpz_init(root);
   mpz_init(rem);
-  mpz_sqrtrem(root, rem, BIGNUM_VAL(z));
+  mpz_sqrtrem(root, rem, BIGNUM_VAL(n));
   return STk_n_values(2,
                       bignum2number(root),
                       bignum2number(rem));
@@ -4966,19 +4966,19 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
 doc>
  */
 
-DEFINE_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base))
+DEFINE_PRIMITIVE("number->string", number2string, subr12, (SCM z, SCM base))
 {
   long b = (base)? STk_integer_value(base) : 10L;
   char *s, buffer[100];
-  SCM z;
+  SCM zz;
 
-  if (!NUMBERP(n))                            error_bad_number(n);
+  if (!NUMBERP(z))                            error_bad_number(z);
   if (b != 2 && b != 8 && b != 10 && b != 16) error_incorrect_radix(base);
 
-  s = number2Cstr(n, b, buffer, sizeof(buffer));
-  z = STk_makestring(strlen(s), s);
+  s = number2Cstr(z, b, buffer, sizeof(buffer));
+  zz = STk_makestring(strlen(s), s);
   if (s != buffer) STk_free(s);
-  return z;
+  return zz;
 }
 
 /*
@@ -5018,13 +5018,13 @@ DEFINE_PRIMITIVE("string->number", string2number, subr12, (SCM str, SCM base))
 
 /*
 <doc EXT decode-float
- * (decode-float n)
+ * (decode-float x)
  *
  * |decode-float| returns three exact integers: |significand|, |exponent|
  * and |sign| (where |-1 \<= sign \<= 1|). The values returned by
  * |decode-float| satisfy:
  * @lisp
- * n = (* sign significand (expt 2 exponent))
+ * x = (* sign significand (expt 2 exponent))
  * @end lisp
  * Here is an example of |decode-float| usage.
  * @lisp
@@ -5119,11 +5119,11 @@ DEFINE_PRIMITIVE("float-max-exponent", float_max_exp, subr0, ())
   return MAKE_INT(DBL_MAX_EXP - DBL_MANT_DIG);
 }
 
-DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
+DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM x))
 {
-  if (!NUMBERP(n) || COMPLEXP(n)) error_not_a_real_number(n);
-  if (EXACTP(n)) n = exact2inexact(n);
-  return decode(n);
+  if (!NUMBERP(x) || COMPLEXP(x)) error_not_a_real_number(x);
+  if (EXACTP(x)) x = exact2inexact(x);
+  return decode(x);
 }
 
 /*

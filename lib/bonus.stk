@@ -1195,11 +1195,11 @@ doc>
 
 #|
 <doc EXT 1+ 1-
- * (1+ x)
- * (1- x)
+ * (1+ z)
+ * (1- z)
  *
- * These procedures return |x| plus one and |x| minus one, respectively. Note that
- * the value of |x| is not changed.
+ * These procedures return |z| plus one and |z| minus one, respectively. Note that
+ * the value of |z| is not changed.
  *
  * @lisp
  * (define x 10)
@@ -1207,11 +1207,14 @@ doc>
  * x               => 10
  * (1- x)          => 9
  * x               => 10
+ * (1+ 0.5-2i)     => 1.5-2i
+ * (1+ 1/2+0.0i)   => 3/2+0.0i
+ *  (1+ 2.5-1i)    => 3.5-1i
  * @end lisp
 doc>
 |#
-(define (1+ x) (+ x 1))
-(define (1- x) (- x 1))
+(define (1+ z) (+ z 1))
+(define (1- z) (- z 1))
 
 
 #|
@@ -1306,6 +1309,10 @@ doc>
  * (inc! (car l))
  * (dec! (list-ref l 1) 20)
  * l                        => (2 -18 3)
+ * (define z 2.2-1i)
+ * z                        => 2.2-1i
+ * (inc! z +1/2i)
+ * z                        => 2.2-1/2i
  * @end lisp
 doc>
 |#
@@ -1563,7 +1570,7 @@ doc>
 (define do-color
   (let ((term (or (getenv "TERM") "")))
     (if (and (not (key-get *%system-state-plist* :interactive #f))
-             (any (lambda(x) (regexp-match x term))
+             (any (lambda (x) (regexp-match x term))
                   '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
         ;; Terminal accepts color
         ansi-color
@@ -1628,13 +1635,13 @@ doc>
  * current error port
 doc>
 |#
-(define (print . l)
-  (for-each display l)
+(define (print . args)
+  (for-each display args)
   (newline))
 
-(define (printerr . l)
+(define (printerr . args)
   (let ((p (current-error-port)))
-    (for-each (lambda (x) (display x p)) l)
+    (for-each (lambda (x) (display x p)) args)
     (newline p)))
 
 
@@ -2037,13 +2044,13 @@ doc>
 #|
 
 <doc EXT exact-integer-log
- * (exact-integer-log n b)
+ * (exact-integer-log n base)
  *
  * |Exact-integer-log| is to |log| what |exact-integer-sqrt| is to |sqrt|.
  *
  * Returns two values: the first value is the largest integer number less
- * than or equal to the logarithm of |n| in base |b|. The second value is
- * the difference between |n| and |(expt b k)|, where |k| is the first value.
+ * than or equal to the logarithm of |n| in base |base|. The second value is
+ * the difference between |n| and |(expt base k)|, where |k| is the first value.
  *
  * Both arguments must be exact, and the resulting values are exact integers.
  * Also, both arguments are mandatory, since it is no meaningful in this context
@@ -2067,43 +2074,42 @@ doc>
  * @end lisp
 doc>
 |#
-(define (exact-integer-log n b)
+(define (exact-integer-log n base)
   (unless (and (exact-integer? n) (positive? n))
     (error "log exponent ~S is not a positive exact integer" n))
-  (unless (and (exact-integer? b) (> b 1))
-    (error "log base ~S is not exact integer greater than one" b))
+  (unless (and (exact-integer? base) (> base 1))
+    (error "log base ~S is not exact integer greater than one" base))
   ;; This is easier and faster than R7RS exact-integer-sqrt, since:
-  ;; * log(n b) = log_2(n) / log_2(b).
+  ;; * log(n base) = log_2(n) / log_2(base).
   ;; * integer-length(n) = floor(log_2(n)) + 1
   ;; We just put it all together.
   (let ((log2-n (- (integer-length n) 1))
-        (log2-b (- (integer-length b) 1)))
-    (let ((L (quotient log2-n log2-b))
+        (log2-base (- (integer-length base) 1)))
+    (let ((L (quotient log2-n log2-base))
           (step 1))
       ;; Ok, so FLOOR(a/b) can be smaller than FLOOR(a)/FLOOR(b).
-      ;; That means we may have overestimated L -- but we should be
-      ;; close. If we overestimated, then (expt b L) will be larger
+      ;; That means we may have overshot L -- but we should be
+      ;; close. If we undershot, then (expt base L) will be larger
       ;; than n, and we can subtract from it until we find the correct
       ;; number.
       ;; We do increase the step at each iteration in order to speed
-      ;; up the process. If we go too far, we correct it later. This is
-      ;; fast.
-      (while (> (expt b L) n)
+      ;; up the process. If we go too far, we correct it later. This
+      ;; is fast.
+      (while (> (expt base L) n)
         (set! L (- L step))
         (set! step (+ step 2)))
 
       ;; If we overestimated, then we had to walk down from L.
-      ;; In this case, since we added 2 to the step at each
-      ;; iteration, we may now have UNDERestimated. But then,
-      ;; we undo the last iteration (the "go back" line below),
-      ;; and start walking again, this time with a fixed step
-      ;; equal to 1.
+      ;; In this case, since we added 2 to the step at each iteration,
+      ;; we may now have UNDERshot. But then, we undo the last
+      ;; iteration (the "go back" line below), and start walking
+      ;; again, this time with a fixed step equal to 1.
       (when (> step 1)            ; did we need to walk?
         (set! L (+ L step -2))    ; go back...
-        (while (> (expt b L) n)
+        (while (> (expt base L) n)
           (set! L (- L 1))))      ; don't grow the step this time!
 
-      (values L (- n (expt b L))))))
+      (values L (- n (expt base L))))))
 
 #|
 <doc EXT radians->degrees degrees->radians
