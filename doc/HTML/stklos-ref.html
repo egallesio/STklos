@@ -5508,7 +5508,7 @@ positive real part, or zero real part and non-negative imaginary part.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(exact-integer-log n b) </strong></code><br></p>
+<p><code><strong>(exact-integer-log n base) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -5517,8 +5517,8 @@ positive real part, or zero real part and non-negative imaginary part.</p>
 </div>
 <div class="paragraph">
 <p>Returns two values: the first value is the largest integer number less
-than or equal to the logarithm of <code>n</code> in base <code>b</code>. The second value is
-the difference between <code>n</code> and <code>(expt b k)</code>, where <code>k</code> is the first value.</p>
+than or equal to the logarithm of <code>n</code> in base <code>base</code>. The second value is
+the difference between <code>n</code> and <code>(expt base k)</code>, where <code>k</code> is the first value.</p>
 </div>
 <div class="paragraph">
 <p>Both arguments must be exact, and the resulting values are exact integers.
@@ -5860,7 +5860,7 @@ function of  <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRF
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(decode-float n) </strong></code><br></p>
+<p><code><strong>(decode-float x) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -5871,7 +5871,7 @@ and <code>sign</code> (where <code>-1 &#8656; sign &#8656; 1</code>). The values
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">n</span> <span class="nv">=</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">sign</span> <span class="nv">significand</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="nv">exponent</span><span class="p">))</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">x</span> <span class="nv">=</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">sign</span> <span class="nv">significand</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="nv">exponent</span><span class="p">))</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -6039,14 +6039,14 @@ This procedure works for any type of integer (fixnums and bignums).</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(1+ x) </strong></code><br>
-<code><strong>(1- x) </strong></code><br></p>
+<p><code><strong>(1+ z) </strong></code><br>
+<code><strong>(1- z) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>These procedures return <code>x</code> plus one and <code>x</code> minus one, respectively. Note that
-the value of <code>x</code> is not changed.</p>
+<p>These procedures return <code>z</code> plus one and <code>z</code> minus one, respectively. Note that
+the value of <code>z</code> is not changed.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -6054,7 +6054,10 @@ the value of <code>x</code> is not changed.</p>
 <span class="p">(</span><span class="nf">1+</span> <span class="nv">x</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">11</span>
 <span class="nv">x</span>               <span class="nv">=&gt;</span> <span class="mi">10</span>
 <span class="p">(</span><span class="nf">1-</span> <span class="nv">x</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">9</span>
-<span class="nv">x</span>               <span class="nv">=&gt;</span> <span class="mi">10</span></code></pre>
+<span class="nv">x</span>               <span class="nv">=&gt;</span> <span class="mi">10</span>
+<span class="p">(</span><span class="nf">1+</span> <span class="mf">0.5</span><span class="mi">-2</span><span class="nv">i</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">1.5</span><span class="mi">-2</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">1+</span> <span class="mi">1</span><span class="nv">/2+0</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="mi">3</span><span class="nv">/2+0</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span>
+ <span class="p">(</span><span class="nf">1+</span> <span class="mf">2.5</span><span class="mi">-1</span><span class="nv">i</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mf">3.5</span><span class="mi">-1</span><span class="nv">i</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -6094,7 +6097,11 @@ of <code>proc</code>.</p>
 <span class="p">(</span><span class="k">define</span> <span class="nv">l</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">inc!</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">l</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">dec!</span> <span class="p">(</span><span class="nb">list-ref</span> <span class="nv">l</span> <span class="mi">1</span><span class="p">)</span> <span class="mi">20</span><span class="p">)</span>
-<span class="nv">l</span>                        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">-18</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+<span class="nv">l</span>                        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">-18</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">z</span> <span class="mf">2.2</span><span class="mi">-1</span><span class="nv">i</span><span class="p">)</span>
+<span class="nv">z</span>                        <span class="nv">=&gt;</span> <span class="mf">2.2</span><span class="mi">-1</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">inc!</span> <span class="nv">z</span> <span class="nv">+1/2i</span><span class="p">)</span>
+<span class="nv">z</span>                        <span class="nv">=&gt;</span> <span class="mf">2.2</span><span class="mi">-1</span><span class="nv">/2i</span></code></pre>
 </div>
 </div>
 <div class="sect3">

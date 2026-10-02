@@ -1523,8 +1523,8 @@ char* STk_boot_consts = "#("
 "until" " "
 "(lambda (test . body) `(tagbody #:top (unless ,test ,@body (-> #:top))))" " "
 "(test . body)" " "
-"(x)" " "
-"(x)" " "
+"(z)" " "
+"(z)" " "
 "\"place must be a symbol (variable) or a list (generalized variable). Was ~S\"" " "
 "(who place)" " "
 "%invalid-place" " "
@@ -1718,7 +1718,7 @@ char* STk_boot_consts = "#("
 "\"log base ~S is not exact integer greater than one\"" " "
 "integer-length" " "
 "expt" " "
-"(n b)" " "
+"(n base)" " "
 "exact-integer-log" " "
 "real?" " "
 "\"bad real number ~S\"" " "
@@ -32523,7 +32523,7 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x24,
 0xa8,
-0xb3,
+0x84,
 0x1f,
 0x645,
 0x23,
@@ -32564,7 +32564,7 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0xa8,
-0xb3,
+0x84,
 0x1f,
 0x647,
 0x23,
