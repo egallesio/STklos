@@ -30,7 +30,7 @@
 #include <float.h>
 #include <ctype.h>
 #include <locale.h>
-
+#include <string.h> /* for memmove */
 
 #undef sinc
 #if defined(__linux__) && defined(__alpha__)
@@ -856,6 +856,30 @@ void STk_double2Cstr(char *buffer, size_t bufflen, double n)
   }
 }
 
+static SCM decode(SCM num);
+static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen);
+void *number2Chexfloatstring(char *buffer, size_t bufflen, SCM x) {
+  double val = REAL_VAL(x);
+
+  if (isnan(val)) { snprintf(buffer, 7, signbit(val) ? "-nan.0" : "+nan.0"); return buffer;}
+  if (isinf(val)) { snprintf(buffer, 7, signbit(val) ? "-inf.0" : "+inf.0"); return buffer;}
+  if (val == 0)   { snprintf(buffer, 7, signbit(val) ? "-0p0"   : "0p0");    return buffer;}
+
+  size_t size = snprintf(buffer, bufflen, "%a", val);
+  if (size < 0) STk_error("unexpected error converting real ~S to hex-float format", x);
+
+  /* Remove the 0x prefix. Shift the written bytes to the left. The
+     amount is the least of size, bufflen (because the GMP could
+     *theoretically* write more bytes than the buffer size - but it
+     won't happen, since the buffer is enough for decimal
+     representation, and the same number is written here in base 16,
+     which takes less digits. But we chop on the minimum of both
+     numbers (size, bufflen) anyway.                                 */
+  size = size < bufflen ? size : bufflen;
+  memmove(buffer, buffer+2, size);
+
+  return buffer;
+}
 
 /* Convert a number to a C-string. Result must be freed if != from buffer */
 static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
@@ -921,8 +945,13 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
         return res;
       }
     case tc_real:
-      if (base != 10) STk_error("base must be 10 for this number", n);
-      STk_double2Cstr(buffer, bufflen, REAL_VAL(n));
+      if (base == 10)
+        STk_double2Cstr(buffer, bufflen, REAL_VAL(n));
+      else if
+        (base == 16) number2Chexfloatstring(buffer, bufflen, n);
+      else
+        STk_error("base must be 10 or 16 for this number", n);
+
       return buffer;
 
     default: return STk_void; /* never reached (for the gcc static analyzer)  */
@@ -1227,15 +1256,22 @@ static int digitp(char c, long base)
  *
  ******************************************************************************/
 
-static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
+static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4,
+                             long base)
 {
   SCM int_part, fract_part, exp_part;
   mpz_t tmp;
 
   mpz_init(tmp);
+
+  /* The GMP does not like numbers beginning with a plus sin. But it
+     does accept the minus sign just fine... So we skip the "plus"
+     if it's there: */
+  if (*s == '+') s++;
+
   int_part   = MAKE_INT(0);
   fract_part = MAKE_INT(0);
-  exp_part   = MAKE_INT(1);
+  //exp_part   = MAKE_INT(1);
 
   /* Representation of the given number (number is '\0' terminated)
    *
@@ -1245,26 +1281,55 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
    *        +-str          p1-++-p2      p3-++-p4
    */
 
+  /* The last part is interpreted differently in different bases!
+
+     - Base 10 (standard, well-known):
+       xxx.yyyE+nnn = xxx.yyy * 10^nnn
+       xxx.yyyE-nnn = xxx.yyy * (-10)^nnn
+
+     - Base 16 (SRFI 270):
+       xxx.yyyE+nnn = xxx.yyy * 2^nnn
+       xxx.yyyE-nnn = xxx.yyy * (-2)^nnn
+
+     In base 16 the exponent brings a power of two as its base (not a
+     power of sixteen).                                                */
+
+  /* If s begins with "-0" the sign would have been lost here, so we
+     put it back, in exp_part, which is certainly different from
+     zero: */
+
+
   /* patch the given string so that splitting the various parts of the number
    * is easy
    */
   if (p1) *p1 = '\0';
   if (p3) *p3 = '\0';
-
   if (p1) {             /* compute integer part */
-    if (mpz_init_set_str(tmp, s, 10L) < 0) { mpz_clear(tmp); return STk_false; }
+    if (mpz_init_set_str(tmp, s, (int) base) < 0) { mpz_clear(tmp); return STk_false; }
     int_part = bignum2number(tmp);
   }
 
-  if (p3 > p2) {        /* compute decimal part as a rational 0.12 => 6/5 */
-    SCM num, den;
+  /* If s begins with "-0" the sign would have been lost here, so we
+     put it back, in exp_part, which is certainly different from
+     zero. We save the sign here and use later: */
+  long sign;
+  if ((mpz_sgn(tmp) == 0) && (*s == '-'))
+      sign =-1;
+  else
+      sign = +1;
 
-    if (mpz_init_set_str(tmp, p2, 10L) < 0) { mpz_clear(tmp); return STk_false; }
+  exp_part   = MAKE_INT(sign);
+
+
+  if (p3 > p2) {        /* compute decimal part as a rational
+                             0.12 => 6/5   (base 10)
+                           #x0.12 => 9/128 (base 16)           */
+    SCM num, den;
+    if (mpz_init_set_str(tmp, p2, (int) base) < 0) { mpz_clear(tmp); return STk_false; }
     num = bignum2number(tmp);
 
-    mpz_ui_pow_ui(tmp, 10UL, strlen(p2));
+    mpz_ui_pow_ui(tmp, (int) base, strlen(p2));
     den = bignum2number(tmp);
-
     fract_part = make_rational(num, den);
   }
 
@@ -1272,12 +1337,16 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
     long expo;
 
     expo = atoi(p4);
+    /* See comment in the beginning of the function regarding
+       exponent_base. */
+    int exponent_base = (base == 10) ? 10 : 2;
     if (expo > 0) {
-      mpz_ui_pow_ui(tmp, 10UL, expo);
+      mpz_ui_pow_ui(tmp, exponent_base, expo);
+      if (sign < 0) mpz_neg(tmp, tmp); /* put back the sign */
       exp_part = bignum2number(tmp);
     } else {
-      mpz_ui_pow_ui(tmp, 10UL, -expo);
-      exp_part = div2(MAKE_INT(1), bignum2number(tmp));
+      mpz_ui_pow_ui(tmp, exponent_base, -expo);
+      exp_part = div2(MAKE_INT(sign), bignum2number(tmp)); /* put back the sign  in MAKE_INT */
     }
   }
 
@@ -1400,6 +1469,8 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
 
   if (adigit) p1 = p;           /* p1 = end of integral part */
 
+  /* If there is a dot, it's a float (in base 10 or 16, doesn't
+     yet matter): */
   if (*p=='.') {
     isint = 0; p += 1;
     p2 = p;
@@ -1409,7 +1480,11 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
 
   if (!adigit) return STk_false;
 
-  if (*p && strchr("eEsSfFdDlL", *p)) {
+  /* If we find one of the chars 'eEsSfFdDlL' in a number, it's a
+     float; if we find a 'p', it's an hex float. We will mark it as
+     the position where the exponent begins. */
+  if (*p && ((base != 16 && strchr("eEsSfFdDlL", *p)) || /* float */
+             (base == 16 && strchr("p", *p)))) {         /* hex float (SRFI 270) */
     isint = 0;
     p += 1;
     p4 = p;
@@ -1459,16 +1534,25 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     }
   } else {
     /* Number is a float */
-    if (base == 10) {
+    if (base == 10 || base == 16) {
       /* Replace sharp signs by 0 */
       for(p=str; *p; p++)
         switch (*p) {
           case '#': *p = '0'; break;
-          case 's': case 'S': case 'f': case 'F':
-          case 'd': case 'D': case 'l': case 'L': *p = 'e';
+          case 's': case 'S': case 'l': case 'L': {
+            if (base == 10) *p = 'e';
+            else res = STk_false;
+          }
+          case 'd': case 'D': case 'f': case 'F': {
+            /* If base is 16, leave those characters in place!
+               If it's 10, then it's the exponent. */
+            if (base == 10) *p = 'e';
+          }
         }
       if (exact_flag == 'e') {
-        res = compute_exact_real(str, p1, p2, p3, p4);
+        res = compute_exact_real(str, p1, p2, p3, p4, base);
+      } else if (base == 16) {
+        res = STk_ex2inex(compute_exact_real(str, p1, p2, p3, p4, base));
       } else {
         res = double2real(strtod(str, &p));
       }
@@ -1509,14 +1593,22 @@ static SCM read_rational_den(SCM num, char *str, long base, char exact_flag, cha
 
 /* STk_Cstr2simple_number will read from str a non-complex number.
    The function STk_Cstr2number, which reads complexes, uses
-   this one to read the two parts of the number, */
-static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
+   this one to read the two parts of the number.
+   Note: str and end are pointers to pointers, because:
+         - str will be changed to after the beginning sharps
+           (#x, #e, #i #o etc)
+         - end will be changed to the end ot the number.                  */
+static SCM Cstr2simple_number(char **str, char *exact, long *base, char **end)
 {
   int i, radix;
-  char *p = str;
+  char *p = *str;
   SCM num;
 
-  /* Should we read in a different basis or exactness? */
+  /* Should we read in a different basis or exactness?
+     The following code will set
+     * *base to the basis used, but only once
+     * *exact to either 'e' or 'i'.
+   */
   radix = 0;
   for (i = 0; i < 2 && *p == '#'; i++) { /* two loops laps to permit #i#xff -> 255.0 */
     p += 1;
@@ -1529,7 +1621,7 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
       case 'x': if (!radix) {*base = 16; radix = 1; break;} else return STk_false;
       default:  return STk_false;
     }
-    str += 2;
+    *str += 2;
   }
 
   /* If the user tries to make us read a complex with two different
@@ -1559,7 +1651,7 @@ SCM STk_Cstr2number(char *str, long base)
     SCM a, b;
 
     /* First part of the number */
-    a = Cstr2simple_number(str, &exact, &base, &end);
+    a = Cstr2simple_number(&str, &exact, &base, &end);
     if (a == STk_false) return STk_false; /* Not even the first part was good */
 
     /* Second part of the number; the possibilities now are:
@@ -1580,12 +1672,13 @@ SCM STk_Cstr2number(char *str, long base)
       case '-':
         if (strcasecmp(end, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
         if (strcasecmp(end, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
-        b = Cstr2simple_number(end, &exact, &base, &end2);
+        b = Cstr2simple_number(&end, &exact, &base, &end2);
         if ((*end2=='i' || *end2=='I') && *(end2+1)=='\0') return make_complex(a,b);
         break;
       case '@':
         /* end+1, because we want to skip the '@' sign: */
-        b = Cstr2simple_number(end+1, &exact, &base, &end2);
+        end++;
+        b = Cstr2simple_number(&end, &exact, &base, &end2);
         if (*end2 == '\0') return make_polar(a,b);
         break;
     }
