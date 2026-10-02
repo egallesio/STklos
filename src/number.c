@@ -4361,7 +4361,18 @@ static inline SCM expt_via_log(SCM x, SCM y) {
 
       then we do 3 iterations of Newton's method, which should be
       enough to get the best possible approximation to the actual
-      value.          */
+      value.
+
+      NOTE: The intention is NOT to try to get correct results for
+      cases when range reduction would be needed, as for example
+
+      (expt (- (expt 10 1000) 1) +1234567890987654321i)
+
+      These are not possible without large-precision arithmetic,
+      which we don't have.
+
+      We only want to get the manageable results more precise.
+   */
    if (( (finitep(x) && !STk_isnan(x)) || !REALP(x) ) &&
        (INTP(y) || (RATIONALP(y) &&
                     INTP(RATIONAL_DEN(y)) &&
@@ -4381,18 +4392,19 @@ static inline SCM expt_via_log(SCM x, SCM y) {
            : my_expt_basic(x, INT_VAL(p));
        SCM z_new;
        SCM z_prev = MAKE_INT(0);
+
        /* Three iterations: */
        for(int i=0; i<3; i++) {
            z_new = add2(mul2(sub2(q,MAKE_INT(1)),
                              my_expt_basic(z, INT_VAL(q))),
                         K);
 
-           /* If z_new is inf, don't continue, because we'll divide
-              inf by inf and end up with a NaN. Just return +inf.0. */
-           if (IS_INFP(z_new) ||
+           /* If z_new is inf or NaN, don't continue, because we'll
+              divide inf by it and end up with a NaN. Just return
+              +inf.0. */
+           if (IS_INFP(z_new) || STk_isnan(z_new) ||
                (BIGNUMP(z_new) && !BIGNUM_FITS_DOUBLE(z_new)))
-             return double2real(plus_inf);
-
+               break;
            z_new = div2(z_new,
                         mul2(q,
                              my_expt_basic(z,
@@ -4609,13 +4621,12 @@ static SCM my_expt(SCM x, SCM y) {
        0      >=0    0
 ----------------------------------------------------- y = 1, 1.0, 0.0:
                 1    x
-     0.0      0.0    1.0
               1.0    inex(x)
      0.0    -a+bi    error
 -----------------------------------------------------  x REAL:
    +-NaN             +NaN
-    -1.0       big   x
-    +1.0       big   +-x (parity of y)
+    +1.0       big   x
+    -1.0       big   +-x (parity of y)
     -0.0       big   +-0.0 (parity of y)
     +0.0      +big   +0.0
 ] 0.0,+1.0[   +big   +0.0
@@ -4624,10 +4635,11 @@ static SCM my_expt(SCM x, SCM y) {
    -real      +big   +inf.0 * parity(y)
     real   +fixnum   expt_real_positivefixnum
     -0.0             +-0.0 (parity of y)
-     0,0             0.0
+     0.0             0.0
     real      real   my_expt_real_real(x, y)
-   +real +rational   expt_via_log(x, y)
-   -real +rational   make-rect(0,  imag-part(expt_via_log(x, y)))
+   -real       1/2   make_complex(0, -sqrt(x))
+   +real       1/2   sqrt(x)
+    real +rational   expt_via_log(x, y)
     real   complex   expt_via_log(x, y)
     real       < 0   1 / exp(x,-y)
 ----------------------------------------------------- x EXACT except 0, 1:
@@ -4638,9 +4650,9 @@ static SCM my_expt(SCM x, SCM y) {
   +exact -rational   1 / my_expt_exact_x_rational_y(x, -y)
   -exact       1/2   make-complex(0, my_expt_exact_x_rational_y(-x,y)
   -exact      -1/2   make-complex(0, 1 / (my_expt_exact_x_rational_y(-x,-y))
-  -exact  rational   1 / my_expt_exact_x_rational_y(x,y)
-   exact     -real   make-rect(0,  imag-part( pow(x,y) )
-   exact     +real   pow(x,y)
+   exact  rational   expt_via_log(x, y)
+  +exact      real   pow(x,y) ; x represents int
+   exact      real   expt_via_log
    exact   complex   expt_via_log(x, y)
 ----------------------------------------------------- x COMPLEX:
  complex      +real  expt_exact_positivefixnum(x,y)      IF y represents int
@@ -4700,48 +4712,55 @@ static SCM my_expt(SCM x, SCM y) {
                                                  ? double2real(-0.0)
                                                  : double2real(0.0);
     if (REALP(x) && REALP(y))                return my_expt_real_real(x, y);
-    /* (expt -inf.0 1/2) => +inf.0i
-       (expt -inf.0 1/n) => +inf.0+inf.0i with signs changing accordig to the
-                            exp-log method. */
-    if (IS_INFP(x) &&
-        RATIONALP(y) &&
-        (RATIONAL_NUM(y)!=MAKE_INT(1) ||
-         RATIONAL_DEN(y)!=MAKE_INT(2)))        return expt_via_log(x,y);
 
-    if (REALP(x) && RATIONALP(y))            return negativep(x)
-                                                 ? make_complex(MAKE_INT(0),
-                                                                COMPLEX_IMAG(expt_via_log(x,y)))
-                                                 : expt_via_log(x,y);
-    if (REALP(x) && COMPLEXP(y))             return expt_via_log(x,y);
-    if (REALP(x) && negativep(y))            return invert(my_expt(x, flip(y)));
+    /* -x ^ 1/2 always has zero real part, while this is not true for
+       -x ^ 1/r, for other values r. So we explicitly set the real part to exact zero
+       when computing negative ^ 1.2.
+       Also, when y is 1/2, we use C sqrt. */
+
+    // finite ^ 1/2:
+    if (REALP(x) &&
+        RATIONALP(y) &&
+        RATIONAL_NUM(y)==MAKE_INT(1) &&
+        RATIONAL_DEN(y)==MAKE_INT(2))        return negativep(x)
+                                               ? make_complex(MAKE_INT(0),
+                                                              double2real(sqrt(-REAL_VAL(x))))
+                                               : double2real(sqrt(REAL_VAL(x)));
+    // finite ^ 1/s:
+    if (REALP(x) && RATIONALP(y))            return expt_via_log(x,y);
+
+    if (REALP(x) && COMPLEXP(y))              return expt_via_log(x,y);
+    if (REALP(x) && negativep(y))             return invert(my_expt(x, flip(y)));
 
     /* x EXACT except 0, 1: */
-    if (exact_int_or_ratio_p(x) && BIGNUMP(y))   STk_error("exponent too large: ~S", y);
-    if (exact_int_or_ratio_p(x) && INTP(y))      return positivep(y)
+    if (exact_int_or_ratio_p(x) && BIGNUMP(y)) STk_error("exponent too large: ~S", y);
+    if (exact_int_or_ratio_p(x) && INTP(y))    return positivep(y)
                                          ? expt_exact_positivefixnum(x, INT_VAL(y))
                                          : invert(expt_exact_positivefixnum(x, INT_VAL(y)));
-    /* Three cases for exact x and rationa y: */
+    /* Three cases for exact x and rational y: */
+    // +exact +rational
     if (exact_int_or_ratio_p(x) &&
         !negativep(x) &&
         RATIONALP(y))                            return negativep(y)
                                                      ? invert(my_expt_exact_x_rational_y(x, flip(y)))
                                                      : my_expt_exact_x_rational_y(x, y);
+    // -exact       1/2
     if (exact_int_or_ratio_p(x) &&
         RATIONALP(y) &&
         RATIONAL_NUM(y)==MAKE_INT(1) &&
         RATIONAL_DEN(y)==MAKE_INT(2))            return make_complex(MAKE_INT(0),
                                                                      my_expt_exact_x_rational_y(flip(x), y));
+    // -exact      -1/2
     if (exact_int_or_ratio_p(x) &&
         RATIONALP(y) &&
         RATIONAL_NUM(y)==MAKE_INT(-1UL) &&
         RATIONAL_DEN(y)==MAKE_INT(2))            return make_complex(MAKE_INT(0),
                                                                      invert(my_expt_exact_x_rational_y(flip(x), flip(y))));
+
     if (exact_int_or_ratio_p(x) && RATIONALP(y)) return expt_via_log(x, y);
-    if (exact_int_or_ratio_p(x) && REALP(y))     return negativep(x)
-                                         ? make_complex(MAKE_INT(0),
-                                                        double2real(pow(- REAL_VAL(exact2inexact(x)),
-                                                                        REAL_VAL(y))))
-                                         : double2real(pow(REAL_VAL(exact2inexact(x)),REAL_VAL(y)));
+    if (exact_int_or_ratio_p(x) && REALP(y))     return REAL_REPRESENTS_INT(REAL_VAL(y)) && !negativep(x)
+                                                     ? double2real(pow(REAL_VAL(exact2inexact(x)),REAL_VAL(y)))
+                                                     : expt_via_log(x,y);
     if (exact_int_or_ratio_p(x) && COMPLEXP(y))  return expt_via_log(x,y);
 
     /* x COMPLEX: */
