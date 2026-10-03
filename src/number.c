@@ -1468,7 +1468,13 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
           case 'd': case 'D': case 'l': case 'L': *p = 'e';
         }
       if (exact_flag == 'e') {
+        int sign = 1;
+
+        if (*str == '+' || *str == '-')
+          if (*str++ == '-') sign = -1;
+        /* compute_exact_real cannot deal with signed numbers. Skip sign here */
         res = compute_exact_real(str, p1, p2, p3, p4);
+        if (sign < 0) res = mul2(res, MAKE_INT(-1UL));
       } else {
         res = double2real(strtod(str, &p));
       }
