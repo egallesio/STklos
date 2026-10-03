@@ -141,7 +141,7 @@
 (test/compile-error "exact nan"  (read-from-string "#e+nan.0"))
 
 (test "signed #e number.1" 101/10 #e+10.1)
-(test "signed #e number.2" -101/10 #e+10.1)
+(test "signed #e number.2" -101/10 #e-10.1)
 (test "signed #i number.1" #t (= (* #i12 -1) #i-12))
 (test "signed #i number.2" #t (= (* #i-12 -1) #i+12))
 
