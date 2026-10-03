@@ -74,7 +74,10 @@ static void print_format(SCM port,char *format, va_list ap)
                   else
                     STk_puts("<NULL>", port);
                   break;
-        case 'c': STk_putc(va_arg(ap, int), port); break;
+        case 'C': STk_putc('\'', port); /* FALLTHROUGH */
+        case 'c': STk_putc(va_arg(ap, int), port);
+                  if (*s == 'C') STk_putc('\'', port);
+                  break;
         case 'x': print_int(port, va_arg(ap, unsigned int), 16); break;
         case 'd': {
                     int val =  va_arg(ap, unsigned int);
