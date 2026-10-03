@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2026 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,9 +65,14 @@ static void print_format(SCM port,char *format, va_list ap)
         case '%': STk_putc('%', port); break;
 
         case 'S': STk_putc('\'', port); /* FALLTHROUGH */
-        case 's': for (str = va_arg(ap, char *); *str; str++)
-                    STk_putc(*str, port);
-                  if (*s == 'S') STk_putc('\'', port);
+        case 's': str = va_arg(ap, char *);
+                  if (str) {
+                    for ( ; *str; str++)
+                      STk_putc(*str, port);
+                    if (*s == 'S') STk_putc('\'', port);
+                  }
+                  else
+                    STk_puts("<NULL>", port);
                   break;
         case 'c': STk_putc(va_arg(ap, int), port); break;
         case 'x': print_int(port, va_arg(ap, unsigned int), 16); break;
