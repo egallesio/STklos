@@ -674,6 +674,21 @@
 (test "+bignum < +fixnum" #t (> (+ (expt 2 100) +10)))
 (test "+bignum < -fixnum" #t (> (+ (expt 2 100) -10)))
 
+;;  (< 1.0e16 10000000000000001) is interesting when double floats
+;;  take 64 bits.
+;;
+;;  * 1.0e16 = 10000000000000000  -- represents the integer exactly
+;;  * 10000000000000001 is NOT representable in IEEE format (at least not
+;;    with 64 bits).
+;;
+;;  So  if we just turn both into reals, the integer will be converted into
+;;  a SMALLER number, and the comparison will be incorrect (#f).
+;;  STklos was adapted to return the right answer, as most Schemes and
+;;  Common Lisp systems.
+;;
+;;  Remark: this is not a "bug". In C one would as well get the wrong value,
+;;  it's how IEEE floats behave... But we can do a bit better! :)
+(test "float/fixnum comparison" #t (< 1.0e16 10000000000000001))
 
 
 ;;==================================================================
