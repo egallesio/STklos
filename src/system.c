@@ -48,6 +48,9 @@
 #  define TIME_DIV_CONST 1000
 #endif
 
+extern int _stklos_restart;    /* buffer used to writ to the pipe below */
+extern int restart_pipefd[2];  /* pipe for communicating the REPL (or parent) that we want
+                                  to be restarted. */
 
 static SCM exit_procs = STk_nil; /* atexit functions */
 static SCM date_type, time_type;
@@ -1349,13 +1352,28 @@ DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
       ret = STk_integer_value(retcode);
       if (ret == LONG_MIN)
         ret = 1;
-}
+    }
   }
   _exit(ret);
 
   return STk_void; /* never reached */
 }
 
+DEFINE_PRIMITIVE("stklos-restart", stklos_restart, subr0, ())
+{
+  fprintf(stderr,
+          "=========================================================\n"
+          "STklos is being restarted afer a call to (stklos-restart).\n"
+          "All variable bindings and parameters have been reset.\n"
+          "=========================================================\n");
+  fflush(stderr);
+
+  _stklos_restart = 1;
+  write(restart_pipefd[1], &_stklos_restart, sizeof(_stklos_restart));
+
+  /* The REPL loop will restart after we exit from the forked child: */
+  _exit(1);
+}
 
 /*
 <doc EXT machine-type
@@ -2082,6 +2100,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(pre_exit);
   ADD_PRIMITIVE(exit);
   ADD_PRIMITIVE(emergency_exit);
+  ADD_PRIMITIVE(stklos_restart);
   ADD_PRIMITIVE(at_exit);
   ADD_PRIMITIVE(machine_type);
 
