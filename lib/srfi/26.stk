@@ -41,7 +41,7 @@
                  (body (cdr tmp)))
             `(lambda ,(reverse slot-names)
                :%cut
-               ((begin ,fct) ,@body))))
+               (,fct ,@body))))
       ((eq? (car lst) '<...>)
           (let* ((rest (gensym))
                  (body (reverse pos)))
