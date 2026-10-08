@@ -40,11 +40,13 @@
                  (fct  (car tmp))
                  (body (cdr tmp)))
             `(lambda ,(reverse slot-names)
+               :%cut
                ((begin ,fct) ,@body))))
       ((eq? (car lst) '<...>)
           (let* ((rest (gensym))
                  (body (reverse pos)))
             `(lambda (,@(reverse slot-names) . ,rest)
+               :%cut+
                (apply ,@body ,rest))))
       ((eq? (car lst) '<>)
           (let ((x (gensym)))
@@ -72,12 +74,14 @@
           (let* ((body (reverse pos)))
             `(let ,(reverse bindings)
                (lambda ,(reverse slot-names)
+                 :%cute
                  ,body))))
       ((eq? (car lst) '<...>)
           (let* ((rest (gensym))
                  (body (reverse pos)))
             `(let ,(reverse bindings)
                  (lambda (,@(reverse slot-names) . ,rest)
+                   :%cute+
                    (apply ,@body ,rest)))))
       ((eq? (car lst) '<>)
           (let ((x (gensym)))
