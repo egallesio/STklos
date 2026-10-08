@@ -33,13 +33,14 @@
   (export check-arg values-checked
           check-case %check-case
           lambda-checked %lambda-checked
-          define-checked
+          define-checked %define-checked
           case-lambda-checked %case-lambda-checked
           define-record-type-checked %define-record-type-checked %wrap-constructor)
 
   (import (scheme base)
           (scheme case-lambda)
-          (srfi 227))
+          (srfi 227)
+          (stklos object))
 
 
 (define-syntax check-arg
@@ -283,11 +284,70 @@
      (%case-lambda-checked () (rest-clauses ...) args-var () (first-body ...)))))
 
 ;; ----------------------------------------------------------------------
+(define-syntax %define-checked
+  (syntax-rules (integer?
+                 exact-integer? boolean? char? complex? real? inexact?
+                 pair? number? null?
+                 procedure? rational? string? symbol? keyword? vector? fixnum?
+
+                 check-impl?
+
+                 <boolean> <char> <complex> <real> <pair> <number> <null>
+                 <procedure> <rational> <string> <symbol> <keyword> <vector>
+                 <fixnum>)
+    ((_ name (body ...) (args-so-far ...) (arg integer?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <integer>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg exact-integer?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <integer>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg boolean?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <boolean>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg char?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <char>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg complex?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <complex>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg real?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <real>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg inexact?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <real>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg pair?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <pair>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg null?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <null>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg number?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <number>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg procedure?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <procedure>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg rational?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <rational>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg string?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <string>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg symbol?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <symbol>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg keyword?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <keyword>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg vector?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <vector>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg fixnum?) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg <fixnum>)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg (check-impl? type)) . args)
+     (%define-checked name (body ...) (args-so-far ... (arg type)) . args))
+    ((_ name (body ...) (args-so-far ...) (arg pred) . args)
+     (%define-checked name ((check-arg pred arg 'name) body ...)
+                      (args-so-far ... arg) . args))
+    ((_ name (body ...) (args-so-far ...) arg . args)
+     (%define-checked name (body ...) (args-so-far ... arg) . args))
+    ((_ name (body ...) (args-so-far ...))
+     (define-method name (args-so-far ...)
+       body ...))
+    ((_ name (body ...) (args-so-far ...) . rest)
+     (define-method name (args-so-far ... . rest)
+       body ...))))
+
 (define-syntax define-checked
   (syntax-rules ()
     ;; Procedure
     ((_ (name . args) body ...)
-     (define name (%lambda-checked name (body ...) () () . args)))
+     (%define-checked name (body ...) () . args))
     ;; Variable
     ((_ name pred value)
      (define name (values-checked (pred) value)))))
