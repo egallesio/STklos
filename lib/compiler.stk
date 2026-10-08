@@ -1434,7 +1434,7 @@ doc>
          (arity   (compute-arity formals)))
     (if (or (= arity len)
             (and (negative? arity) (>= len (- (- arity) 1))))
-        (if (zero? len)
+        (if (and (zero? len) (zero? arity))
             ;; ([lambda () ...]) or (let() ...)
             ;; ==> (begin ...)
             ;; NOTE: compile-body takes care of internal defines
