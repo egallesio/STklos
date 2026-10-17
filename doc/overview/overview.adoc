@@ -1,0 +1,455 @@
+= STklos Overview
+:toc: left
+:toclevels: 2
+:icons: font
+:source-highlighter: rouge
+
+A practical, question-and-answer overview of the STklos Scheme system
+(version 26.0). For full details see the reference manual in
+`doc/refman` and the man pages in `doc/*.1`.
+
+== What is STklos?
+
+STklos is a free Scheme implementation, largely conforming to
+https://small.r7rs.org/[R7RS small]. Its goals are speed and a small
+footprint. It is the successor of STk (a Scheme tightly coupled to Tk,
+started in 1993) and is written by Erick Gallesio.
+
+Notable features:
+
+* A CLOS-style object system with multiple inheritance, generic
+  functions, multi-methods and a Meta Object Protocol (MOP).
+* A native module system plus R7RS `define-library` libraries.
+* The full R7RS numeric tower (bignums, rationals, complex numbers).
+* A Foreign Function Interface (FFI) for calling C libraries.
+* Native threads built on POSIX threads (SRFI-18).
+* Perl-compatible regular expressions (PCRE2).
+* Unicode support.
+* Proper tail calls.
+* More than 130 SRFIs (see `SUPPORTED-SRFIS`).
+* An optional GTK binding (`extensions/gtklos`), plus `curl` and
+  `fuse` extensions.
+
+== What is it written in?
+
+Two languages:
+
+* *C* -- the runtime core: the virtual machine (`src/vm.c`), the
+  reader, numeric tower, strings, ports, hash tables, threads, FFI,
+  dynamic loading, and so on. All of it lives in `src/`.
+* *Scheme* -- the compiler, assembler, peephole optimizer, macro
+  expander, module/library system, REPL, object system, and most
+  libraries and SRFIs. These live in `lib/` (`.stk` source files).
+
+It relies on a few third-party C libraries, each of which can come
+from the system or from the bundled copy in the source tree:
+
+[cols="1,3"]
+|===
+| Library | Purpose
+
+| Boehm GC (`gc/`)      | Garbage collector
+| GMP / GMPlite (`gmp/`) | Bignums
+| PCRE2 (`pcre2/`)       | Regular expressions
+| libffi (`ffi/`)        | Foreign function interface
+|===
+
+== Is it a compiler or an interpreter?
+
+It is a *bytecode compiler* with an ad hoc virtual machine. Every
+expression, including those typed at the REPL, is compiled to bytecode
+before it runs; there is no tree-walking interpreter. It does *not*
+compile to native machine code.
+
+The compiler is itself written in Scheme and does source rewriting,
+inlining of common primitives, loop unrolling and peephole
+optimization. Its behavior is controlled by `compiler:*` parameters or
+by the `-F` / `--compiler-flags` command-line option.
+
+=== Can it save precompiled files?
+
+Yes. Scheme source can be compiled ahead of time into bytecode files
+with the `.ostk` extension:
+
+[source,shell]
+----
+stklos-compile -o foo.ostk foo.stk
+----
+
+or from Scheme:
+
+[source,scheme]
+----
+(compile-file "foo.stk" "foo.ostk")
+----
+
+`load` and `require` search for files using `load-suffixes`, which by
+default tries the shared-library suffix (`.so`), then `ostk`, `stk`,
+`sld` and `scm`, so a compiled `.ostk` is preferred over its source
+when both exist.
+
+`stklos-compile -C` writes the bytecode as a C file instead. This is
+how the system embeds its own boot code (`src/boot.c`) and how some
+libraries ship mixed C/Scheme code as shared objects (`.so`).
+
+=== Can it save and restore an image?
+
+No, not in the Smalltalk or Common Lisp `save-lisp-and-die` sense.
+There is no way to dump the running heap, with your program loaded,
+and resume it later. Nor can you build a standalone native executable
+that runs without STklos installed.
+
+STklos does have a *boot image*, `lib/boot.img`, but it is not that
+kind of image. It holds the compiled bytecode of the system's own core
+Scheme code (compiler, REPL, and so on). At build time it is converted
+into C (`src/boot.c`) and linked into the `stklos` executable. The
+`-b FILE` option boots from a different one, but it is meant for
+bootstrapping the system, not for packaging applications.
+
+==== What to do instead: a compiled `.ostk` program
+
+Most of what an image would give you comes from compiling your program
+to a `.ostk` file:
+
+[source,shell]
+----
+stklos-compile -o myprog myprog.stk
+./myprog arg1 arg2
+----
+
+The output starts with `#!/usr/bin/env stklos` and is marked
+executable, so you can run it directly as a command. If the program
+defines `main`, STklos calls it with the command-line arguments.
+
+==== Does it run faster?
+
+No. Source and compiled code run on the same virtual machine,
+executing the same bytecode. A CPU-bound test (`(fib 32)`) took about
+0.13 s either way.
+
+==== Does it start faster?
+
+Yes, when the program is large. Running a `.stk` file means compiling
+all of it before it starts; a `.ostk` skips that step. In a test with
+3000 procedure definitions, startup dropped from 0.44 s (source) to
+0.02 s (compiled). For small programs the difference is negligible,
+and STklos itself starts in about 0.02 s.
+
+==== Is it easier to distribute?
+
+Partly:
+
+* Files pulled in with `include` are compiled into the output, so a
+  program assembled from many source files can ship as a *single*
+  `.ostk` file, with no source code.
+* Libraries loaded with `import` or `require` are *not* bundled. They
+  are loaded at run time and must be installed where the `load-path`
+  can find them. Libraries that come with STklos are already there;
+  your own libraries must be shipped alongside, preferably compiled to
+  `.ostk` too. A tested program that imported its own library failed
+  with `cannot load file` once that library was removed.
+* The target machine must have STklos installed, with a compatible
+  version, because the `.ostk` file is bytecode for the STklos VM.
+
+In short: for a self-contained program, put your code in files that
+are combined with `include` (not separate libraries), compile it with
+`stklos-compile`, and ship the one resulting file to machines that
+already have STklos installed.
+
+== How do you build it?
+
+STklos uses the GNU autotools. The usual sequence is:
+
+[source,shell]
+----
+./configure            # optionally --prefix=/opt etc.
+make
+make tests             # optional, runs the test suite
+sudo make install
+----
+
+Useful `configure` options:
+
+[cols="2,3"]
+|===
+| Option | Effect
+
+| `--prefix=PATH`            | Install location (default `/usr/local`)
+| `--with-provided-gc`       | Use the bundled Boehm GC
+| `--with-provided-bignum`   | Use the bundled GMPlite (alias `--with-gmp-light`)
+| `--with-provided-regexp`   | Use the bundled PCRE2
+| `--with-provided-ffi`      | Use the bundled libffi
+| `--disable-threads`        | Build without POSIX thread support
+| `--disable-ffi`            | Build without the FFI
+| `--disable-control-fast-math` | Skip argument checks in `fx`/`fl` operations
+|===
+
+You can also set the compiler and flags, for example
+`./configure CC=clang CFLAGS="-O3 -Wall"`. Debug builds can add
+`-DSTK_DEBUG`, `-DVM_DEBUG` or `-DSTAT_VM` to `CFLAGS`. `configure`
+ends with a summary of what it found and which bundled libraries it
+will compile.
+
+The HTML and PDF documentation are rebuilt only if Asciidoctor is
+installed.
+
+See `QUICK-INSTALL.md`, `INSTALL`, `INSTALL-android.md` and
+`INSTALL-cross-compile.md` for details.
+
+== How do you run it?
+
+=== Interactive REPL
+
+[source,shell]
+----
+$ stklos
+stklos> (+ 1 2)
+3
+----
+
+The REPL uses GNU readline or BSD libedit when available (disable it
+with `-n`). It accepts comma commands such as `,help`, `,describe`,
+`,expand` (show macro expansion), `,time`, `,backtrace`, `,apropos`,
+`,import`, `,manual` and `,cd`. A line starting with `!` runs a shell
+command. The last five results are kept in `@1` ... `@5` (`@` is
+`@1`).
+
+=== Running a file or script
+
+[source,shell]
+----
+stklos -f program.stk arg1 arg2   # run a program
+stklos -l init.stk                # load a file, then enter the REPL
+stklos -e '(display "hi")'        # evaluate an expression and exit
+----
+
+If a program defines a `main` procedure, STklos calls it with the
+command-line arguments (program name first), and its return value
+becomes the process exit status (SRFI-22 style). Executable scripts
+can begin with:
+
+[source,scheme]
+----
+#!/usr/bin/env stklos
+(define (main args)
+  (display (cdr args))
+  (newline)
+  0)
+----
+
+Other common options: `-I DIR` and `-A DIR` (prepend/append to the
+load path), `-q` (don't load the init file), `-Q` (no banner), `-d`
+(debug information), `-s N` (stack size) and `-v` / `-V` (version).
+See `man stklos`.
+
+=== Companion tools
+
+* `stklos-compile` -- compiles to bytecode (`.ostk`) or C.
+* `stklos-config` -- reports compile and link flags for C extensions.
+* `stklos-genlex` -- lexer generator (SILex based).
+* `stklos-pp` -- documentation preprocessor.
+* `stklos-script` -- obsolete wrapper; use `stklos` directly.
+
+== How do you exit?
+
+Any of the following:
+
+* Type `Ctrl-D` (end of file) at the REPL prompt.
+* Type the REPL command `,quit` (or `,q`).
+* Call `(exit)` or `(exit code)`. `#t` or no argument means success,
+  `#f` means failure, and an integer is passed to the OS as the exit
+  status. Pending `dynamic-wind` "after" thunks run first, followed by
+  any functions registered with `register-exit-function!`, and then
+  all ports are flushed.
+* Call `(emergency-exit [code])` to exit immediately, without running
+  any of those cleanup actions.
+
+== Macro facilities
+
+STklos provides several macro systems:
+
+[cols="1,3"]
+|===
+| Facility | Description
+
+| `define-macro`
+| Traditional non-hygienic Lisp-style macros: the transformer receives
+  the unevaluated form and returns a new form. This is the fundamental
+  mechanism; much of the core syntax is implemented with it.
+
+| `define-syntax` / `syntax-rules`
+| R7RS hygienic pattern-based macros, available by default. The
+  implementation is Dorai Sitaram's "Macro by Example", which expands
+  into `define-macro` macros. It is cheap, but not fully referentially
+  transparent.
+
+| `(require "full-syntax")`
+| Loads Hieb and Dybvig's portable `syntax-case` expander (version
+  2.1). It provides a fully hygienic, referentially transparent
+  `syntax-rules`, plus `let-syntax` and `letrec-syntax`. It is more
+  complete but also more expensive.
+|===
+
+Related tools: `macro-expand` (and the REPL's `,expand` command) show
+how a form expands, and `define-syntax` macros can be exported from
+modules and libraries.
+
+== Threads
+
+STklos implements https://srfi.schemers.org/srfi-18/[SRFI-18]
+completely, on top of native *POSIX threads* (pthreads). Threads share
+one heap, and the Boehm collector is built with thread support.
+
+* Threads: `make-thread`, `thread-start!`, `thread-join!`,
+  `thread-yield!`, `thread-sleep!`, `thread-terminate!`,
+  `thread-specific`, and more.
+* Mutexes: `make-mutex`, `mutex-lock!`, `mutex-unlock!`,
+  `with-mutex`, `mutex-state`.
+* Condition variables: `make-condition-variable`,
+  `condition-variable-signal!`, `condition-variable-broadcast!`.
+* SRFI-18 conditions: `join-timeout-exception?`,
+  `abandoned-mutex-exception?`, `terminated-thread-exception?` and
+  `uncaught-exception?`.
+
+[source,scheme]
+----
+(define t (make-thread (lambda () (* 6 7))))
+(thread-start! t)
+(thread-join! t)   ; => 42
+----
+
+Thread support is on by default. To leave it out, configure with
+`--disable-threads`. On Android, `pthread_cancel` is missing, so a
+thread can only terminate itself or threads that are not running.
+
+== Portability across operating systems
+
+STklos targets POSIX systems and is developed on Linux (Arch).
+According to `PORTING-NOTES.md`, it builds and runs on:
+
+* *Linux* -- x86_64, 32-bit and 64-bit ARM (Raspberry Pi and others),
+  and MIPS (cross-compiled for OpenWRT/musl routers); with gcc or
+  clang.
+* *BSD* -- FreeBSD and OpenBSD (clang).
+* *macOS* -- works, but may need `--with-provided-ffi
+  --with-provided-regexp` because the system libraries lack headers.
+* *Windows* -- through WSL. Native Win32 is not supported; Cygwin
+  worked in the past.
+* *Android* -- built on the device under Termux (see
+  `INSTALL-android.md`).
+
+Bundling GC, GMP, PCRE2 and libffi lets the system build on platforms
+that lack those libraries. Cross-compilation is described in
+`INSTALL-cross-compile.md`.
+
+== Does it support tail recursion?
+
+Yes. STklos implements proper tail calls as R7RS requires: a call in
+tail position reuses the current frame, so loops written as tail
+recursion run in constant stack space. This covers both self-recursion
+and mutual recursion, and it applies to `apply` as well.
+
+== Does it support continuations?
+
+Yes. `call/cc` (`call-with-current-continuation`) and `dynamic-wind`
+are provided, along with R7RS exceptions (`with-exception-handler`,
+`raise`, `guard`) and a condition system (see `doc/refman/cond.adoc`).
+
+== The module system
+
+STklos has two layers.
+
+=== Native modules
+
+Inherited from STk and based on Tung and Dybvig's design, these
+modules are built to be convenient in interactive use.
+
+[source,scheme]
+----
+(define-module counter
+  (export make-counter)
+  (define (make-counter)
+    (let ((n 0))
+      (lambda () (set! n (+ n 1)) n))))
+
+(import counter)
+((make-counter))   ; => 1
+----
+
+Key forms and procedures: `define-module`, `export`, `import`,
+`select-module` (switch the REPL's current module), `in-module`,
+`current-module`, `find-module`, `module-exports`, `module-imports`,
+`module-symbols`, `symbol-value`, `module-immutable!` and
+`all-modules`.
+
+=== R7RS libraries
+
+`define-library` is implemented on top of modules. The library
+`(foo bar)` becomes a module named `foo/bar` that does not import the
+`STklos` module by default. Library declarations support `export`,
+`import` (with `only`, `except`, `prefix` and `rename`), `begin`,
+`include`, `include-ci`, `include-library-declarations` and
+`cond-expand`.
+
+Standard libraries include `(scheme base)` and the other R7RS small
+libraries, many R7RS large libraries, `(srfi N)` for each supported
+SRFI, and `(stklos ...)` utility libraries such as `pretty-print`,
+`getopt`, `trace` and `describe`. Files are found through
+`load-path` (adjust it with `-I` and `-A`). `require` and `provide`
+are also available for simple feature-based loading.
+
+== Other common questions
+
+=== Is there an object system?
+
+Yes: STklos's object system, a CLOS derivative with classes, multiple
+inheritance, generic functions with multi-method dispatch, `next-method`
+and a full MOP. See `doc/refman/object.adoc`.
+
+=== Can it call C code?
+
+Yes, in two ways:
+
+* The *FFI* (`define-external`) calls functions in shared libraries
+  without writing any C (`doc/refman/ffi.adoc`).
+* *C extensions* are compiled as shared objects using flags from
+  `stklos-config` and loaded at runtime.
+
+=== Can it be embedded in a C program?
+
+STklos is primarily a standalone executable. Building it as an
+embeddable library is not an officially supported, documented feature
+at present.
+
+=== Is it case sensitive?
+
+Yes, by default, as R7RS requires. `--case-insensitive` restores
+R5RS-style behavior, and `#!fold-case` / `#!no-fold-case` work inside
+source files.
+
+=== What about Unicode and strings?
+
+Strings are UTF-8 when the locale calls for it (the default), and
+`--utf8-encoding=yes|no` forces the choice. Characters and string
+procedures are Unicode-aware.
+
+=== Is there a package manager?
+
+Not in this source tree. The man page still mentions a `stklos-pkg`
+command (with `-D` / `--conf-dir` and `STKLOS_CONFDIR` setting where
+packages go), but that tool is not part of the current distribution.
+`-D` and `STKLOS_CONFDIR` still choose the configuration directory.
+
+=== Where is the documentation?
+
+* Reference manual: `doc/refman/*.adoc`, built into `doc/HTML` and
+  `doc/PDF`.
+* Man pages: `doc/stklos.1`, `doc/stklos-compile.1`, and others.
+* VM and internals notes: `doc/vm`, `doc/hacking`.
+* Online: https://stklos.net
+* At the REPL: `,manual`, `,apropos` and `(help 'symbol)`.
+
+=== What license does it use?
+
+The code is GPL-2.0-or-later, and the documentation is
+GFDL-1.3-or-later. See `COPYING` and `LICENSE`.
