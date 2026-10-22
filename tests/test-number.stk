@@ -2379,8 +2379,11 @@
 ;; Domain error:
 (test/error "atanh 1"    (atanh +1))
 (test/error "atanh -1"   (atanh -1))
-(test/error "atanh 1.0"  (atanh +1.0))
-(test/error "atanh -1.0" (atanh -1.0))
+
+
+;; atanh
+(test "atanh 1.0"  +inf.0 (atanh +1.0))
+(test "atanh -1.0" -inf.0 (atanh -1.0))
 
 (test "atanh 1/2"
       #t
@@ -2388,13 +2391,14 @@
          (atanh 1/2)
          0.5493061450000000))
 
+(test "sinh 0.0"  0.0 (sinh  0.0))
+(test "cosh 0.0"  1.0 (cosh  0.0))
+(test "tanh 0.0"  0.0 (tanh  0.0))
+(test "asinh 0.0" 0.0 (asinh 0.0))
+(test "acosh 1.0" 0.0 (acosh 1.0))
+(test "atanh 0.0" 0.0 (atanh 0.0))
+
 ;; These should return exact results:
-(test "sinh 0.0"  0 (sinh  0.0))
-(test "cosh 0.0"  1 (cosh  0.0))
-(test "tanh 0.0"  0 (tanh  0.0))
-(test "asinh 0.0" 0 (asinh 0.0))
-(test "acosh 1.0" 0 (acosh 1.0))
-(test "atanh 0.0" 0 (atanh 0.0))
 (test "sinh 0"    0 (sinh  0))
 (test "cosh 0"    1 (cosh  0))
 (test "tanh 0"    0 (tanh  0))
@@ -2738,7 +2742,7 @@
       (parameterize ((real-precision 6)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
 
 (test "degrees->radians 0"
-      0.0
+      0
       (degrees->radians 0))
 
 (test "degrees->radians 180"
@@ -2756,7 +2760,7 @@
 (let ((pi 3.141592653589793115997963468544185161590576171875))
 
   (test "radians->degrees 0"
-        0.0
+        0
         (radians->degrees 0))
 
   (test "radians->degrees pi"
