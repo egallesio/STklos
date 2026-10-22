@@ -158,6 +158,10 @@
   (test-approximate (/ (- (exp 1) (exp -1)) 2)
                     (sinh 1)
                     1e-6)
+  (test-approximate (/ (- (exp 10) (exp -10)) 2)
+                    (sinh 10)
+                    1e-6)
+  (test "srfi-278."  0  (real-part (sinh 0+2i)))
 
 (test-subsection "cosh")
   (test "srfi-278."   1 (cosh 0))
@@ -166,6 +170,10 @@
   (test-approximate (/ (+ (exp 1) (exp -1)) 2)
                     (cosh 1)
                     1e-6)
+  (test-approximate (/ (+ (exp 10) (exp -10)) 2)
+                    (cosh 10)
+                    1e-6)
+  (test "srfi-278."  0  (imag-part (cosh 0+2i)))
 
 (test-subsection "tanh")
   (test "srfi-278."   0 (tanh 0))
@@ -176,6 +184,7 @@
   (test-approximate (/ (sinh 10) (cosh 10))
                     (tanh 10)
                     1e-6)
+  (test "srfi-278."  0  (real-part (tanh 0+2i)))
 
 (define (naive-atanh z)
   (/ (- (log (+ 1 z)) (log (- 1 z)))
@@ -304,6 +313,9 @@
   (test-subsection "(asinh 1+2i)")
     (test-real-and-imag (naive-asinh 1+2i)
                         (asinh 1+2i))
+  (test "srfi-278."  0  (real-part (asinh 0+1/2i)))
+  (test "srfi-278."  0  (real-part (asinh 0-0.2i)))
+  (test "srfi-278."  0  (real-part (asinh 0+0.0i)))
 
 (test-subsection "exact integer nth root")
   (let-values (((e i) (exact-integer-nth-root 40 3)))

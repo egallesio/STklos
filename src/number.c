@@ -3781,8 +3781,14 @@ static SCM my_cosh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(add2(ez,inv_ez),
-                                    double2real(2.0));
+                        SCM res = div2(add2(ez,inv_ez),
+                                       double2real(2.0));
+                        /* For pure imaginary, the result is pure REAL */
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0))
+                          return COMPLEX_REAL(res);
+                        else
+                          return res;
                       }
     default:          error_bad_number(z);
   }
@@ -3809,8 +3815,15 @@ static SCM my_sinh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(sub2(ez,inv_ez),
-                                    double2real(2.0));
+                        SCM res = div2(sub2(ez,inv_ez),
+                                       double2real(2.0));
+                        /* For pure imaginary, the result is pure imaginary */
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0))
+                          return make_complex(MAKE_INT(0),
+                                              COMPLEX_IMAG(res));
+                        else
+                          return res;
                       }
     default:          error_bad_number(z);
   }
@@ -3840,8 +3853,15 @@ static SCM my_tanh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(sub2 (ez, inv_ez),
-                                    add2 (ez, inv_ez));
+                        SCM res = div2(sub2 (ez, inv_ez),
+                                       add2 (ez, inv_ez));
+                        /* For pure imaginary, the result is pure imaginary */
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0))
+                          return make_complex(MAKE_INT(0),
+                                              COMPLEX_IMAG(res));
+                        else
+                          return res;
                       }
     default:          error_bad_number(z);
   }
@@ -3859,7 +3879,17 @@ static SCM my_asinh(SCM z) {
                       return double2real(asinh(INT_VAL(z)));
     case tc_complex:
     case tc_bignum:
-    case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
+    case tc_rational: {
+                        SCM res = my_log(add2(z, STk_sqrt(add2(mul2(z,z),
+                                                               MAKE_INT(1)))));
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0) &&
+                            STk_numle2(COMPLEX_IMAG(z), MAKE_INT(+1)) &&
+                            STk_numge2(COMPLEX_IMAG(z), MAKE_INT(-1)))
+                          return make_complex(MAKE_INT(0), COMPLEX_IMAG(res));
+                        else
+                          return res;
+    }
     default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
