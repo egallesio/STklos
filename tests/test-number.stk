@@ -2742,7 +2742,7 @@
       (parameterize ((real-precision 6)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
 
 (test "degrees->radians 0"
-      0.0
+      0
       (degrees->radians 0))
 
 (test "degrees->radians 180"
@@ -2760,7 +2760,7 @@
 (let ((pi 3.141592653589793115997963468544185161590576171875))
 
   (test "radians->degrees 0"
-        0.0
+        0
         (radians->degrees 0))
 
   (test "radians->degrees pi"
