@@ -2298,6 +2298,8 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
+  if (o1 == MAKE_INT(0) && STk_numberp(o2) == STk_true) return MAKE_INT(0);
+  if (o2 == MAKE_INT(0) && STk_numberp(o1) == STk_true) return MAKE_INT(0);
   if (o1 == MAKE_INT(1) && STk_numberp(o2) == STk_true) return o2;
   if (o2 == MAKE_INT(1) && STk_numberp(o1) == STk_true) return o1;
 
@@ -2630,6 +2632,7 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
+  if (o1 == MAKE_INT(0) && STk_numberp(o2) == STk_true) return MAKE_INT(0);
   if (o2 == MAKE_INT(1) && STk_numberp(o1) == STk_true) return o1;
 
   switch (TYPEOF(o1)) {
