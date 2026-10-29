@@ -179,10 +179,10 @@ DEFINE_PRIMITIVE("greatest-fixnum", greatest_fixnum, subr0, (void))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o))
+DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM obj))
 {
-  ensure_fx(o);
-  return MAKE_BOOLEAN (INT_VAL(o)==0);
+  ensure_fx(obj);
+  return MAKE_BOOLEAN (INT_VAL(obj)==0);
 }
 
 /*
@@ -205,16 +205,16 @@ DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxpositive?", fxpositivep, subr1, (SCM o))
+DEFINE_PRIMITIVE("fxpositive?", fxpositivep, subr1, (SCM obj))
 {
-  ensure_fx(o);
-  return MAKE_BOOLEAN (INT_VAL(o)>0);
+  ensure_fx(obj);
+  return MAKE_BOOLEAN (INT_VAL(obj)>0);
 }
 
-DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o))
+DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM obj))
 {
-  ensure_fx(o);
-  return MAKE_BOOLEAN (INT_VAL(o)<0);
+  ensure_fx(obj);
+  return MAKE_BOOLEAN (INT_VAL(obj)<0);
 }
 
 /*
@@ -235,26 +235,26 @@ DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM o))
+DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM obj))
 {
-  ensure_fx(o);
+  ensure_fx(obj);
   /* This was:
        return MAKE_BOOLEAN (INT_VAL(o)&1);
      However, since the fixnum tag is "01", we can just check if the
      third bit is one. --jpellegrini
   */
-  return MAKE_BOOLEAN (((long) o) & 4);
+  return MAKE_BOOLEAN (((long) obj) & 4);
 }
 
-DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o))
+DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM obj))
 {
-  ensure_fx(o);
+  ensure_fx(obj);
   /* This was:
        return MAKE_BOOLEAN (!(INT_VAL(o)&1));
      However, since the fixnum tag is "01", we can just check if the
      third bit is one. --jpellegrini
   */
-  return MAKE_BOOLEAN (!(((long) o) & 4));
+  return MAKE_BOOLEAN (!(((long) obj) & 4));
 }
 
 

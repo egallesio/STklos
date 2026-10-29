@@ -71,7 +71,8 @@ of available commands is given below.
 - **,time** (or **,t** ): Print the time used to run the next expression
 - **,describe** (or **,d**): Describe an object
 - **,expand** (or **,e**): Pretty print the macro expansion of a form
-- **,import** (or  **,i**): Import a library
+- **,import** (or  **,i**): Import a library. If library is a number,
+  the corresponding SRFI is imported (e.g. use ",i 1" to import SRFI-1)
 - **,require-feature** (or **,r**):  Require a feature
 - **,open** (or **,o**): Open file or URL
 - **,browse** (or **,b**): Browse file or URL with the default browser

@@ -117,7 +117,7 @@ DEFINE_PRIMITIVE("make-keyword", make_keyword, subr1, (SCM str))
  * (keyword? '#:foo)   => #t  ; always
  * (keyword? :foo)     => #t  ; depends of keyword-colon-position
  * (keyword? foo:)     => #t  ; depends of keyword-colon-position
- * (keyword? #:foo)    => #t  ; always 
+ * (keyword? #:foo)    => #t  ; always
  * @end lisp
 doc>
  */
@@ -134,12 +134,12 @@ DEFINE_PRIMITIVE("keyword?", keywordp, subr1, (SCM obj))
  * Returns the name of |key| as a string. The result does not contain a colon.
 doc>
  */
-DEFINE_PRIMITIVE("keyword->string", keyword2string, subr1, (SCM obj))
+DEFINE_PRIMITIVE("keyword->string", keyword2string, subr1, (SCM k))
 {
  SCM res;
 
- if (!KEYWORDP(obj)) error_bad_keyword(obj);
- res = STk_Cstring2string(KEYWORD_PNAME(obj));
+ if (!KEYWORDP(k)) error_bad_keyword(k);
+ res = STk_Cstring2string(KEYWORD_PNAME(k));
  return res;
 }
 
@@ -237,7 +237,7 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
  * |List| must be a list of keywords and their respective values.
  * |key-delete| remove the |key| and its associated value of the keyword
  * list. The key can be absent of the list.
- * 
+ *
  * |key-delete!| does the same job as |key-delete| by physically
  * modifying its |list| argument.
  * @lisp

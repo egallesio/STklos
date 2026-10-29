@@ -105,9 +105,9 @@ DEFINE_PRIMITIVE("constant-box", cbox, vsubr, (int argc, SCM *argv))
  * Returns |#t| if |obj| is a box, |#f| otherwise.
 doc>
 */
-DEFINE_PRIMITIVE("box?", boxp, subr1, (SCM x))
+DEFINE_PRIMITIVE("box?", boxp, subr1, (SCM obj))
 {
-  return MAKE_BOOLEAN(BOXP(x));
+  return MAKE_BOOLEAN(BOXP(obj));
 }
 
 
@@ -118,9 +118,9 @@ DEFINE_PRIMITIVE("box?", boxp, subr1, (SCM x))
  * Returns |#t| if |obj| is a mutable box, |#f| otherwise.
 doc>
 */
-DEFINE_PRIMITIVE("box-mutable?", box_mutablep, subr1, (SCM x))
+DEFINE_PRIMITIVE("box-mutable?", box_mutablep, subr1, (SCM obj))
 {
-  return MAKE_BOOLEAN(BOXP(x) && !(BOXED_INFO(x) & BOX_CONST));
+  return MAKE_BOOLEAN(BOXP(obj) && !(BOXED_INFO(obj) & BOX_CONST));
 }
 
 
@@ -152,7 +152,7 @@ DEFINE_PRIMITIVE("unbox", unbox, subr1, (SCM x))
  * with a number of values that differs from the number of values in the box
  * being set. (In other words, |set-box!| does not allocate memory.)
  * It is also an error to call |set-box!| on a box which is not mutable.
- * 
+ *
  * The name |box-set!| is now obsolete and kept only for compatibility.
 doc>
 */

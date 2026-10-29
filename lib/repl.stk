@@ -297,8 +297,14 @@ doc>
                     (lambda () (pretty-print (macro-expand (read)))))
   ;; ==== import
   (repl-add-command '(import i)
-                    "Import a library"
-                    (lambda () (eval-from-string (format "(import ~a)" (read)))))
+                    "Import a library (shortcut: use ',i n' to import SRFI-n)"
+                    (lambda ()
+                      (let ((lib (read)))
+                        (eval-from-string
+                         (format (if (and (integer? lib) (positive? lib))
+                                     "(import (srfi ~a))"
+                                     "(import ~a)")
+                                 lib)))))
   ;; == require-feature
   (repl-add-command '(require-feature r)
                     "Require a feature"

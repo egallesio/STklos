@@ -1,6 +1,6 @@
 # Makefile for the STklos specific  libraries
 #
-# Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2026 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ SRC_STK  = apropos.stk      \
            help.stk         \
            preproc.stk      \
            pretty-print.stk \
+           smatch.stk       \
            trace.stk
 
 SRC_OSTK = apropos.ostk      \
@@ -44,6 +45,7 @@ SRC_OSTK = apropos.ostk      \
            help.ostk         \
            preproc.ostk      \
            pretty-print.ostk \
+           smatch.ostk       \
            trace.ostk
 
 #

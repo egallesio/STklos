@@ -1434,7 +1434,7 @@ doc>
          (arity   (compute-arity formals)))
     (if (or (= arity len)
             (and (negative? arity) (>= len (- (- arity) 1))))
-        (if (zero? len)
+        (if (and (zero? len) (zero? arity))
             ;; ([lambda () ...]) or (let() ...)
             ;; ==> (begin ...)
             ;; NOTE: compile-body takes care of internal defines
@@ -1459,8 +1459,7 @@ doc>
   (let* ((fct     (car args))
          (actuals (cdr args))
          (len     (length actuals)))
-    (if (and (pair? fct) (or (eq? (car fct) 'lambda)
-                          (eq? (car fct) '|λ|)))
+    (if (and (pair? fct) (memq (car fct) '(lambda |λ| #%lambda)))
         ;; fct is (lambda (...) ...)
         ;;    if fct is not an epair, it is probably because it has been
         ;;    built programmatically. Anyway its body is probably an epair

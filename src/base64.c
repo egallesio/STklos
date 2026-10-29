@@ -130,15 +130,15 @@ static void decode(SCM f, SCM g)
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
+DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM in, SCM out))
 {
-  if (!IPORTP(f))  error_bad_input_port(f);
-  if (!g)
-    g = STk_current_output_port();
+  if (!IPORTP(in))  error_bad_input_port(in);
+  if (!out)
+    out = STk_current_output_port();
   else
-    if (!OPORTP(g)) error_bad_output_port(g);
+    if (!OPORTP(out)) error_bad_output_port(out);
 
-  encode(f, g);
+  encode(in, out);
   return STk_void;
 }
 
@@ -160,15 +160,15 @@ DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
 doc>
 doc>
 */
-DEFINE_PRIMITIVE("base64-decode", base64_decode, subr12, (SCM f, SCM g))
+DEFINE_PRIMITIVE("base64-decode", base64_decode, subr12, (SCM in, SCM out))
 {
-  if (!IPORTP(f))  error_bad_input_port(f);
-  if (!g)
-    g = STk_current_output_port();
+  if (!IPORTP(in))  error_bad_input_port(in);
+  if (!out)
+    out = STk_current_output_port();
   else
-    if (!OPORTP(g)) error_bad_output_port(g);
+    if (!OPORTP(out)) error_bad_output_port(out);
 
-  decode(f, g);
+  decode(in, out);
   return STk_void;
 }
 

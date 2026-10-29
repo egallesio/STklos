@@ -85,7 +85,7 @@ doc>
   return MAKE_BOOLEAN(x==STk_false);
 }
 
-DEFINE_PRIMITIVE("boolean?", booleanp, subr1, (SCM x))
+DEFINE_PRIMITIVE("boolean?", booleanp, subr1, (SCM obj))
 /*
 <doc  boolean?
  * (boolean? obj)
@@ -100,7 +100,7 @@ DEFINE_PRIMITIVE("boolean?", booleanp, subr1, (SCM x))
 doc>
  */
 {
-  return MAKE_BOOLEAN(BOOLEANP(x));
+  return MAKE_BOOLEAN(BOOLEANP(obj));
 }
 
 

@@ -140,6 +140,10 @@
 (test/compile-error "exact infinity" (read-from-string "#e-inf.0"))
 (test/compile-error "exact nan"  (read-from-string "#e+nan.0"))
 
+(test "signed #e number.1" 101/10 #e+10.1)
+(test "signed #e number.2" -101/10 #e-10.1)
+(test "signed #i number.1" #t (= (* #i12 -1) #i-12))
+(test "signed #i number.2" #t (= (* #i-12 -1) #i+12))
 
 ;;------------------------------------------------------------------
 (test-subsection "rational reader")
@@ -670,6 +674,21 @@
 (test "+bignum < +fixnum" #t (> (+ (expt 2 100) +10)))
 (test "+bignum < -fixnum" #t (> (+ (expt 2 100) -10)))
 
+;;  (< 1.0e16 10000000000000001) is interesting when double floats
+;;  take 64 bits.
+;;
+;;  * 1.0e16 = 10000000000000000  -- represents the integer exactly
+;;  * 10000000000000001 is NOT representable in IEEE format (at least not
+;;    with 64 bits).
+;;
+;;  So  if we just turn both into reals, the integer will be converted into
+;;  a SMALLER number, and the comparison will be incorrect (#f).
+;;  STklos was adapted to return the right answer, as most Schemes and
+;;  Common Lisp systems.
+;;
+;;  Remark: this is not a "bug". In C one would as well get the wrong value,
+;;  it's how IEEE floats behave... But we can do a bit better! :)
+(test "float/fixnum comparison" #t (< 1.0e16 10000000000000001))
 
 
 ;;==================================================================
@@ -1548,6 +1567,17 @@
       +inf.0
       (expt +inf.0 (expt 2 100)))
 
+(let ((x  (square (- (expt 9 -10000) 1))))
+  (test "expt on a big rational.1 "
+        #t
+        (let ((res (expt (+ 1 x) 1/2)))   ;; SQRT
+          (and (not (nan? res))
+               (< 1.410 res 1.415))))
+  (test "expt on a big rational.2"
+        #t
+        (let ((res (expt (+ 1 x) 1/7)))
+          (and (not (nan? res))
+               (< 1.10 res 1.11)))))
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")
@@ -1590,6 +1620,14 @@
         (and (zero? (real-part s))
              (< 0.999999 (imag-part s) 1.00001)
              (inexact? s))))
+
+(test "sqrt 0.0+0.0i"
+      0.0+0.0i
+      (sqrt 0.0+0.0i))
+
+(test "sqrt 0.0-0.0"
+      0.0-0.0i
+      (sqrt 0.0-0.0i))
 
 (test "sqrt -inf"
       +inf.0i
