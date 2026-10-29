@@ -310,7 +310,7 @@
     (267 "Raw String Syntax" (raw-strings) #t)
     ;; 268 Multidimensional Array Literals
     ;; 269 Portable Test Definitions
-    ;; 270 Hexadecimal Floating-Point Constants
+    (270 "Hexadecimal Floating-Point Constants")
     ;; 271 Random port libraries
     ;; 272 Pretty Printing
     (273 "Extensions to Data (Type-)Checking")
