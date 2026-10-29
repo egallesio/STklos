@@ -318,6 +318,7 @@
     ;; 275 URIs and IRIs
     ;; 276 Type-specific Flonum Libraries
     (277 "Cyclic ports" (cyclic-port))
+    (278 "Supplemental Numerics" (supplementa-numerics))
     ))
 
 ;; ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
