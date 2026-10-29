@@ -1080,6 +1080,25 @@ static long do_compare(SCM x, SCM y)
                 But we do NOT do this for reals and complexes, because it's a
                 more complicated situation.       */
 
+  /* REAL/FIXNUM comparisons:
+       (< 1.0e16 10000000000000001) is interesting when double floats
+       take 64 bits.
+
+       * 1.0e16 = 10000000000000000  -- represents the integer exactly
+       * 10000000000000001 is NOT representable in IEEE format (at least not
+       with 64 bits).
+
+       So  if we just turn both into reals, the integer will be converted into
+       a SMALLER number, and the comparison will be incorrect (#f).
+       STklos was adapted to return the right answer, as most Schemes and
+       Common Lisp systems.
+
+       If a real represents an integer exactly, AND it is being compared to a
+       fixnum, then convert the real to integer instead of the opposite!
+
+       Remark: this is not a "bug". In C one would as well get the wrong value,
+       it's how IEEE floats behave... But we can do a bit better! :)             */
+
   /* Fast path when no math is necessary: */
   if (!COMPLEXP(x) && !COMPLEXP(y)) {
     if (positivep(x) && negativep(y)) return +1;
@@ -1090,7 +1109,9 @@ static long do_compare(SCM x, SCM y)
     case tc_real:
       switch (TYPEOF(y)) {
         case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
-        case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
+      case tc_integer:    return REAL_REPRESENTS_INT(REAL_VAL(x))
+                                 ? do_compare(inexact2exact(x), y)
+                                 : double_diff(REAL_VAL(x), INT_VAL(y));
         case tc_complex:  return complex_diff(x, MAKE_INT(0),
                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
         default: break;
@@ -1098,7 +1119,9 @@ static long do_compare(SCM x, SCM y)
       break;
     case tc_integer:
       switch (TYPEOF(y)) {
-        case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
+        case tc_real:     return REAL_REPRESENTS_INT(REAL_VAL(y))
+                                 ? do_compare(x, inexact2exact(y))
+                                 : double_diff(INT_VAL(x), REAL_VAL(y));
         case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
         case tc_rational: return do_compare(STk_mul2(x, RATIONAL_DEN(y)),
                                             RATIONAL_NUM(y));
