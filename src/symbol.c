@@ -59,11 +59,11 @@ int STk_symbol_flags(register const char *s)
     if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;       // seems to be a keyword
 
     for (; *s; s++) {
-      if (isdigit(*s))    digit = 1;
+      if (isdigit((unsigned char)*s))    digit = 1;
       else if (*s == '_') underscore = 1;
       else                nondigit = 1;
- 
-      if (isupper(*s)) {
+
+      if (isupper((unsigned char)*s)) {
         res |= SYMBOL_HAS_UPPER;
         continue;
       }
