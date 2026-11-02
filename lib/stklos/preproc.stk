@@ -126,11 +126,11 @@
   ;;;; document-value
   ;;;;
   (define (document-value symbol . default)
-    (apply symbol-value symbol (find-module 'stklos/preproc/env) default))
+    (apply symbol-value symbol *md-env* default))
 
   (define (document-value-set! symbol value)
     ;; FIXME: This is ugly, we should have a symbol-value-set! 
-    (eval `(set! ,symbol ,value) (find-module 'stklos/preproc/env) default))
+    (eval `(set! ,symbol ,value) *md-env*))
 
   ;;;;
   ;;;; parse-metadata
