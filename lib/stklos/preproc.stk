@@ -130,7 +130,7 @@
 
   (define (document-value-set! symbol value)
     ;; FIXME: This is ugly, we should have a symbol-value-set! 
-    (eval `(set! ,symbol ,value) *md-env*))
+    (eval `(define ,symbol ,value) *md-env*))
 
   ;;;;
   ;;;; parse-metadata
