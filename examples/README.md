@@ -34,7 +34,11 @@ The files in this directory show some examples in STklos:
 
 - `draw-tree.stk` comes from Nils Holm implementation of the S9 Scheme
   implementation. It permits to draw the structure of a list as an ASCII
-  chart. 
+  chart.
+
+- `mop-unique-method.stk` defines a new class `<unique-method> which, when
+  added to a generic function, deletes the previous registered methods. This
+  permits to define type checked procedures. 
 
 - `socket-server.stk` is a simple TCP server. Running it displays the
   port to use for communicating with it. This server accepts only one
