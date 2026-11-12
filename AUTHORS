@@ -17,6 +17,9 @@
 - Lassi Kortela ([@lassik](https://github.com/lassik))
   Bug fixes, Ideas, SRFIs
 
+- Akinori Hattori ([@hattya]((https://github.com/hattya))
+  Bug fixes
+
 - Tom Niget ([@zdimension](https://github.com/zdimension))
   Bug fixes, Code refactoring
 
@@ -29,12 +32,17 @@
 - Ivan Maidanski ([@ivmai](https://github.com/ivmai))
   Bug fixes
 
-* Ben Taca ([@bentaca](https://github.com/bentaca))
+- Ben Taca ([@bentaca](https://github.com/bentaca))
   Documentation
 
-* Okuoku ([@okuoku](https://github.com/okuoku))
+- Okuoku ([@okuoku](https://github.com/okuoku))
   Bug fixes
 
+- Retropikzel ([@Retropikzel](https://github.com/Retropikzel))
+  FFI enhancement, Bug fixes
+
+- Artyom Bologov ([@aartaka](https://github.com/aartaka))
+  SRFIs implementation, ideas, pattern matching code
 
 <!-- Local Variables: -->
 <!-- mode: markdown -->
