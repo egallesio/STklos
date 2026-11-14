@@ -1,0 +1,119 @@
+;;;;
+;;;;
+;;;; mop-unique-generic.stk         -- MOP example: unique generics
+;;;;
+;;;; Copyright © 2026 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@stklos.net]
+;;;;    Creation date: 11-Nov-2026 17:45
+;;;;
+
+
+#|
+
+In this example, we want to define a new kind of generic function which can
+have only one method. So, adding a new method to the generic function will
+delete its previous method (if it exists).  This permits us to reuse the
+powerful method selection mechanism to check parameters as in the
+define-checked syntax of SRFI-273.
+
+We will see that we need to define a new kind of generic for that, and that
+the standard <generic> class is not adequate here.
+
+Suppose for instance that we define
+
+    (define-method log ([msg <string>] value)
+       (eprintf "*** ~A: ~W~%" msg value))
+
+Now let's try using log:
+
+    stklos> (log "Hello" 10)
+    *** Hello: 10           ;; Fine
+    stklos> (log 10 10)
+    1                       ;; not an error here
+
+The second call does not produce an error because, in STklos, when a method
+would overwrite an existing function, it will first add the old function as a
+fallback to the generic function. We can see this using describe:
+
+stklos> (describe log)
+log is a generic function. It's an instance of <generic>.
+Methods defined for log
+    Method #[<method> 7f578880aa80]
+        Specializers: (<string> <top>)
+    Method #[<method> 7f578880aab0]
+        Specializers: <top>
+
+We see here that the <generic> log has two methods associated. To circumvent
+this issue, we will define a new kind of generic called <unique-generic>. When
+a method is added to such a generic function, it will forget the old method
+associated to this generic function. Using the MOP (Meta Object Protocol) is
+quite easy, as we will see below |#
+
+;;; First define a new class <unique-generic>
+(define-class <unique-generic> (<generic>)
+  ())
+
+;;;; The MOP says that add-method will be called when a new method is
+;;;; defined. Parameters are the generic function and the new method.
+;;;; Define a new method for <unique-generic>
+;;;;
+(define-method add-method! ((gf <unique-generic>) (m <method>))
+  ;; Do the normal stuff (add the method to the class involved in the
+  ;; specializers of the method + other method and classes bookkeeping.
+  (next-method)
+  ;; Set the list of methods of this generic to a list containing only m
+  (slot-set! gf 'methods (list m)))
+
+
+;;;; OPTIONAL: This is needed to have better messages on errors
+;;;;
+;;;; Note that when the function is called with bad parameters
+;;;; we will have the message
+;;;;      no applicable method for #[<generic> log (1)]
+;;;;      in call (log bad usage)
+;;;; We can redefine this message to hide a bit the implementation
+;;;; details with a new method for no-applicable-method:
+(define-method no-applicable-method ((gf <unique-generic>) args)
+  (error 'not-applicable
+         "invalid call ~S\nType of accepted parameters: ~S"
+         (cons (generic-function-name gf) args)
+         (map* class-name
+               (method-specializers (car (generic-function-methods gf))))))
+
+;;;;
+;;;; Everything is ready. Here we go
+;;;;
+
+;;;; define log as a generic of class <unique-generic>
+(define-generic log <unique-generic>)
+
+(define-method log ([msg <string>] value)
+  (eprintf "*** ~A: ~W~%" msg value))
+
+;;;; ----------------------------------------------------------------------
+(define (main args)
+  ;; This call will succeed
+  (printf "A successful call\n")
+  (log "A test" 100)
+  ;; This one will not
+  (with-handler (lambda (c)
+                  (printf "A bad call. Message was:\n~A\n"
+                          (condition-message c)))
+                (log 'bad 'usage)))
