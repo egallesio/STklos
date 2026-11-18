@@ -73,7 +73,7 @@
 
 ;; 23-Nov-2006 (v 0.82)
 (define (stklos-pragma . args)
-  (error "Don't use anymore pragma, but compiler:warn-use-undef parameter"))
+  (error "Don't use anymore pragma, but compiler:warn-use-undefined parameter"))
 (define-reader-ctor 'pragma stklos-pragma)
 
 
