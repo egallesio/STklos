@@ -49,6 +49,10 @@
  */
 static SCM signals[NSIG];
 
+extern int _stklos_restart;    /* buffer used to writ to the pipe below */
+extern int restart_pipefd[2];  /* pipe for communicating the REPL (or parent) that we want
+                                  to be restarted. */
+
 
 /* ====================================================================== */
 struct codeset_code STk_signal_names[] = {
@@ -173,6 +177,16 @@ static void sig_cannot_be_trapped(int i)
                   "Exit.\n",
           (i == SIGFPE)? "FPE": "ILL");
   fflush(stderr);
+  if   (i == SIGFPE) {
+    fprintf(stderr,
+            "=========================================================\n"
+            "STklos is being restarted due to a floating point signal.\n"
+            "All variable bindings and parameters have been reset.\n"
+            "=========================================================\n");
+    fflush(stderr);
+    _stklos_restart = 1;
+    write(restart_pipefd[1], &_stklos_restart, sizeof(_stklos_restart));
+  }
   _exit(i);
 }
 
@@ -199,7 +213,6 @@ static void set_signal_handler(int sig, void(*proc)(int), int flag)
   sigact.sa_flags   = flag;
   sigaction(sig, &sigact, NULL);
 }
-
 
 DEFINE_PRIMITIVE("%default-signal-handler", dflt_sighdlr, subr1, (SCM sig))
 {
