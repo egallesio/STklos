@@ -1,0 +1,616 @@
+;;;;
+;;;; ascii-draw.stk  -- An object-oriented program to draw geometric
+;;;;                    shapes using ASCII characters
+;;;;
+;;;; Copyright © 2024 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 29-Aug-2024 20:55 (jpellegrini)
+
+
+;;; NOTES:
+;;; * This is an example of medium difficulty. It illustrates several
+;;;   object orientation concepts *as they are implemented in STklos*.
+;;; * The geometric shapes are not pretty. It's an example of a object
+;;;   oriented program, and the focus is not on doing ASCII prettyfication
+;;;   of the figures.
+
+;;; Concepts illustrated:
+;;;
+;;; 1. Class definition, #:accessor, #:init-keyword, #:init-form
+;;; 2. Class inheritance
+;;; 3. Generic methods, including the use of next-method inside
+;;;    initialize-instance
+;;; 4. Using *only* the class of an object to get different behavior
+;;;    (the initializers for <triangle> and <parallelogram> are mostly
+;;;    the same, but the objects will be drawn differently *because
+;;;    they are instances of different classes*)
+;;; 5. display-object and object-equal?
+;;; 6. One case in which syntax-rules would get much more complex than
+;;;    low-level macros
+;;; 7. Specific STklos procedures: 1+, 1-, key-get
+
+;;; CLOS is quite interesting in its way of defining how methods act on
+;;; objects. A method does not "belong" to an object. It actually "acts
+;;; on" an object, respecting what would be the intuitive expectation
+;;; of the programmer:
+;;; (define-method draw ((<polygon> p)) ;; draws the polygon p
+;;; (define-method draw ((<circle>  c)) ;; draws the circle c
+;;; So the method "draw" will dynamically dispatch, according to the
+;;; class of its argument. But it doesn't "belong" to a class.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; UTLITIES
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; unbracket will remove BOTH signs '<' and '>' around a string,
+;; or it won't do anything if the string isn't surrounded by those
+;; signs.
+;;
+;; (unbracket "<abc>")  => "abc"
+;; (unbracket "<abc")   => "<abc"
+;; (unbracket "abc")    => "abc"
+;; (unbracket "<<abc>") => "<abc"
+(define (unbracket str)
+  (let ((L (string-length str)))
+    (if (and (eq? (string-ref str 0) #\<)
+             (eq? (string-ref str (1- L)) #\>) (1- L) L)
+        (substring str 1 (1- L))
+        str)))
+
+;; bracket will add '<' and '>' around a string, ONLY if the string
+;; doesn't already have them on both sides.
+;;
+;; (bracket "abc")   => "<abc>"
+;; (bracket "<abc")  => "<<abc>"
+;; (bracket "<abc>") => "<abc>"
+(define (bracket str)
+  (let ((L (string-length str)))
+    (if (and (eq? (string-ref str 0) #\<)
+             (eq? (string-ref str (1- L)) #\>) (1- L) L)
+        str
+        (string-append "<" str ">"))))
+
+;; make-class-predicate semi-automates creating predicates for
+;; our defined classes. Example:
+;;
+;; (macro-expand '(make-class-predicate my-class))
+;;    => (define (my-class? obj-4) (is-a? obj-4 <my-class>))
+;;
+(define-macro (make-class-predicate class)
+  (unless (symbol? class) (error "bad symbol ~S" class))
+  (let* ((class-name (symbol->string class))
+         (unbracketed-class-str  (unbracket class-name))
+         (bracketed-class-str    (bracket   class-name))
+         (unbracketed-class-name (string->symbol unbracketed-class-str))
+         (bracketed-class-name   (string->symbol bracketed-class-str))
+         (obj (gensym "obj-"))
+         (pred-name (string->symbol
+                     (string-append unbracketed-class-str "?"))))
+    `(define (,pred-name ,obj) (is-a? ,obj ,bracketed-class-name))))
+
+
+(define (ansi-color? obj)
+  (symbol? obj))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; PIXEL
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <pixel> ()
+  ((color #:accessor color-of #:init-keyword #:color)
+   (value #:accessor value-of #:init-keyword #:value)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; CANVAS
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <canvas> ()
+  ((rows             #:accessor canvas-rows
+                     #:init-keyword #:rows
+                     #:init-form 0)                ; integer
+   (columns          #:accessor canvas-columns
+                     #:init-keyword #:columns
+                     #:init-form 0)                ; integer
+   (background-color #:accessor canvas-background
+                     #:init-keyword #:background
+                     #:init-form 'bg-black)        ; ansi-color
+   (pixels           #:init-form '())))            ; matrix (as lists)
+
+(make-class-predicate <canvas>)
+
+
+;; We do NOT define a "canvas-set!" method for <point>s, because:
+;; 1. We will define a draw method for <point> anyway, which will
+;;    call set-canvas!
+;; 2. This would make <point> conceptually different from other
+;;    drawables, and we don't need that
+;; 3. We cannot dynamically dispatch on <point> before the <point>
+;;    class has been defined.
+;; Instead, canvas-set! accepts r and c (two integers) and a color.
+(define-method canvas-set! ((v <canvas>)
+                            (r <integer>)
+                            (c <integer>)
+                            color
+                            (value <char>))
+
+  (when (not (or (eq? #f color)
+                 (ansi-color? color)))
+    (error "color must be either an ansi-color specifier or #f"))
+
+
+  (let ((pixel (if color
+                   (make <pixel> #:color color #:value value)
+                   (make <pixel> #:color color #:value #\space))))
+    (list-set! (list-ref (slot-value v 'pixels) r) c pixel)))
+
+
+;; -ref methods for getting pixels
+(define-method canvas-ref ((v <canvas>) (r <integer>) (c <integer>))
+  (unless (and (positive? (canvas-rows v))
+               (positive? (canvas-columns v)))
+    (error "cannot reference pixel on empty canvas"))
+  (list-ref (list-ref (slot-value v 'pixels) r) c))
+
+
+;; a method for resetting the canvas
+(define-method reset! ((v <canvas>))
+  (let ((background (canvas-background v)))
+    (dotimes (r (canvas-rows v))
+      (dotimes (c (canvas-columns v))
+        (canvas-set! v r c #f #\space)))))
+
+;; the initializer for <canvas>
+(define-method initialize-instance ((v <canvas>) args)
+  ;; We call (next-method) first in order to initialize the slots with
+  ;; their init-forms because we will use them:
+  (next-method)
+
+  ;; if the user passed rows and columns, we check if they're proper
+  (unless (and (integer? (canvas-rows v))
+               (not (negative? (canvas-rows v))))
+    (error "number of rows is not non-negative integer: ~S" (canvas-rows v)))
+  (unless (and (integer? (canvas-columns v))
+               (not (negative? (canvas-columns v))))
+    (error "number of columns is not non-negative integer: ~S" (canvas-columns v)))
+
+  (let ((background (canvas-background v)))
+    (unless (ansi-color? background)
+      (error "bad ansi-color specifier ~S" background))
+
+    ;; Create the  matrix
+    (let ((pixels (let loop-rows ((pixels ())
+                                  (rows (canvas-rows v)))
+                    (if (positive? rows)
+                        (loop-rows (cons (make-list (canvas-columns v)
+                                                    (make <pixel> #:color #f #:value #\space))
+                                         pixels)
+                                   (1- rows))
+                        pixels))))
+
+      (set! (slot-value v 'pixels) pixels))))
+
+
+;; When display is called on an object, the method display-object is
+;; used (see the STklos reference manual)
+(define-method display-object ((v <canvas>) (p <port>))
+  (unless (textual-port? p) (error "non-textual port ~S" p))
+  (dotimes (r (canvas-rows v))
+    (dotimes (c (canvas-columns v))
+      (let ((pixel (canvas-ref v r c)))
+        (let ((color (color-of pixel))
+              (value (value-of pixel)))
+          (display (ansi-color (canvas-background v)
+                               (if color color "")
+                               (string value)
+                               'normal)
+               p))))
+    (newline p)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; DRAWABLE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <drawable> ()
+  ((color #:accessor color-of
+          #:init-keyword #:color
+          #:init-form 'white)))
+
+(make-class-predicate <drawable>)
+
+(define-method initialize-instance ((d <drawable>) args)
+  ;; <drawable> is not supposed to be initialized directly. Only its
+  ;; subclasses should have instances, so we check here if class-of
+  ;; d is <drawable>.
+  (when (eq? (class-of d)
+             (find-class <drawable>))
+    (error "cannot directly instantiate <drawable>"))
+
+  ;; check if color is really a color, but only if it was
+  ;; given as argument.
+  (let ((c (key-get args #:color #f)))
+    (when c
+      (unless (ansi-color? c)
+        (error "bad ANSI color specifier ~s" c))))
+  (next-method))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; POINT
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <point> (<drawable>)
+  ((x #:accessor point-x #:init-keyword #:x)
+   (y #:accessor point-y #:init-keyword #:y)))
+
+(make-class-predicate <point>)
+
+(define-method initialize-instance ((p <point>) args)
+  (let ((x (key-get args #:x))
+        (y (key-get args #:y)))
+    (unless (and (integer? x)
+                 (integer? y))
+      (error "point coordinates must be integer")))
+  (next-method))
+
+(define-method draw ((v <canvas>)
+                     (p <point>))
+  (canvas-set! v (point-x p) (point-y p) (color-of p) #\*))
+
+(define-method write-object ((p <point>) (port <port>))
+  (display "#[<point> x=" port)
+  (display (point-x p) port)
+  (display " y=" port)
+  (display (point-y p) port)
+  (display "]" port))
+
+;; When equal? is called on two points, this method will be called.
+;; (See the STklos reference manual)
+(define-method object-equal? ( (p <point>) (q <point>) )
+  (and (eq? (color-of p) (color-of q))
+       (= (point-x p) (point-x q))
+       (= (point-y p) (point-y q))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; CIRCLE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <circle> (<drawable>)
+  ((center #:init-keyword #:center #:accessor circle-center)   ; <point>
+   (radius #:init-keyword #:radius #:accessor circle-radius))) ; integer
+
+(make-class-predicate <circle>)
+
+(define-method initialize-instance ((c <circle>) args)
+  (unless (point? (key-get args #:center))
+    (error "circle center must be a point"))
+  (when (not (integer? (key-get args #:radius)))
+    (error "circle radius must be an integer"))
+  (when (not (positive? (key-get args #:radius)))
+    (error "circle cannot have non-positive radius"))
+  (next-method))
+
+;; When equal? is called on two points, this method will be called.
+;; (See the STklos reference manual)
+(define-method object-equal? ( (p <circle>) (q <circle>) )
+  ;; - color is either symbol of #f, so we can use eq?
+  ;; - radius is a number, we use =
+  ;; - center is a point, so we use equal? (because we defined object-equal?
+  ;;   for points!)
+  (and (eq? (color-of p) (color-of q))
+       (= (circle-radius p) (circle-radius q))
+       (equal? (circle-center p) (circle-center q))))
+
+
+(define-method draw ((v <canvas>) (c <circle>))
+  (let ((radius (circle-radius c))
+        (center (circle-center c))
+        (pi 3.14159265358979)
+        (angle-step 0.1))
+    (let loop (( angle 0 ))
+      ;; Let's be "smart". We use make-polar, then turn the complex
+      ;; number into rectangular form. And we go from 0 to pi, but
+      ;; mirroring (y) with (-y).
+      (let ((polar (make-polar radius angle)))
+        (let ((p (make <point>
+                   #:x (+ (point-x center)
+                          (exact (round (real-part polar))))
+                   #:y (+ (point-y center)
+                          (exact (round (imag-part polar))))
+                   #:color (color-of c)))
+             (q (make <point>
+                  #:x (+ (point-x center)
+                         (exact (round (real-part polar))))
+                  #:y (- (point-y center)
+                         (exact (round (imag-part polar))))
+                  #:color (color-of c))))
+          (draw v p)
+          (draw v q))
+        (when (< angle pi)
+          (loop (+ angle angle-step)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; POLYGON
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <polygon> (<drawable>)
+  ((points #:init-keyword #:points #:accessor points))) ; list of <point>
+
+(make-class-predicate <polygon>)
+
+
+(define-method initialize-instance ((p <polygon>) args)
+  (unless (every point? (key-get args #:points))
+    (print (key-get args #:points))
+    (error "only points allowed as arguments when creating a polygon"))
+  (next-method))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; SEGMENT
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <segment> (<polygon>) ())
+
+(make-class-predicate <segment>)
+
+(define-method initialize-instance ((s <segment>) args)
+  (next-method) ; first check if all points are really points :)
+  (let ((points (key-get args #:points)))
+    (unless (= (length (key-get args #:points)) 2)
+      (error "exactly two points needed for a segment"))
+    (when (equal? (car points) (cadr points))
+      (error "two identical points are not allowed when creating a segment"))))
+
+(define-method draw ((v <canvas>) (s <segment>))
+  (let ((pts (points s)))
+    (let ((x1 (point-x (car  pts)))
+          (y1 (point-y (car  pts)))
+          (x2 (point-x (cadr pts)))
+          (y2 (point-y (cadr pts))))
+      (let* ((delta-y (- y2 y1))
+             (delta-x (- x2 x1))
+             (sign-delta-x (/ delta-x (abs delta-x)))
+             (sign-delta-y (/ delta-y (abs delta-y))))
+        (let ((loop-length (max (abs delta-x) (abs delta-y))))
+          ;; if x displacement larger than y displacement
+          ;; we run through x. If not, we run through y
+          (let ((x-step (* sign-delta-x (min 1 (abs (/ (inexact delta-x) delta-y)))))
+                (y-step (* sign-delta-y (min 1 (abs (/ (inexact delta-y) delta-x))))))
+            (let loop ((i 0)
+                       (x-cursor x1)
+                       (y-cursor y1))
+              (canvas-set! v
+                           (exact (round x-cursor))
+                           (exact (round y-cursor))
+                           (color-of s)
+                           #\*)
+              (when (< i loop-length)
+                (loop (1+ i)
+                    (+ x-cursor x-step)
+                    (+ y-cursor y-step))))))))))
+
+(define-method draw ((v <canvas>) (p <polygon>))
+  (let ((points (points p)))
+    (if (< (length points) 2)
+        (draw v (car points)) ; should not happen
+        (let loop ((pts points))
+          (draw v (make <segment>
+                    #:points (list (car pts) (cadr pts))
+                    #:color (color-of p)))
+          (if (> (length  pts) 2)
+              (loop (cdr pts))
+              (draw v (make <segment>
+                            #:points (list (car points)
+                                           (cadr pts))
+                            #:color (color-of p))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; TRIANGLE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <triangle> (<polygon>) ())
+
+(make-class-predicate <triangle>)
+
+(define-method valid-triangle? ((p1 <point>)
+                                (p2 <point>)
+                                (p3 <point>))
+  (let ((x1 (point-x p1))
+        (y1 (point-y p1))
+        (x2 (point-x p2))
+        (y2 (point-y p2))
+        (x3 (point-x p3))
+        (y3 (point-y p3)))
+    (not (zero? (- (* (- x2 x1) (- y3 y1))
+                   (* (- y2 y1) (- x3 x1)))))))
+
+(define-method initialize-instance ((t <triangle>) args)
+  (next-method) ; first check if all points are really points :)
+  (let ((points (key-get args #:points)))
+    (unless (= (length points) 3)
+      (error "exactly three points needed for a triangle"))
+    (unless (valid-triangle? (car points)
+                             (cadr points)
+                             (caddr points))
+      (error "given points do not form a triangle"))))
+
+;; We don't need a draw method for triangles, since the one for
+;; polygons works for triangles!
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; PARALLELOGRAM
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class <parallelogram> (<polygon>) ())
+
+(make-class-predicate <parallelogram>)
+
+(define-method initialize-instance ((r <parallelogram>) args)
+  (next-method) ; first check if all points are really points :)
+  (let ((pts (key-get args #:points)))
+    (unless (= (length pts) 3)
+      (error "exactly three points needed for a parallelogram"))
+    (unless (valid-triangle? (car pts)
+                             (cadr pts)
+                             (caddr pts))
+      (error "collinear points are not allowed when creating a parallelogram"))))
+
+;; We DO need a draw method for parallelograms! If we draw them as
+;; polygons, we'll end up drawing a segment.
+
+(define-method draw ((v <canvas>) (r <parallelogram>))
+  (let ((pts (points r)))
+    ;; compute the delta-x and delta-y between the first two points
+    (let ((delta-x (- (point-x (cadr pts))
+                      (point-x (car pts))))
+          (delta-y (- (point-y (cadr pts))
+                      (point-y (car pts)))))
+      ;; remove them from the *third* point, and we have the fourth:
+      (let ((new-x (- (point-x (caddr pts)) delta-x))
+            (new-y (- (point-y (caddr pts)) delta-y)))
+        (let ((p (make <point> :x new-x :y new-y)))
+          (draw v (make <polygon>
+                    #:points (cons p pts)
+                    #:color (color-of r))))))))
+
+
+#|
+Try this:
+
+(define v (make <canvas> #:rows 20 #:columns 40))
+(define p (make <point>  #:x 10 #:y 25))
+(define i (make <circle> #:center p #:radius 8 #:color 'red))
+
+(define q (make <point>  #:x 5  #:y 8))
+(define r (make <point>  #:x 10  #:y 7))
+(define s (make <point>  #:x 7  #:y 4))
+(define a (make <parallelogram> #:points (list q r s) #:color 'blue))
+
+(draw v i)
+(display v)
+(draw v a)
+(display v)
+
+(reset! v)
+(display v)
+
+(define g (make <polygon> #:points (list q s r p) #:color 'blue))
+(draw v g)
+(display v)
+
+(set! (canvas-background v) 'white)
+(display v)
+|#
+
+;; Interesting exercises (these are only suggestions):
+;;
+;;  0. Make the <canvas> class require the numbers of rows and columns
+;;     (without default values). If the user doesn't pass the numbers,
+;;     an error is signaled (so we won't ever have an empty canvas, since
+;;     we can require the numbers to be positive).
+;;  1. Implement object-equal? for all classes
+;;  2. What if we want to render a canvas in a monocrhromatic screen? Make
+;;     a method for that.
+;;  3. Create two classes, <open-polygon> and <closed-polygon>, both
+;;     having <polygon> as superclass. Only implement "draw" for them,
+;;     not for <polygon>
+;;  4. Make the draw method refuse to draw a shape when it would
+;;     overwrite part of another shape
+;;  5. Make the draw method ONLY refuse to draw a shape when it would
+;;     overwrite part of another shape if they have the same color
+;;  6. Create a method to merge two <canvas>es, but the method should
+;;     refuse to merge using criterion (2) or (3)
+;;  7. Implement <rectangle> and <square>
+;;  8. Can you enhance the circle drawing algorithm? Small circumferences
+;;     are ugly.
+;;  9. Implement <ellipsis> (will be ugly on small canvases)
+;; 10. Explain in details how the draw method works for segments
+;; 11. Factor the code: chack for duplicate points in the list of
+;;     points given to polygon, not in the initializer of <segment>
+;;     or <parallelogram>
+;; 12. Create "perimeter" and "area" methods for <circle>, <triangle>
+;;     and <parallelogram>.
+;;     - For <segment>s, the area is obviously zero, and the "perimeter"
+;;       is the length (implement "length" and "perimeter" as synonyms)
+;;     - For a general <closed-polygon>, computing the area may be a bit
+;;       harder (remember that a set of points, as we implemented, can
+;;       describe a NON-convex polygon
+;;     - For <open-polygon>s the concept of area is meaningless.
+;; 15. How would you implement filled closed polygons?
+;; 16. We could have implemented <parallelogram> as
+;;     - a set of *four* points, so we could use the same draw method
+;;       for polygons
+;;     - a set of *three* points (because the fourth can be computed) -
+;;       this is what we did
+;;     But in any case, we'd need to check wether the given points
+;;     really do form a parallelogram. Try to implement the other approach,
+;;     using a single generig method. You will notice that the method
+;;     CANNOT automatically distinguish the cases (because it will receive
+;;     a list of points in all cases), and you need to do the dispatch
+;;     yourself, using the list length.
+;; 17. Write methods for each drawable that will return a parallelogram, which
+;;     happens to be a rectangle that is the region of the canvas that the object
+;;     needs to be drawn. For example, for a <circle> with center (10,15) and
+;;     radius 3 the method would return the rectangle that goes from (7,12)
+;;     (top left corner) to (13,18) (down right corner). This rectangle always
+;;     has sides parallel with the axes, as it will be used to decide wether one
+;;     can shrink the canvas.
+;; 18. Write a canvas-reshape method that will change the number of rows
+;;     and columns (and hence the shape) of a <canvas> object.
+;;     - first make the method just change the size and fill in the extra
+;;       space (if any) with the background
+;;     - then, make the method refuse to shrink the canvas if it would
+;;       remove part of a geometric shape in that canvas
+;;     Use the methods developed in (17)
+;; 19. Add timestamps, or even a history log to canvases and compositions:
+;;     - creation date
+;;     - modification dates
+;;     - maybe a history of changes
+;;     Perhaps a new class would make sense?
+;; 20. Now that you have a history of actions on each canvas, can you
+;;     implement undo?
+;; 21. What about an undo *tree*?
+;; 22. Are you still keeping the pixels in the canvas, or just a list of
+;;     draw actions that were sent to the canvas, so it can lazily draw them
+;;     on demand?
+;; 23. angle-step in the draw method for circles is hardcoded. Could you perhaps
+;;     find a way to compute the optimal value?
