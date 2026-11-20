@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; mop-unique-generic.stk         -- MOP example: unique generics
+;;;; meth2.stk         --
 ;;;;
 ;;;; Copyright © 2026 Erick Gallesio <eg@stklos.net>
 ;;;;
@@ -21,106 +21,79 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
-;;;;    Creation date: 11-Nov-2026 17:45
+;;;;    Creation date: 16-Nov-2026 17:22
+;;;; Last file update: 20-Nov-2026 13:13 (eg)
 ;;;;
-
 
 #|
 
-In this example, we want to define a new kind of generic function which can
-have only one method. So, adding a new method to the generic function will
-delete its previous method (if it exists).  This permits us to reuse the
-powerful method selection mechanism to check parameters as in the
-define-checked syntax of SRFI-273.
+SEE BEFORE mop-unique-generic.stk
 
-We will see that we need to define a new kind of generic for that, and that
-the standard <generic> class is not adequate here.
 
-Suppose for instance that we define
+As with mop-unique-generic, we want to have generic functions with only one method.
+However, as we have seen, <unique-generic>s are not very efficient, even when tuning
+the call to generic functions using the MOP. The main reason of this inefficiency is
+that subclasses of <generic> plainly use the MOP (written in Scheme), whereas
+<generic>s use code written in C.
 
-    (define-method log ([msg <string>] value)
-       (eprintf "*** ~A: ~W~%" msg value))
+Hence, the idea here consists to use <generic> and a new class <unique-method>
+which, when added to a generic function will delete all its previously
+existing methods.
+|#
 
-Now let's try using log:
-
-    stklos> (log "Hello" 10)
-    *** Hello: 10           ;; Fine
-    stklos> (log 10 10)
-    1                       ;; not an error here
-
-The second call does not produce an error because, in STklos, when a method
-would overwrite an existing function, it will first add the old function as a
-fallback to the generic function. We can see this using describe:
-
-stklos> (describe log)
-log is a generic function. It's an instance of <generic>.
-Methods defined for log
-    Method #[<method> 7f578880aa80]
-        Specializers: (<string> <top>)
-    Method #[<method> 7f578880aab0]
-        Specializers: <top>
-
-We see here that the <generic> log has two methods associated. To circumvent
-this issue, we will define a new kind of generic called <unique-generic>. When
-a method is added to such a generic function, it will forget the old method
-associated to this generic function. Using the MOP (Meta Object Protocol) is
-quite easy, as we will see below |#
-
-;;; First define a new class <unique-generic>
-(define-class <unique-generic> (<generic>)
+;;; First define a new class <unique-method>
+(define-class <unique-method> (<method>)
   ())
 
 ;;;; The MOP says that add-method will be called when a new method is
-;;;; defined. Parameters are the generic function and the new method.
-;;;; Define a new method for <unique-generic>
+;;;; desfined. Parameters are the geneic function and the new method.
+;;;; Define a new method for <unique-method>s
 ;;;;
-(define-method add-method! ((gf <unique-generic>) (m <method>))
-  ;; Do the normal stuff (add the method to the class involved in the
-  ;; specializers of the method + other method and classes bookkeeping.
-  (next-method)
+(define-method add-method! ((gf <generic>) (m <unique-method>))
+  ;; Classes know the methods where they appears in their specialiers. So
+  ;; before deleting the methods from the gf, we will delete them from the
+  ;; classes using m.
+  (%debug "==> ~S ~S" add-method-in-classes! (generic-function-methods gf))
+  (for-each remove-method-in-classes! (generic-function-methods gf))
+  ;; Add this method in classes
+  (add-method-in-classes! m)
+  (%debug "DONE")
   ;; Set the list of methods of this generic to a list containing only m
-  (slot-set! gf 'methods (list m)))
+  (slot-set! gf 'methods (list m))
+  m)
 
-
-#|
-
-NOTE: `<unique-generic>`s are really slow, as you can see below:
-
-    (define-generic foo <unique-generic>)
-    (define-method foo ((a <string>)) 'string)
-
-    (define (foo-proc a)
-      (unless (string? a) (error "bad string ~a" a))
-      'string)
-
-    stklos> (time (repeat 1_000_000 (foo "a")))
-    ;    Elapsed time: 1991.179 ms
-    ;    Allocations: 1032000000 bytes in 29000000 allocation calls (GC: 519)
-    stklos> (time (repeat 1_000_000 (foo-proc "a")))
-    ;    Elapsed time: 64.62 ms
-    ;    Allocations: 0 bytes in 0 allocation calls (GC: 0)
-
-It is slow since it allocates a lot (29 allocations by call!). However, since
-we have a MOP, we can perhaps enhance things a bit by writing a new `apply-generic`
-knowing that there is only one method, at most, for a `<unique-generic>`
-|#
-
-(define-method apply-generic ((gf <unique-generic>) args)
-  (let ((methods (apply find-method gf args)))
-    (if methods
-        (apply (method-procedure (car (generic-function-methods gf)))
-               args)
-        (no-applicable-method gf args))))
-
-;;;; Testing now:
-;;;;    stklos> (time (repeat 1_000_000 (foo "a")))
-;;;;    ;    Elapsed time: 441.734 ms
-;;;;    ;    Allocations: 152000000 bytes in 5000000 allocation calls (GC: 78)
+;;;;
+;;;; We can now define the syntax define-unique-method for defining a
+;;;; <unique-method>, by copying the code of define-method and ensuring that
+;;;; the method class is <unique-method>.
+;;;; BEWARE: don't use standard define-method after using
+;;;; define-unique-method, or you'll have a mix of <method> and
+;;;; <unique-method> for the generic.
+(define-macro (define-unique-method name args . body)
+  `(begin
+     (ensure-generic-function ',name)
+     (add-method! ,name ,(ensure-method name args body  '<unique-method>))
+     (values (void) ',name)))
 
 #|
-That's better (only 5 allocations per call), but no so fast. The class
-<unique-method> defined in the file mop-unique-method.stk permits to have
-better performance.
+Let's see performance now:
+
+(define-unique-method foo ((a <string>)) ' string)
+
+(define (foo-proc a)
+  (unless (string? a) (error "bad string ~A" a))
+'string)
+
+
+stklos> (time (repeat 1_000_000 (foo "a")))
+;    Elapsed time: 150.504 ms
+;    Allocations: 72000000 bytes in 2000000 allocation calls (GC: 38)
+stklos> (time (repeat 1_000_000 (foo-proc "a")))
+;    Elapsed time: 70.178 ms
+;    Allocations: 0 bytes in 0 allocation calls (GC: 0)
+
+That's better than what we had with <unique-generic>s: we have only two allocations
+by call (instead of 4) and we are only two time slower.
 |#
 
 ;;;;
@@ -128,13 +101,13 @@ better performance.
 ;;;;
 
 ;;;; define log as a generic of class <unique-generic>
-(define-generic log <unique-generic>)
-
-(define-method log ([msg <string>] value)
+(define-unique-method log ([msg <string>] value) 
   (eprintf "*** ~A: ~W~%" msg value))
+
 
 ;;;; ----------------------------------------------------------------------
 (define (main args)
+  (printf "Using <unique-method>\n")
   ;; This call will succeed
   (printf "A successful call\n")
   (log "A test" 100)

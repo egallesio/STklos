@@ -82,20 +82,49 @@ quite easy, as we will see below |#
   (slot-set! gf 'methods (list m)))
 
 
-;;;; OPTIONAL: This is needed to have better messages on errors
-;;;;
-;;;; Note that when the function is called with bad parameters
-;;;; we will have the message
-;;;;      no applicable method for #[<generic> log (1)]
-;;;;      in call (log bad usage)
-;;;; We can redefine this message to hide a bit the implementation
-;;;; details with a new method for no-applicable-method:
-(define-method no-applicable-method ((gf <unique-generic>) args)
-  (error 'not-applicable
-         "invalid call ~S\nType of accepted parameters: ~S"
-         (cons (generic-function-name gf) args)
-         (map* class-name
-               (method-specializers (car (generic-function-methods gf))))))
+#|
+
+NOTE: <unique-generic>s are really slow, as you can see below:
+
+    (define-generic foo <unique-generic>)
+    (define-method foo ((a <string>)) 'string)
+
+    (define (foo-proc a)
+      (unless (string? a) (error "bad string ~a" a))
+      'string)
+
+    stklos> (time (repeat 1_000_000 (foo "a")))
+    ;    Elapsed time: 1991.179 ms
+    ;    Allocations: 1032000000 bytes in 29000000 allocation calls (GC: 519)
+    stklos> (time (repeat 1_000_000 (foo-proc "a")))
+    ;    Elapsed time: 64.62 ms
+    ;    Allocations: 0 bytes in 0 allocation calls (GC: 0)
+
+
+It is slow since it allocates a lot (29 allocations by call!). However, since
+we have a MOP, we can perhaps enhance things a bit by writing a new
+`apply-generic` knowing that there is only one method, at most, for a
+`<unique-generic>`
+|#
+
+(define-method apply-generic ((gf <unique-generic>) args)
+  (let ((methods (apply find-method gf args)))
+    (if methods
+        (apply (method-procedure (car (generic-function-methods gf)))
+               args)
+        (no-applicable-method gf args))))
+
+;;;; Testing now:
+;;;;    stklos> (time (repeat 1_000_000 (foo "a")))
+;;;;    ;    Elapsed time: 441.734 ms
+;;;;    ;    Allocations: 152000000 bytes in 5000000 allocation calls (GC: 78)
+
+#|
+That's better (only 5 allocations per call), but no so fast.
+
+NOTE: The class <unique-method> defined in the file mop-unique-method.stk
+permits to have better performance.
+|#
 
 ;;;;
 ;;;; Everything is ready. Here we go
@@ -109,6 +138,7 @@ quite easy, as we will see below |#
 
 ;;;; ----------------------------------------------------------------------
 (define (main args)
+  (printf "Using <unique-generic>\n")
   ;; This call will succeed
   (printf "A successful call\n")
   (log "A test" 100)
