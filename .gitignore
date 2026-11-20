@@ -74,6 +74,9 @@ examples/fork-test
 examples/hello
 examples/secho
 examples/threads
+examples/draw-tree
+examples/mop-unique-generic
+examples/mop-unique-method
 
 # FFI directory
 ffi/.libs/libffi.lai
