@@ -36,9 +36,17 @@ The files in this directory show some examples in STklos:
   implementation. It permits to draw the structure of a list as an ASCII
   chart.
 
-- `mop-unique-method.stk` defines a new class `<unique-method> which, when
+- `mop-unique-generic.stk` defines a new class `<unique-generic>` which
+  defines a generic function which can have only one method associated. This
+  permits to define type checked procedures. The `<unique-generic>`s are not
+  to efficient and the `<unique-method>s` defined in the file
+  `mop-unique-method.stk` are bit faster. 
+
+- `mop-unique-method.stk` defines a new class `<unique-method>` which, when
   added to a generic function, deletes the previous registered methods. This
-  permits to define type checked procedures. 
+  permits to define type checked procedures.  The `<unique-method>`s are 
+  more efficient than the `<unique-generic>`s defined in the file
+  `mop-unique-generic.stk` are bit faster.
 
 - `socket-server.stk` is a simple TCP server. Running it displays the
   port to use for communicating with it. This server accepts only one
