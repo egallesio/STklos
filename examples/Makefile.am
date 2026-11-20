@@ -21,14 +21,16 @@
 #    Creation date: ???y
 
 schemedemodir       = $(prefix)/share/@PACKAGE@/@VERSION@/Demos.d
-schemedemo_DATA     = dice.stk draw-tree.stk \
-                      fork-test.stk hello.stk mop-unique-generic.stk secho.stk \
+schemedemo_DATA     = dice.stk draw-tree.stk fork-test.stk hello.stk \
+                      mop-unique-generic.stk  mop-unique-method.stk \
+                      mop-unique-method.stk secho.stk \
                       socket-server.stk socket-client.stk \
                       socket-server-fork.stk socket-server-thread.stk \
                       threads.stk
 
-schemedemo_SCRIPTS  = dice draw-tree fork-test hello mop-unique-generic secho \
-                      socket-server socket-client \
+schemedemo_SCRIPTS  = dice draw-tree fork-test hello \
+                      mop-unique-generic mop-unique-method \
+                      mop-unique-method secho socket-server socket-client \
                       socket-server-fork socket-server-thread \
                       threads
 

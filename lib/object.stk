@@ -39,7 +39,7 @@
     ensure-metaclass ensure-metaclass-with-supers
     ensure-class
     ensure-generic-function
-    ensure-method add-method!
+    ensure-method add-method! add-method-in-classes! remove-method-in-classes!
     object-eqv? object-equal?
     write-object display-object
     slot-unbound slot-missing
