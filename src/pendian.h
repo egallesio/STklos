@@ -52,7 +52,11 @@
 
 #	include <sys/endian.h>
 
-#elif defined(__NetBSD__) || defined(__DragonFly__) // FreeBSD deleted here by eg on 12 Feb 2023
+#elif defined(__NetBSD__) // In NetBSD we cannot redefine beNNtoh, leNNtoh.
+
+#	include <sys/endian.h>
+
+#elif defined(__DragonFly__) // FreeBSD deleted here by eg on 12 Feb 2023
 
 #	include <sys/endian.h>
 
