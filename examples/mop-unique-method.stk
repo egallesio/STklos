@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; meth2.stk         --
+;;;; mop-unique-method.stk --  -- MOP example: unique methods
 ;;;;
 ;;;; Copyright © 2026 Erick Gallesio <eg@stklos.net>
 ;;;;
@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 16-Nov-2026 17:22
-;;;; Last file update: 20-Nov-2026 13:13 (eg)
 ;;;;
 
 #|
@@ -46,7 +45,7 @@ existing methods.
   ())
 
 ;;;; The MOP says that add-method will be called when a new method is
-;;;; desfined. Parameters are the geneic function and the new method.
+;;;; defined. Parameters are the generic function and the new method.
 ;;;; Define a new method for <unique-method>s
 ;;;;
 (define-method add-method! ((gf <generic>) (m <unique-method>))
