@@ -162,6 +162,7 @@ SRC_STK   = 0.stk   \
             261.stk \
             264.stk \
             267.stk \
+            270.stk \
             273.stk \
             274.stk \
             277.stk
@@ -295,6 +296,7 @@ SRC_OSTK =  0.ostk   \
             261.ostk \
             264.ostk \
             267.ostk \
+            270.ostk \
             273.ostk \
             274.ostk \
             277.ostk

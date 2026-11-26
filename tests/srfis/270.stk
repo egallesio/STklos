@@ -1,0 +1,132 @@
+
+(define epsilon 0.0001)
+
+(define (approx target value)
+  (cond ((or (not (real? target))
+             (not (real? value)))
+         (let ((result (list (approx (real-part target)
+                                     (real-part value))
+                             (approx (imag-part target)
+                                     (imag-part value)))))
+           (if (equal? result '(within within))
+               'within
+               result)))
+        ((< value (- target epsilon))
+         'below)
+        ((> value (+ target epsilon))
+         'above)
+        (else 'within)))
+
+
+;; Tests given as examples in the SRFI text:
+
+(test "srfi-270" 4608.0       #x9p9)
+(test "srfi-270" 9.0          #x1.2p3)
+(test "srfi-270" 509.9921875  #xFE.FFp1)
+(test "srfi-270" 254.99609375 #xFE.FF)
+(test "srfi-270" -.15625      #x-0.Ap-2)
+(test "srfi-270" 3.125+32.0i  #x1.9p1+10p1i)
+(test "srfi-270"
+      'within
+      (approx 3.141592653589793115997963468544185161590576171875
+              #x1.921fb54442d18p+1))
+
+;; These two we skip, because they use the "p" anmd "d" markers in the
+;; exponent. Gauche also doesn't accept them, and they are not normative.
+;;
+;;(test "srfi-270" #x1.921fb54442d18pd+1)
+;;(test "srfi-270" #x1.921fb54442d18pf+1)
+
+(test "srfi-270"
+      'within
+      (approx 12.5394313737456+29.4408332222973i
+              #x1p5@1p6))
+
+;; Tests from the git repository of the sample implementation:
+
+(test "srfi-270" 9                    (string->number "#e#x1.2p3"))
+(test "srfi-270" 4608                 (string->number "#e#x9p9"))
+(test "srfi-270" 65279/128            (string->number "#e#xFE.FFp1"))
+(test "srfi-270" -5/32                (string->number "#e#x-0.Ap-2"))
+(test "srfi-270" 25/8+32i             (string->number "#e#x1.9p1+10p1i"))
+(test "srfi-270" 3.141592653589793116 (string->number "#x1.921fb54442d18p+1"))
+(test "srfi-270" 65279/256            (string->number "#e#xFE.FF"))
+(test "srfi-270" 32@130799/1024       (string->number "#x1p5@1.FEEFp6"))
+(test "srfi-270" +63/2i               (string->number "#e#x+3.Fp3i"))
+(test "srfi-270" 63/2+i               (string->number "#e#x3.Fp3+i"))
+
+(test "srfi-270" 9                    #e#x1.2p3)
+(test "srfi-270" 4608                 #e#x9p9)
+(test "srfi-270" 65279/128            #e#xFE.FFp1)
+(test "srfi-270" -5/32                #e#x-0.Ap-2)
+(test "srfi-270" 25/8+32i             #e#x1.9p1+10p1i)
+(test "srfi-270" 3.141592653589793116 #x1.921fb54442d18p+1)
+(test "srfi-270" 65279/256            #e#xFE.FF)
+(test "srfi-270" 32@130799/1024       #x1p5@1.FEEFp6)
+(test "srfi-270" +63/2i               #e#x+3.Fp3i)
+(test "srfi-270" 63/2+i               #e#x3.Fp3+i)
+
+;; STklos extra tests
+
+(test "srfi-270" "+nan.0" (number->string +nan.0 16))
+(test "srfi-270" "+nan.0" (number->string -nan.0 16)) ; -nan.0 reads as +NaN!
+(test "srfi-270" "+inf.0" (number->string +inf.0 16))
+(test "srfi-270" "-inf.0" (number->string -inf.0 16))
+(test "srfi-270" "0p0"   (number->string +0.0 16))
+(test "srfi-270" "-0p0"   (number->string -0.0 16))
+
+;; The constant below is larger than 2^1000, so should resuilt in
+;; inf. We check the sign of the infinity here.
+(test "srfi-270"
+      "+inf.0"
+      (number->string  #xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.))
+(test "srfi-270"
+      "-inf.0"
+      (number->string #x-ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.))
+
+
+(define (hexfloat-twoway-conversion x)
+  (string->number (number->string x)))
+
+(let ((nums (list +nan.0 -nan.0
+                  +inf.0 -inf.0
+                  +0.0   -0.0
+                  5e10
+                  5e-10
+                  #i1/2
+                  0.000000001
+                  16.
+                  -10.0
+                  1/2-3.0i
+                  -0.0+0.0i
+                  -0.0@1/2
+                  -.222-.555i)))
+  (test "srfi-270"
+        nums
+        (map hexfloat-twoway-conversion nums)))
+
+
+(define (first-digit-of-hexfloat x)
+  (if (or (not (finite? x)) (nan? x))
+      #f
+      (let ((str (with-output-to-string
+                   (lambda () (write-hexadecimal-float x)))))
+        (let ((pos (regexp-match-positions "[[:xdigit:]]" str)))
+          (if pos
+              (string-ref str (caar pos))
+              #f)))))
+
+(let ((nums (list +0.0   -0.0
+                  5e10
+                  5e-10
+                  #i1/2
+                  0.000000001
+                  16.
+                  -10.0
+                  1/2-3.0i
+                  -0.0+0.0i
+                  -.222-.555i)))
+  (test "srfi-270"
+        ;; for subnormals 0; for normals 1.
+        '(#\0 #\0 #\1 #\1 #\1 #\1 #\1 #\1 #\1 #\0 #\1 )
+        (map first-digit-of-hexfloat nums)))

@@ -151,6 +151,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-261: Portable SRFI Library Reference
     - SRFI-264: String Syntax for Scheme Regular Expressions
     - SRFI-267: Raw String Syntax
+    - SRFI-270: Hexadecimal Floating-Point Constants
     - SRFI-273: Extensions to Data (Type-)Checking
     - SRFI-274: Extended List Conversion Procedures
     - SRFI-277: Cyclic ports
