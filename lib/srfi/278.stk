@@ -1,0 +1,180 @@
+;;;;
+;;;;
+;;;; 278.stk         -- SRFI 278 Supplemental Numerics
+;;;;
+;;;; Copyright © 2026 Jerônimo Pellegrini
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by Peter McGoron (2026) and it is copyrighted as:
+;;;;
+;;;; © 2026 Peter McGoron.
+;;;;
+;;;; Permission is hereby granted, free of charge, to any person
+;;;; obtaining a copy of this software and associated documentation
+;;;; files (the "Software"), to deal in the Software without
+;;;; restriction, including without limitation the rights to use,
+;;;; copy, modify, merge, publish, distribute, sublicense, and/or sell
+;;;; copies of the Software, and to permit persons to whom the
+;;;; Software is furnished to do so, subject to the following
+;;;; conditions:
+;;;;
+;;;; The above copyright notice and this permission notice (including
+;;;; the next paragraph) shall be included in all copies or
+;;;; substantial portions of the Software.
+;;;;
+;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jerônimo Pellegrni [j_p@aleph0.info]
+;;;;    Creation date: 21-Oct-2026 11:04
+;;;;
+
+(select-module srfi/278)
+
+(import (only SCHEME
+              real? integer?
+              exact-integer-log
+              sinh cosh tanh
+              asinh acosh atanh))
+
+(import (prefix (only SCHEME nan?) r7rs:))
+
+(export real? integer? exact-integer? nan?
+        exact-integer-log
+        sinh cosh tanh
+        asinh acosh atanh)
+
+(export nonnegative?
+        nonpositive?
+        nonzero?
+        exact-integer-nth-root
+        rationalize)
+
+(define (nonnegative? x) (>= x 0))
+(define (nonpositive? x) (<= x 0))
+(define (nonzero? x)     (!= x 0))
+
+(define (exact-integer? obj)
+  (and (integer? obj) (exact? obj)))
+
+(define (nan? obj)
+  (and (number? obj) (r7rs:nan? obj)))
+
+(define (rationalize* lower upper lower-inclusive? upper-inclusive?)
+  (cond
+   ((and (integer? lower) lower-inclusive?)
+    lower)
+   ((and (integer? upper) upper-inclusive?)
+    upper)
+   (else
+    (let ((candidate (ceiling lower)))
+      (if (<= candidate upper)         ; integer in interval?
+          candidate                    ; return integer. Note that
+                                       ; when the upper bound is +inf.0,
+                                       ; the code below never runs.
+          ;; Refine guess.
+          (let* ((integer-part (floor lower))
+                 (new-lower (/ (- upper integer-part)))
+                 (new-upper (if (integer? lower)
+                                +inf.0 ; swap to inexact infinity
+                                (/ (- lower integer-part)))))
+            (+ integer-part
+               (/ (rationalize* new-lower
+                                new-upper
+                                upper-inclusive?
+                                lower-inclusive?)))))))))
+
+(define (rationalize-easy-cases lower
+                                upper
+                                lower-inclusive?
+                                upper-inclusive?)
+  (cond
+   ((< lower 0 upper) 0)
+   ((and lower-inclusive? (zero? lower)) 0)
+   ((and upper-inclusive? (zero? upper)) 0)
+   ((= lower upper) lower)
+   ((not (positive? upper))
+    (- (rationalize* (- upper)
+                     (- lower)
+                     lower-inclusive?
+                     upper-inclusive?)))
+   (else
+    (rationalize* lower
+                  upper
+                  lower-inclusive?
+                  upper-inclusive?))))
+
+(define rationalize
+  (case-lambda
+    ((x y) (rationalize x y y #t #t))
+    ((x dlower dupper) (rationalize x dlower dupper #t #t))
+    ((x dlower dupper lower-inclusive? upper-inclusive?)
+     (unless (and (real? x) (finite? x))
+       (error "x must be a real, finite number" x))
+     (unless (real? dlower)
+       (error "delta must be a real number" dlower))
+     (unless (real? dupper)
+       (error "upper delta must be a real number" dupper))
+     (when (= dlower dupper 0)
+       (unless (and lower-inclusive? upper-inclusive?)
+         (error "interval is empty"
+                x dlower dupper
+                lower-inclusive?
+                upper-inclusive?)))
+     ;; Don't check for boolean
+     (let* ((lower (- x (abs dlower)))
+            (upper (+ x (abs dupper)))
+            (value (rationalize-easy-cases (exact lower)
+                                           (exact upper)
+                                           lower-inclusive?
+                                           upper-inclusive?)))
+       (if (or (inexact? x) (inexact? dlower) (inexact? dupper))
+           (inexact value)
+           value)))))
+
+(define (exact-integer-nth-root k n)
+  (cond ((or (eq? 0 k) (eq? 1 k) (eq? 1 n)) ; Maybe call exact-integer-sqrt on n=2?
+         (values k 0))
+        ((eq? n 2) (exact-integer-sqrt k 2))
+        (else (let ((len (integer-length k)))
+	        (if (< len n)	       ; Idea from Gambit: 2^{len-1} <= k < 2^{len}
+	            (values 1 (- k 1)) ; Since x >= 2, we know x^{n} can't exist
+	            ;; Set initial guess to (at least) 2^ceil(ceil(log2(k))/n)
+	            (let* ((shift-amount (exact (ceiling (/ (+ len 1) n))))
+		           (g0 (bit-shift 1 shift-amount))
+		           (n-1 (- n 1)))
+	              (let lp ((g0 g0)
+		               (g1 (quotient
+			            (+ (* n-1 g0)
+			               (quotient k (expt g0 n-1)))
+			            n)))
+		        (if (< g1 g0)
+		            (lp g1 (quotient
+			            (+ (* n-1 g1)
+			               (quotient k (expt g1 n-1)))
+			            n))
+		            (values g0 (- k (expt g0 n)))))))))))
+
+(provide "srfi/278")

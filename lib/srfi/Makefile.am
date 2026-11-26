@@ -164,7 +164,8 @@ SRC_STK   = 0.stk   \
             267.stk \
             273.stk \
             274.stk \
-            277.stk
+            277.stk \
+            278.stk
 
 SRC_OSTK =  0.ostk   \
             1.ostk   \
@@ -297,14 +298,15 @@ SRC_OSTK =  0.ostk   \
             267.ostk \
             273.ostk \
             274.ostk \
+            278.ostk \
             277.ostk
 
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     170.c      175.c      178.c     238.c
-SRC_C_STK = 25.stk   27.stk   170.stk    175.stk    178.stk   238.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)  178.$(SO) 238.$(SO)
+SRC_C     = 25.c     27.c     170.c      175.c      178.c     238.c     278.c
+SRC_C_STK = 25.stk   27.stk   170.stk    175.stk    178.stk   238.stk   278.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)  178.$(SO) 238.$(SO) 278.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -389,6 +391,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 175-incl.c:  175.stk
 178-incl.c:  178.stk
 238-incl.c:  238.stk
+278-incl.c:  278.stk
 
 
 25.$(SO):  25-incl.c  25.c 25.stk
@@ -399,6 +402,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 175.$(SO): 175-incl.c 175.c 175.stk
 178.$(SO): 178-incl.c 178.c 178.stk
 238.$(SO): 238-incl.c 238.c 238.stk
+278.$(SO): 278-incl.c 278.c 278.stk
 
 ../streams/derived.ostk:
 	(cd ../streams && $(MAKE) derived.ostk)

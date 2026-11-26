@@ -2321,6 +2321,8 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
+  if (o1 == MAKE_INT(0) && STk_numberp(o2) == STk_true) return MAKE_INT(0);
+  if (o2 == MAKE_INT(0) && STk_numberp(o1) == STk_true) return MAKE_INT(0);
   if (o1 == MAKE_INT(1) && STk_numberp(o2) == STk_true) return o2;
   if (o2 == MAKE_INT(1) && STk_numberp(o1) == STk_true) return o1;
 
@@ -2653,6 +2655,7 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
+  if (o1 == MAKE_INT(0) && STk_numberp(o2) == STk_true) return MAKE_INT(0);
   if (o2 == MAKE_INT(1) && STk_numberp(o1) == STk_true) return o1;
 
   switch (TYPEOF(o1)) {
@@ -3796,8 +3799,7 @@ static SCM my_cosh(SCM z)
 
      3. cosh(z) = cos(i z),
         but it's always slow. (not used) */
-    case tc_real:    if (REAL_ZEROP(z)) return MAKE_INT(1);
-                     return double2real(cosh(REAL_VAL(z)));
+    case tc_real:    return double2real(cosh(REAL_VAL(z)));
     case tc_integer: if (INT_VAL(z) == 0) return MAKE_INT(1);
                      return double2real(cosh(INT_VAL(z)));
     case tc_complex:
@@ -3805,8 +3807,14 @@ static SCM my_cosh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(add2(ez,inv_ez),
-                                    double2real(2.0));
+                        SCM res = div2(add2(ez,inv_ez),
+                                       double2real(2.0));
+                        /* For pure imaginary, the result is pure REAL */
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0))
+                          return COMPLEX_REAL(res);
+                        else
+                          return res;
                       }
     default:          error_bad_number(z);
   }
@@ -3825,8 +3833,7 @@ static SCM my_sinh(SCM z)
         but it is almost always faster to use exponentials
         (not used) */
   switch (TYPEOF(z)) {
-    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
-                      return double2real(sinh(REAL_VAL(z)));
+    case tc_real:     return double2real(sinh(REAL_VAL(z)));
     case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
                       return double2real(sinh(INT_VAL(z)));
     case tc_complex:
@@ -3834,8 +3841,15 @@ static SCM my_sinh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(sub2(ez,inv_ez),
-                                    double2real(2.0));
+                        SCM res = div2(sub2(ez,inv_ez),
+                                       double2real(2.0));
+                        /* For pure imaginary, the result is pure imaginary */
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0))
+                          return make_complex(MAKE_INT(0),
+                                              COMPLEX_IMAG(res));
+                        else
+                          return res;
                       }
     default:          error_bad_number(z);
   }
@@ -3854,8 +3868,7 @@ static SCM my_tanh(SCM z)
         but this is always slower than using exponentials...
         (not used) */
   switch (TYPEOF(z)) {
-    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
-                      return double2real(tanh(REAL_VAL(z)));
+    case tc_real:     return double2real(tanh(REAL_VAL(z)));
     case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
                       return double2real(tanh(INT_VAL(z)));
     case tc_bignum:   if (BIGNUM_FITS_DOUBLE(BIGNUM_VAL(z)))
@@ -3866,8 +3879,15 @@ static SCM my_tanh(SCM z)
     case tc_rational: {
                         SCM ez = my_exp(z);
                         SCM inv_ez = div2 (MAKE_INT(1), ez);
-                        return div2(sub2 (ez, inv_ez),
-                                    add2 (ez, inv_ez));
+                        SCM res = div2(sub2 (ez, inv_ez),
+                                       add2 (ez, inv_ez));
+                        /* For pure imaginary, the result is pure imaginary */
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0))
+                          return make_complex(MAKE_INT(0),
+                                              COMPLEX_IMAG(res));
+                        else
+                          return res;
                       }
     default:          error_bad_number(z);
   }
@@ -3880,13 +3900,22 @@ static SCM my_tanh(SCM z)
 static SCM my_asinh(SCM z) {
   /* asinh(z) = ln (z + SQRT(z^2 + 1)) */
   switch (TYPEOF(z)) {
-    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
-                      return double2real(asinh(REAL_VAL(z)));
+    case tc_real:     return double2real(asinh(REAL_VAL(z)));
     case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
                       return double2real(asinh(INT_VAL(z)));
     case tc_complex:
     case tc_bignum:
-    case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
+    case tc_rational: {
+                        SCM res = my_log(add2(z, STk_sqrt(add2(mul2(z,z),
+                                                               MAKE_INT(1)))));
+                        if (COMPLEXP(z) &&
+                            COMPLEX_REAL(z) == MAKE_INT(0) &&
+                            STk_numle2(COMPLEX_IMAG(z), MAKE_INT(+1)) &&
+                            STk_numge2(COMPLEX_IMAG(z), MAKE_INT(-1)))
+                          return make_complex(MAKE_INT(0), COMPLEX_IMAG(res));
+                        else
+                          return res;
+    }
     default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
@@ -3914,17 +3943,21 @@ acosh_aux(SCM z, double zz) {
 static SCM my_acosh(SCM z) {
   /* acosh(z) = ln (z + SQRT(z^2 - 1)) */
   switch (TYPEOF(z)) {
-  case tc_real:     {
-      if (fpclassify(REAL_VAL(z)-1.0) == FP_ZERO) return MAKE_INT(0);
-      return acosh_aux(z, REAL_VAL(z));
-  }
+  case tc_real:     return acosh_aux(z, REAL_VAL(z));
   case tc_integer:  {
       if (INT_VAL(z) == 1) return MAKE_INT(0);
       return acosh_aux(z, (double)INT_VAL(z));
   }
   case tc_complex:
   case tc_bignum:
-  case tc_rational: return my_log(add2(z, STk_sqrt(sub2(mul2(z,z), MAKE_INT(1)))));
+  case tc_rational: {
+    SCM res = my_log(add2(z, STk_sqrt(sub2(mul2(z,z), MAKE_INT(1)))));
+    return (IS_ZERO_ZEROP(COMPLEX_IMAG(z)) &&
+            signbit(REAL_VAL(COMPLEX_IMAG(z))) &&
+            !IS_ZERO_ZEROP(COMPLEX_REAL(z)))
+      ? mul2(MAKE_INT(-1), res)
+      : res;
+  }
   default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
@@ -3968,9 +4001,7 @@ static SCM my_atanh(SCM z) {
   switch (TYPEOF(z)) {
   case tc_real:    {
       double zz = REAL_VAL(z);
-      if (zz == -1.0 || zz == +1.0)
-        error_out_of_range(z);
-      if (fpclassify(zz) == FP_ZERO) return MAKE_INT(0);
+      if (fpclassify(zz) == FP_ZERO) return double2real(0.0);
       /* atanh(inf) is -(i.pi)/2 */
       if (isinf(zz)) return Cmake_complex(double2real(0.0),
                                           double2real(MY_PI/(signbit(zz)
@@ -3986,22 +4017,56 @@ static SCM my_atanh(SCM z) {
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
   case tc_complex:
+    if (IS_ZERO_ZEROP(COMPLEX_IMAG(z))) {
+        long imag_sign = signbit(REAL_VAL(COMPLEX_IMAG(z))) ? -1 : +1;
+        if (REALP(COMPLEX_REAL(z)) && labs(REAL_VAL(COMPLEX_REAL(z))) == 1.0 ||
+            INTP(COMPLEX_REAL(z)) && labs(INT_VAL(COMPLEX_REAL(z))) == 1) {
+          /* (atanh +1.0+0.0i) => +inf + pi/4
+             (atanh +1.0-0.0i) => +inf - pi/4
+             (atanh -1.0+0.0i) => -inf + pi/4
+             (atanh -1.0-0.0i) => -inf - pi/4
+             And the same when the real part is exact +1 or -1. */
+          long real_sign = signbit(REAL_VAL(COMPLEX_REAL(z))) ? -1 : +1;
+
+          return Cmake_complex(double2real(plus_inf * real_sign),
+                               double2real(MY_PI/4 * imag_sign));
+        } else {
+          SCM a = COMPLEX_REAL(z);
+          SCM b = COMPLEX_IMAG(z);
+          /* What we do is:
+             z = a + bi
+
+             REAL_PART atanh(z) = [ LOG |1+a| - LOG|1-a| ] / 2.
+
+             IMAG_PART atanh(z) = 0.0           a in (-1, +1)
+                                  +PI/2 sgn(b)  a > +1
+                                  -PI/2 sgn(b)  a < -1
+          */
+          SCM numer = absolute(add2(MAKE_INT(1),z));
+          SCM denom = absolute(sub2(MAKE_INT(1),z));
+          SCM res_real = div2(sub2(my_log(numer), my_log(denom)), MAKE_INT(2));
+          SCM res_imag;
+          if (STk_numgt2(a, MAKE_INT(1)) || STk_numlt2(a, MAKE_INT(-1)))
+            res_imag = double2real(MY_PI/2 * imag_sign);
+          else res_imag = MAKE_INT(0);
+          return make_complex(res_real, res_imag);
+        }
+      }
+      /* fallthrough */
   case tc_bignum:
   case tc_rational: {
+    /* What we do is:
+       z = a + bi
+
+       REAL_PART atanh(z) = [ LOG (1+a) - LOG (1-a) ] / 2.
+    */
       SCM numer = add2(MAKE_INT(1),z);
       SCM denom = sub2(MAKE_INT(1),z);
-      if (zerop(numer) || zerop(denom))
-        error_out_of_range(z);
-      /* Too slow to use div2 here, since my_log will return
-         inexact, except when log returns zero or a complex.
-         Also, log(a)-log(b) is twice as fast as log(a/b)
-         when working with bignums!
-         However, zero will never happen, since numer = denom+2,
-         and log(x) is never log(x-2), so we don't check for
-         zero. */
-      SCM l = sub2(my_log(numer), my_log(denom));
-      if (REALP(l)) return double2real(REAL_VAL(l)/2.0);
-      return div2(l, double2real(2.0));
+      SCM l = div2(sub2(my_log(numer), my_log(denom)), double2real(2.0));
+      /* If real part was exact zero, do the same in the result: */
+      return (COMPLEXP(z) && COMPLEX_REAL(z) == MAKE_INT(0))
+        ? Cmake_complex(MAKE_INT(0), COMPLEX_IMAG(l))
+        : l;
   }
   default:          error_bad_number(z);
   }

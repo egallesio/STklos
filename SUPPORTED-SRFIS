@@ -154,3 +154,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-273: Extensions to Data (Type-)Checking
     - SRFI-274: Extended List Conversion Procedures
     - SRFI-277: Cyclic ports
+    - SRFI-278: Supplemental Numerics
